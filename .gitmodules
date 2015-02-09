@@ -1,18 +1,18 @@
 [submodule "mavlink/include/mavlink/v1.0"]
 	path = mavlink/include/mavlink/v1.0
-	url = git://github.com/mavlink/c_library.git
+	url = git://github.com/15gr830/c_library.git
 [submodule "NuttX"]
 	path = NuttX
-	url = git://github.com/PX4/NuttX.git
+	url = git://github.com/15gr830/NuttX.git
 [submodule "uavcan"]
 	path = src/lib/uavcan
-	url = git://github.com/pavel-kirienko/uavcan.git
+	url = git://github.com/15gr830/uavcan.git
 [submodule "Tools/genmsg"]
 	path = Tools/genmsg
-	url = https://github.com/ros/genmsg.git
+	url = git@github.com:15gr830/genmsg.git
 [submodule "Tools/gencpp"]
 	path = Tools/gencpp
-	url = https://github.com/ros/gencpp.git
+	url = git@github.com:15gr830/gencpp.git
 [submodule "unittests/gtest"]
 	path = unittests/gtest
-	url = https://github.com/sjwilks/gtest.git
+	url = git@github.com:15gr830/gtest.git
