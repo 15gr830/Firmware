@@ -128,11 +128,11 @@ MODULES		+= modules/bottle_drop
 #MODULES		+= examples/math_demo
 # Tutorial code from
 # https://pixhawk.ethz.ch/px4/dev/hello_sky
-#MODULES		+= examples/px4_simple_app
+MODULES		+= examples/px4_simple_app
 
 # Tutorial code from
 # https://pixhawk.ethz.ch/px4/dev/daemon
-#MODULES		+= examples/px4_daemon_app
+MODULES		+= examples/px4_daemon_app
 
 # Tutorial code from
 # https://pixhawk.ethz.ch/px4/dev/debug_values
