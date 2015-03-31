@@ -230,8 +230,8 @@ int matlab_csv_serial_thread_main(int argc, char *argv[])
 				orb_copy(ORB_ID(sensor_gyro), gyro1_sub, &gyro1);
 
 				// write out on accel 0, but collect for all other sensors as they have updates
-				dprintf(serial_fd, "%llu,%d,%d,%d,%d,%d,%d\n", accel0.timestamp, (int)accel0.x_raw, (int)accel0.y_raw, (int)accel0.z_raw,
-					(int)accel1.x_raw, (int)accel1.y_raw, (int)accel1.z_raw);
+                                dprintf(serial_fd, "%llu,%d,%d,%d,%d,%d,%d,%d,%d,", accel0.timestamp, (int)accel0.temperature, (int)accel0.x_raw, (int)accel0.y_raw, (int)accel0.z_raw, (int)accel1.temperature, (int)accel1.x_raw, (int)accel1.y_raw, (int)accel1.z_raw);
+                                dprintf(serial_fd, "%llu,%d,%d,%d,%d,%d,%d,%d,%d\n", gyro0.timestamp, (int)gyro0.temperature, (int)gyro0.x_raw, (int)gyro0.y_raw, (int)gyro0.z_raw, (int)gyro1.temperature, (int)gyro1.x_raw, (int)gyro1.y_raw, (int)gyro1.z_raw); 
 			}
 
 		}
