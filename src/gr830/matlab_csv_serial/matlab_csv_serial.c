@@ -210,7 +210,7 @@ int matlab_csv_serial_thread_main(int argc, char *argv[])
                                 /* Gyro data */
                                 dprintf(serial_fd, "%llu,%d,%d,%d,%f,%f,%f,%llu,%d,%d,%d,%f,%f,%f,", raw.timestamp, (int)raw.gyro_raw[0], (int)raw.gyro_raw[1], (int)raw.gyro_raw[2], (double)raw.gyro_rad_s[0], (double)raw.gyro_rad_s[1], (double)raw.gyro_rad_s[2], raw.gyro1_timestamp, (int)raw.gyro1_raw[0], (int)raw.gyro1_raw[1], (int)raw.gyro1_raw[2], (double)raw.gyro1_rad_s[0], (double)raw.gyro1_rad_s[1], (double)raw.gyro1_rad_s[2]);
 
-                                dprintf(serial_fd, "%llu,%d,%d,%d,%f,%f,%f,%f\n\r", raw.gyro2_timestamp, (int)raw.gyro2_raw[0], (int)raw.gyro2_raw[1], (int)raw.gyro2_raw[2], (double)raw.gyro2_rad_s[0], (double)raw.gyro2_rad_s[1], (double)raw.gyro2_rad_s[2], (double)raw.baro_temp_celcius);
+                                dprintf(serial_fd, "%llu,%d,%d,%d,%f,%f,%f,%f\n", raw.gyro2_timestamp, (int)raw.gyro2_raw[0], (int)raw.gyro2_raw[1], (int)raw.gyro2_raw[2], (double)raw.gyro2_rad_s[0], (double)raw.gyro2_rad_s[1], (double)raw.gyro2_rad_s[2], (double)raw.baro_temp_celcius);
 
 			}
 
