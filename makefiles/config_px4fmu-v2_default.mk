@@ -121,7 +121,6 @@ MODULES		+= lib/launchdetection
 # GR830
 #
 MODULES		+= gr830/matlab_csv_serial # Accelerometer data
-MODULES		+= gr830/matlab_csv_gyro # Gyro data
 
 #
 # OBC challenge

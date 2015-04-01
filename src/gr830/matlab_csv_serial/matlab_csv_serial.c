@@ -31,15 +31,6 @@
  *
  ****************************************************************************/
 
-/**
- * @file matlab_csv_serial_main.c
- *
- * Matlab CSV / ASCII format interface at 921600 baud, 8 data bits,
- * 1 stop bit, no parity
- *
- * @author Lorenz Meier <lm@inf.ethz.ch>
- */
-
 #include <nuttx/config.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -56,12 +47,11 @@
 #include <limits.h>
 #include <math.h>
 #include <uORB/uORB.h>
-#include <drivers/drv_accel.h>
-#include <drivers/drv_gyro.h>
 #include <systemlib/perf_counter.h>
 #include <systemlib/systemlib.h>
 #include <systemlib/err.h>
 #include <poll.h>
+#include <uORB/topics/sensor_combined.h>
 
 __EXPORT int matlab_csv_serial_main(int argc, char *argv[]);
 static bool thread_should_exit = false;		/**< Daemon exit flag */
@@ -79,14 +69,6 @@ static void usage(const char *reason)
 	exit(1);
 }
 
-/**
- * The daemon app only briefly exists to start
- * the background job. The stack size assigned in the
- * Makefile does only apply to this management task.
- *
- * The actual stack size should be set in the call
- * to task_spawn_cmd().
- */
 int matlab_csv_serial_main(int argc, char *argv[])
 {
 	if (argc < 1)
@@ -183,30 +165,23 @@ int matlab_csv_serial_thread_main(int argc, char *argv[])
 		return -1;
 	}
 
-	/* subscribe to vehicle status, attitude, sensors and flow*/
-	struct accel_report accel0;
-	struct accel_report accel1;
-	struct gyro_report gyro0;
-	struct gyro_report gyro1;
+	int sub_raw = orb_subscribe(ORB_ID(sensor_combined));
 
-	/* subscribe to parameter changes */
-	int accel0_sub = orb_subscribe_multi(ORB_ID(sensor_accel), 0);
-	int accel1_sub = orb_subscribe_multi(ORB_ID(sensor_accel), 1);
-	int gyro0_sub = orb_subscribe_multi(ORB_ID(sensor_gyro), 0);
-	int gyro1_sub = orb_subscribe_multi(ORB_ID(sensor_gyro), 1);
+        struct sensor_combined_s raw;
+	memset(&raw, 0, sizeof(raw));
+
+        /*This runs at the rate of the sensors */
+        struct pollfd fds[] = {
+                { .fd = sub_raw, .events = POLLIN }
+        };
 
 	thread_running = true;
 
 	while (!thread_should_exit)
 	{
 
-		/*This runs at the rate of the sensors */
-		struct pollfd fds[] = {
-				{ .fd = accel0_sub, .events = POLLIN }
-		};
-
 		/* wait for a sensor update, check for exit condition every 500 ms */
-		int ret = poll(fds, sizeof(fds) / sizeof(fds[0]), 500);
+		int ret = poll(fds, 1, 500);
 
 		if (ret < 0)
 		{
@@ -224,14 +199,19 @@ int matlab_csv_serial_thread_main(int argc, char *argv[])
 			/* accel0 update available? */
 			if (fds[0].revents & POLLIN)
 			{
-				orb_copy(ORB_ID(sensor_accel), accel0_sub, &accel0);
-				orb_copy(ORB_ID(sensor_accel), accel1_sub, &accel1);
-				orb_copy(ORB_ID(sensor_gyro), gyro0_sub, &gyro0);
-				orb_copy(ORB_ID(sensor_gyro), gyro1_sub, &gyro1);
 
-				// write out on accel 0, but collect for all other sensors as they have updates
-                                dprintf(serial_fd, "%llu,%d,%d,%d,%d,%d,%d,%d,%d,", accel0.timestamp, (int)accel0.temperature, (int)accel0.x_raw, (int)accel0.y_raw, (int)accel0.z_raw, (int)accel1.temperature, (int)accel1.x_raw, (int)accel1.y_raw, (int)accel1.z_raw);
-                                dprintf(serial_fd, "%llu,%d,%d,%d,%d,%d,%d,%d,%d\n", gyro0.timestamp, (int)gyro0.temperature, (int)gyro0.x_raw, (int)gyro0.y_raw, (int)gyro0.z_raw, (int)gyro1.temperature, (int)gyro1.x_raw, (int)gyro1.y_raw, (int)gyro1.z_raw); 
+                                orb_copy(ORB_ID(sensor_combined), sub_raw, &raw);
+
+                                /* Accelerometer data */
+                                dprintf(serial_fd, "%llu,%d,%d,%d,%f,%f,%f,%llu,%d,%d,%d,%f,%f,%f,", raw.accelerometer_timestamp, (int)raw.accelerometer_raw[0], (int)raw.accelerometer_raw[1], (int)raw.accelerometer_raw[2], (double)raw.accelerometer_m_s2[0], (double)raw.accelerometer_m_s2[1], (double)raw.accelerometer_m_s2[2], raw.accelerometer1_timestamp, (int)raw.accelerometer1_raw[0], (int)raw.accelerometer1_raw[1], (int)raw.accelerometer1_raw[2], (double)raw.accelerometer1_m_s2[0], (double)raw.accelerometer1_m_s2[1], (double)raw.accelerometer1_m_s2[2]);
+
+                                dprintf(serial_fd, "%llu,%d,%d,%d,%f,%f,%f,", raw.accelerometer2_timestamp, (int)raw.accelerometer2_raw[0], (int)raw.accelerometer2_raw[1], (int)raw.accelerometer2_raw[2], (double)raw.accelerometer2_m_s2[0], (double)raw.accelerometer2_m_s2[1], (double)raw.accelerometer2_m_s2[2]);
+
+                                /* Gyro data */
+                                dprintf(serial_fd, "%llu,%d,%d,%d,%f,%f,%f,%llu,%d,%d,%d,%f,%f,%f,", raw.timestamp, (int)raw.gyro_raw[0], (int)raw.gyro_raw[1], (int)raw.gyro_raw[2], (double)raw.gyro_rad_s[0], (double)raw.gyro_rad_s[1], (double)raw.gyro_rad_s[2], raw.gyro1_timestamp, (int)raw.gyro1_raw[0], (int)raw.gyro1_raw[1], (int)raw.gyro1_raw[2], (double)raw.gyro1_rad_s[0], (double)raw.gyro1_rad_s[1], (double)raw.gyro1_rad_s[2]);
+
+                                dprintf(serial_fd, "%llu,%d,%d,%d,%f,%f,%f,%f\n\r", raw.gyro2_timestamp, (int)raw.gyro2_raw[0], (int)raw.gyro2_raw[1], (int)raw.gyro2_raw[2], (double)raw.gyro2_rad_s[0], (double)raw.gyro2_rad_s[1], (double)raw.gyro2_rad_s[2], (double)raw.baro_temp_celcius);
+
 			}
 
 		}
