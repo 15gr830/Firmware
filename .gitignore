@@ -42,3 +42,4 @@ Firmware.zip
 unittests/build
 *.generated.h
 */auto/*
+/auto/

@@ -169,6 +169,7 @@ int matlab_csv_serial_thread_main(int argc, char *argv[])
 
         struct sensor_combined_s raw;
 	memset(&raw, 0, sizeof(raw));
+        
 
         /*This runs at the rate of the sensors */
         struct pollfd fds[] = {

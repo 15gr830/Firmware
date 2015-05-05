@@ -63,7 +63,7 @@ int px4_simple_app_main(int argc, char *argv[])
 	orb_advert_t att_pub = orb_advertise(ORB_ID(vehicle_attitude), &att);
 
 	/* one could wait for multiple topics with this technique, just using one here */
-	struct pollfd fds[] = {
+        struct pollfd fds[] = {
 		{ .fd = sensor_sub_fd,   .events = POLLIN },
 		/* there could be more file descriptors here, in the form like:
 		 * { .fd = other_sub_fd,   .events = POLLIN },
@@ -85,7 +85,7 @@ int px4_simple_app_main(int argc, char *argv[])
 			if (error_counter < 10 || error_counter % 50 == 0) {
 				/* use a counter to prevent flooding (and slowing us down) */
 				printf("[px4_simple_app] ERROR return value from poll(): %d\n"
-					, poll_ret);
+                                       , poll_ret);
 			}
 			error_counter++;
 		} else {
@@ -96,9 +96,9 @@ int px4_simple_app_main(int argc, char *argv[])
 				/* copy sensors raw data into local buffer */
 				orb_copy(ORB_ID(sensor_combined), sensor_sub_fd, &raw);
 				printf("[px4_simple_app] Accelerometer:\t%8.4f\t%8.4f\t%8.4f\n",
-					(double)raw.accelerometer_m_s2[0],
-					(double)raw.accelerometer_m_s2[1],
-					(double)raw.accelerometer_m_s2[2]);
+                                       (double)raw.accelerometer_m_s2[0],
+                                       (double)raw.accelerometer_m_s2[1],
+                                       (double)raw.accelerometer_m_s2[2]);
 
 				/* set att and publish this information for other apps */
 				att.roll = raw.accelerometer_m_s2[0];
