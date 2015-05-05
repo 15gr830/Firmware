@@ -3,7 +3,7 @@
  * Author:   Group 830 <15gr830@es.aau.dk>
  *************************************************************************
  *
- * A smal spam program for use in getting the Odroid
+ * A mavros test program for use in getting the Odroid
  * to communicate to the Pixhawk via Mavlink.
  *
  */
@@ -29,15 +29,15 @@
 #include <systemlib/err.h>
 #include <poll.h>
 
-__EXPORT int serial_spam_main(int argc, char *argv[]);
+__EXPORT int mavros_test_main(int argc, char *argv[]);
 static bool thread_should_exit = false;		/**< Daemon exit flag */
 static bool thread_running = false;		/**< Daemon status flag */
 static int daemon_task;				/**< Handle of daemon task / thread */
 
-int matlab_csv_serial_thread_main(int argc, char *argv[]);
+int mavros_test_thread_main(int argc, char *argv[]);
 static void usage(const char *reason);
 
-int matlab_csv_serial_main(int argc, char *argv[]) {
+int mavros_test_main(int argc, char *argv[]) {
 	if (argc < 1)
 		usage("missing command");
 
@@ -49,11 +49,11 @@ int matlab_csv_serial_main(int argc, char *argv[]) {
 		}
 
 		thread_should_exit = false;
-		daemon_task = task_spawn_cmd("serial_spam",
+		daemon_task = task_spawn_cmd("mavros_test",
 					 SCHED_DEFAULT,
 					 SCHED_PRIORITY_MAX - 5,
 					 2048,
-					 serial_spam_main,
+					 mavros_test_main,
 					 (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
 		exit(0);
 	}
@@ -77,7 +77,7 @@ int matlab_csv_serial_main(int argc, char *argv[]) {
 	exit(1);
 }
 
-int serial_spam_main(int argc, char *argv[]) {
+int mavros_test_thread_main(int argc, char *argv[]) {
         
 
 	while (!thread_should_exit) {
@@ -96,6 +96,6 @@ static void usage(const char *reason) {
         if (reason)
 		fprintf(stderr, "%s\n", reason);
 
-	errx(1, "usage: serial_spam {start|stop|status}");
+	errx(1, "usage: mavros_test {start|stop|status}");
 	exit(1);
 }
