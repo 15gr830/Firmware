@@ -76,7 +76,7 @@ int matlab_csv_serial_main(int argc, char *argv[])
 
 	if (!strcmp(argv[1], "start"))
 	{
-		if (thread_running)
+	        if (thread_running)
 		{
 			warnx("already running\n");
 			/* this is not an error */
@@ -85,11 +85,11 @@ int matlab_csv_serial_main(int argc, char *argv[])
 
 		thread_should_exit = false;
 		daemon_task = task_spawn_cmd("matlab_csv_serial",
-					 SCHED_DEFAULT,
-					 SCHED_PRIORITY_MAX - 5,
-					 2000,
-					 matlab_csv_serial_thread_main,
-					 (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
+                                             SCHED_DEFAULT,
+                                             SCHED_PRIORITY_MAX - 5,
+                                             2000,
+                                             matlab_csv_serial_thread_main,
+                                             (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
 		exit(0);
 	}
 
@@ -224,5 +224,3 @@ int matlab_csv_serial_thread_main(int argc, char *argv[])
 	fflush(stdout);
 	return 0;
 }
-
-
