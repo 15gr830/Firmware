@@ -3,7 +3,7 @@
  * Author:   Group 830 <15gr830@es.aau.dk>
  *************************************************************************
  *
- * A small test app to figure out classes
+ * A small test app to figure out quaternion class
  *
  */
 
@@ -27,16 +27,17 @@
 #include <systemlib/systemlib.h>
 #include <systemlib/err.h>
 #include <poll.h>
+#include <lib/mathlib/mathlib.h>
 
-__EXPORT int test_app_main(int argc, char *argv[]);
+extern "C" __EXPORT int q_test_app_main(int argc, char *argv[]);
 static bool thread_should_exit = false;		/**< Daemon exit flag */
 static bool thread_running = false;		/**< Daemon status flag */
 static int daemon_task;				/**< Handle of daemon task / thread */
 
-int test_app_thread_main(int argc, char *argv[]);
+int q_test_app_thread_main(int argc, char *argv[]);
 static void usage(const char *reason);
 
-int test_app_main(int argc, char *argv[]) {
+int q_test_app_main(int argc, char *argv[]) {
 	if (argc < 1)
 		usage("missing command");
 
@@ -48,11 +49,11 @@ int test_app_main(int argc, char *argv[]) {
 		}
 
 		thread_should_exit = false;
-		daemon_task = task_spawn_cmd("test_app",
+		daemon_task = task_spawn_cmd("q_test_app",
 					 SCHED_DEFAULT,
 					 SCHED_PRIORITY_MAX - 5,
 					 2048,
-					 test_app_main,
+					 q_test_app_thread_main,
 					 (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
 		exit(0);
 	}
@@ -76,13 +77,16 @@ int test_app_main(int argc, char *argv[]) {
 	exit(1);
 }
 
-int test_app_thread_main(int argc, char *argv[]) {
+int q_test_app_thread_main(int argc, char *argv[]) {
+        printf("Hello from test_app\n");
+        math::Quaternion q, p;
+        math::Vector<3> qim;
+        q.from_euler(0.f, 90.f, 0.f);
         
-
-	while (!thread_should_exit) {
-                
-
-        }
+//	while (!thread_should_exit) {
+        qim = q.imag();
+        printf("%f%f%f%f\n", (double)q(0), (double)q(1), (double)q(2), (double)q(3));
+//        }
        
 	warnx("exiting");
 	thread_running = false;
