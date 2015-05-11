@@ -19,7 +19,7 @@ namespace math {
 
         class __EXPORT Lqr : public Matrix<4, 12> {
         public:
-                Lqr();
+                Lqr() : Matrix<4, 12>() {}
                 virtual ~Lqr();
 
                 init_LQR();
