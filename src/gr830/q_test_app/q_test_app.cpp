@@ -79,13 +79,24 @@ int q_test_app_main(int argc, char *argv[]) {
 
 int q_test_app_thread_main(int argc, char *argv[]) {
         printf("Hello from test_app\n");
-        math::Quaternion q, p;
+        math::Quaternion q, p, r, t;
         math::Vector<3> qim;
-        q.from_euler(0.f, 90.f, 0.f);
-        
+        //q.from_euler(0.f, 90.f, 0.f);
+        q = {7,6,9,2};
+        p = {0.0412, -0.0353, -0.0529, -0.0118};
+        //q.conjugate();
+        // q.inv();
+        r = p * q;
+        t = q * p;
 //	while (!thread_should_exit) {
-        qim = q.imag();
-        printf("%f%f%f%f\n", (double)q(0), (double)q(1), (double)q(2), (double)q(3));
+        // qim = q.imag();
+        //printf("%f %f %f %f\n", (double)q(0), (double)q(1), (double)q(2), (double)q(3));
+        printf("%4.4f %4.4f %4.4f %4.4f\n", (double)r(0), (double)r(1), (double)r(2), (double)r(3));
+        printf("%4.4f %4.4f %4.4f %4.4f\n", (double)t(0), (double)t(1), (double)t(2), (double)t(3));
+        double lr = r.norm();
+        double lt = r.norm();
+        printf("%4.4f\n", (double)lr);
+        printf("%4.4f\n", (double)lt);
 //        }
        
 	warnx("exiting");
