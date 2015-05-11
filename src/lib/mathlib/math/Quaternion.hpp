@@ -114,6 +114,37 @@ public:
 		return Vector<3>(&data[1]);
 	}
 
+        /**
+	 * Conjugate 
+	 */
+        void conjugate(void) {
+                data[0] = data[0];
+                data[1] = -data[1];
+                data[2] = -data[2];
+                data[3] = -data[3];
+        }
+
+        /**
+         * Norm of the Quaternion
+         */
+        double norm(void) {
+                double l = sqrtf(data[0] * data[0] + data[1] * data[1] + data[2] * data[2] + data[3] * data[3]);
+                return l;
+        }
+
+        /**
+         * inverse
+         */
+        void inv(void) {
+                double n = this->norm();
+                n *= n;
+                Vector<4> c = {data[0], -data[1], -data[2], -data[3]};
+                data[0] = (double)c(0)/n;
+                data[1] = (double)c(1)/n;
+                data[2] = (double)c(2)/n;
+                data[3] = (double)c(3)/n;
+        }
+
 	/**
 	 * set quaternion to rotation defined by euler angles
 	 */
