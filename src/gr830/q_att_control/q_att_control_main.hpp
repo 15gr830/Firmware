@@ -1,9 +1,9 @@
 /*************************************************************************
- * Copyright (c) 2014 Group 731 Aalborg University. All rights reserved.
- * Author:   Group 731 <14gr731@es.aau.dk>
+ * Copyright (c) 2015 Group 830 Aalborg University. All rights reserved.
+ * Author:   Group 830 <15gr830@es.aau.dk>
  *************************************************************************
  *
- * Controller constants for the attutude controllers
+ * 
  *
  */
 

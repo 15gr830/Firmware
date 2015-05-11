@@ -1,32 +1,36 @@
 /*************************************************************************
- * Copyright (c) 2014 Group 731 Aalborg University. All rights reserved.
- * Author:   Group 731 <14gr731@es.aau.dk>
+ * Copyright (c) 2015 Group 830 Aalborg University. All rights reserved.
+ * Author:   Group 830 <15gr830@es.aau.dk>
  *************************************************************************
  *
  * Implementation of an quadrotor attitude control app for use in the
- * semester project.
+ * semester project. 
  *
  */
 
 #include <stdio.h>
 #include <poll.h>
+#include <math.h>
+#include <stdlib.h>
 #include <mavlink/mavlink_log.h>
 #include <uORB/uORB.h>
-#include <uORB/topics/quad_mode.h>
 #include <uORB/topics/actuator_controls.h>
-#include <uORB/topics/quad_velocity_sp.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_status.h>
 #include <systemlib/param/param.h>
 #include <systemlib/systemlib.h>
 #include <lib/mathlib/mathlib.h>
+#include <systemlib/err.h>
+#include <drivers/drv_hrt.h>
 
-#include "quad_att_control_main.h"
-#include "params.h"
+#include "q_att_control_main.hpp"
+#include "params.hpp"
+//#include "lqr.hpp"
+
 
 /* Function prototypes */
-__EXPORT int q_att_control_main(int argc, char *argv[]);
-int att_control_thread_main(int argc, char *argv[]);
+extern "C" __EXPORT int q_att_control_main(int argc, char *argv[]);
+int q_att_control_thread_main(int argc, char *argv[]);
 static void usage(const char *reason);
 
 /**
@@ -40,30 +44,21 @@ static int daemon_task;
 int q_att_control_thread_main(int argc, char *argv[]) {
         warnx("[q_att_control] has begun");
 
-        static int mavlink_fd;
-        mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
-        mavlink_log_info(mavlink_fd, "[q_att_control] started");
+        // static int mavlink_fd;
+        // mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
+        // mavlink_log_info(mavlink_fd, "[q_att_control] started");
 
         struct output_s out;
         memset(&out, 0, sizeof(out));
-        struct PID_object_s roll;
-        memset(&roll, 0, sizeof(roll));
-        struct PID_object_s pitch;
-        memset(&pitch, 0, sizeof(pitch));
-        struct PID_object_s yaw;
-        memset(&yaw, 0, sizeof(yaw));
 
         /**
          * Subscriptions
          */
-        struct quad_velocity_sp_s sp;
-        memset(&sp, 0, sizeof(sp));
         struct vehicle_attitude_s v_att;
         memset(&v_att, 0, sizeof(v_att));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
 
-        int sp_sub = orb_subscribe(ORB_ID(quad_velocity_sp));
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
 
@@ -79,7 +74,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         fd_v_att[0].fd = v_att_sub;
         fd_v_att[0].events = POLLIN;
 
-        bool error = false;
+        // hrt_abstime time = 0, time_old = 0, dt = 0;
 
         while ( !thread_should_exit ) {
                 bool v_status_updated;
@@ -95,16 +90,16 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
 
-                        bool sp_updated;
-                	orb_check(sp_sub, &sp_updated);
+                        // bool sp_updated;
+                	// orb_check(sp_sub, &sp_updated);
 
-	                if ( sp_updated ) {
-	                        orb_copy(ORB_ID(quad_velocity_sp), sp_sub, &sp);
-	                }
+	                // if ( sp_updated ) {
+	                //         orb_copy(ORB_ID(quad_velocity_sp), sp_sub, &sp);
+	                // }
 
-                        time = (hrt_absolute_time() / (float)1000000);
-                        dt = time - time_old;
-                        time_old = time;
+                        // time = (hrt_absolute_time() / (float)1000000);
+                        // dt = time - time_old;
+                        // time_old = time;
 
 
 
@@ -119,6 +114,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         /* nothing happened */
                 }
         }
+        return -1;
 }
 
 static void usage(const char *reason) {
@@ -147,7 +143,7 @@ int q_att_control_main(int argc, char *argv[]) {
                                              SCHED_PRIORITY_MAX - 5,
                                              2048,
                                              q_att_control_thread_main,
-                                             (argv) ? (const char **)&argv[2] : (const char **)NULL);
+                                             (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
                 thread_running = true;
                 exit(0);
         }

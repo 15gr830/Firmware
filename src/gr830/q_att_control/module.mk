@@ -2,6 +2,6 @@
 # Quadcopter attitude control app
 #
 
-MODULE_COMMAND	= quad_att_control
-SRCS		= quad_att_control_main.c
+MODULE_COMMAND	= q_att_control
+SRCS		= q_att_control_main.cpp
 MODULE_STACKSIZE = 1200

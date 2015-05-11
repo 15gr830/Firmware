@@ -88,7 +88,7 @@ int q_test_app_thread_main(int argc, char *argv[]) {
         // q.inv();
         r = p * q;
         t = q * p;
-//	while (!thread_should_exit) {
+
         // qim = q.imag();
         //printf("%f %f %f %f\n", (double)q(0), (double)q(1), (double)q(2), (double)q(3));
         printf("%4.4f %4.4f %4.4f %4.4f\n", (double)r(0), (double)r(1), (double)r(2), (double)r(3));
@@ -97,7 +97,6 @@ int q_test_app_thread_main(int argc, char *argv[]) {
         double lt = r.norm();
         printf("%4.4f\n", (double)lr);
         printf("%4.4f\n", (double)lt);
-//        }
        
 	warnx("exiting");
 	thread_running = false;
