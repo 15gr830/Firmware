@@ -54,9 +54,12 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         memset(&v_att, 0, sizeof(v_att));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
+        // struct vehicle_status_s v_status;
+        // memset(&v_status, 0, sizeof(v_status)); // STATE subscription her
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
+        // int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));  // STATE
 
         /**
          * Topics to be published on
