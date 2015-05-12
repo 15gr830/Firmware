@@ -113,6 +113,9 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                                 once = true;
                         }
 
+                        /* Juster LQR outputs */
+                        /* Input til out */
+
 
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
