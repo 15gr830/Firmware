@@ -23,6 +23,10 @@
 #define LQR_CONTROLLER_1_10    0
 #define LQR_CONTROLLER_1_11    0
 #define LQR_CONTROLLER_1_12    0
+#define LQR_CONTROLLER_1_13    0
+#define LQR_CONTROLLER_1_14    0
+#define LQR_CONTROLLER_1_15    0
+#define LQR_CONTROLLER_1_16    0
                               
 #define LQR_CONTROLLER_2_1     0
 #define LQR_CONTROLLER_2_2     1
@@ -36,6 +40,10 @@
 #define LQR_CONTROLLER_2_10    0
 #define LQR_CONTROLLER_2_11    0
 #define LQR_CONTROLLER_2_12    0
+#define LQR_CONTROLLER_2_13    0
+#define LQR_CONTROLLER_2_14    0
+#define LQR_CONTROLLER_2_15    0
+#define LQR_CONTROLLER_2_16    0
                               
 #define LQR_CONTROLLER_3_1     0
 #define LQR_CONTROLLER_3_2     0
@@ -49,6 +57,10 @@
 #define LQR_CONTROLLER_3_10    0
 #define LQR_CONTROLLER_3_11    0
 #define LQR_CONTROLLER_3_12    0
+#define LQR_CONTROLLER_3_13    0
+#define LQR_CONTROLLER_3_14    0
+#define LQR_CONTROLLER_3_15    0
+#define LQR_CONTROLLER_3_16    0
                               
 #define LQR_CONTROLLER_4_1     0
 #define LQR_CONTROLLER_4_2     0
@@ -62,6 +74,10 @@
 #define LQR_CONTROLLER_4_10    0
 #define LQR_CONTROLLER_4_11    0
 #define LQR_CONTROLLER_4_12    0
+#define LQR_CONTROLLER_4_13    0
+#define LQR_CONTROLLER_4_14    0
+#define LQR_CONTROLLER_4_15    0
+#define LQR_CONTROLLER_4_16    0
 
 
 #endif  /* ATTITUDE_CONTROL_PARAMS_H */

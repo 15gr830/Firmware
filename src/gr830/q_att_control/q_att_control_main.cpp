@@ -25,7 +25,7 @@
 
 #include "q_att_control_main.hpp"
 #include "params.hpp"
-//#include "lqr.hpp"
+#include "lqr.hpp"
 
 
 /* Function prototypes */
@@ -43,10 +43,6 @@ static int daemon_task;
 
 int q_att_control_thread_main(int argc, char *argv[]) {
         warnx("[q_att_control] has begun");
-
-        // static int mavlink_fd;
-        // mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
-        // mavlink_log_info(mavlink_fd, "[q_att_control] started");
 
         struct output_s out;
         memset(&out, 0, sizeof(out));
@@ -74,7 +70,14 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         fd_v_att[0].fd = v_att_sub;
         fd_v_att[0].events = POLLIN;
 
-        // hrt_abstime time = 0, time_old = 0, dt = 0;
+        Lqr lqr;
+
+        math::Vector<4> u = {0, 0, 0, 0};
+        float t[16] = {25,33,77,99,5,6,7,8,9,10,11,12, 13, 14, 15, 16};
+        math::Vector<16> e(t);
+        bool once = false;
+
+        hrt_abstime time = 0, time_old = 0, dt = 0;
 
         while ( !thread_should_exit ) {
                 bool v_status_updated;
@@ -97,10 +100,18 @@ int q_att_control_thread_main(int argc, char *argv[]) {
 	                //         orb_copy(ORB_ID(quad_velocity_sp), sp_sub, &sp);
 	                // }
 
-                        // time = (hrt_absolute_time() / (float)1000000);
-                        // dt = time - time_old;
-                        // time_old = time;
+                        time = (hrt_absolute_time() / (float)1000000);
+                        dt = time - time_old;
+                        time_old = time;
 
+                        if (once == false) {
+                                printf("%f %f %f", (double)time, (double)time_old, (double)dt);
+                                lqr.print();
+                                u = lqr.run(e);
+                                printf("%f %f %f %f\n\n", (double)u(0), (double)u(1), (double)u(2), (double)u(3));
+
+                                once = true;
+                        }
 
 
                         actuators.control[0] = (float)out.roll;

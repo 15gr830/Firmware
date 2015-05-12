@@ -4,4 +4,4 @@
 
 MODULE_COMMAND	= q_att_control
 SRCS		= q_att_control_main.cpp
-MODULE_STACKSIZE = 1200
+MODULE_STACKSIZE = 3000
