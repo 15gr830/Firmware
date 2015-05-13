@@ -242,3 +242,6 @@ ORB_DEFINE(wind_estimate, struct wind_estimate_s);
 
 #include "topics/rc_parameter_map.h"
 ORB_DEFINE(rc_parameter_map, struct rc_parameter_map_s);
+
+#include "topics/att_pos_mocap.h"
+ORB_DEFINE(att_pos_mocap, struct att_pos_mocap_s);
