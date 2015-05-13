@@ -120,6 +120,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_rc_pub(-1),
 	_manual_pub(-1),
 	_land_detector_pub(-1),
+	_att_pos_mocap(-1),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
 	_hil_frames(0),
 	_old_timestamp(0),
@@ -1529,4 +1530,32 @@ MavlinkReceiver::receive_start(Mavlink *parent)
 
 	pthread_attr_destroy(&receiveloop_attr);
 	return thread;
+}
+
+void
+MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
+{
+	/* command */
+	mavlink_att_pos_mocap_t pos_mocap;
+	mavlink_msg_att_pos_mocap_decode(msg, &pos_mocap);
+
+	struct att_pos_mocap_s pos;
+	memset(&pos, 0, sizeof(pos));
+
+	pos.timestamp = to_hrt(pos_mocap.usec);
+
+	for(int i=0;i<3;i++)
+		pos.q[i] = pos_mocap.q[i];
+
+	pos.x = pos_mocap.x;
+	pos.y = pos_mocap.y;
+	pos.z = pos_mocap.z;
+
+
+	if (_att_pos_mocap < 0) {
+		_att_pos_mocap = orb_advertise(ORB_ID(att_pos_mocap), &pos);
+
+	} else {
+		orb_publish(ORB_ID(att_pos_mocap), _att_pos_mocap, &pos);
+	}
 }
