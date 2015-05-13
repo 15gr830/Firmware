@@ -127,7 +127,8 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_hil_local_alt0(0.0f),
 	_hil_local_proj_ref{},
 	_time_offset_avg_alpha(0.6),
-	_time_offset(0)
+	_time_offset(0),
+	_att_pos_mocap(-1)
 {
 
 	// make sure the FTP server is started
@@ -1529,4 +1530,32 @@ MavlinkReceiver::receive_start(Mavlink *parent)
 
 	pthread_attr_destroy(&receiveloop_attr);
 	return thread;
+}
+
+void
+MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
+{
+	/* command */
+	mavlink_att_pos_mocap_t pos_mocap;
+	mavlink_msg_att_pos_mocap_decode(msg, &pos_mocap);
+
+	struct att_pos_mocap_s pos;
+	memset(&pos, 0, sizeof(pos));
+
+	pos.timestamp = to_hrt(pos_mocap.usec);
+
+	for(int i=0;i<3;i++)
++		pos.q[i] = pos_mocap.q[i];
+
+	pos.x = pos_mocap.x;
+	pos.y = pos_mocap.y;
+	pos.z = pos_mocap.z;
+
+
+	if (_att_pos_mocap < 0) {
+		_att_pos_mocap = orb_advertise(ORB_ID(_att_pos_mocap), &pos);
+
+	} else {
+			orb_publish(ORB_ID(att_pos_mocap), _att_pos_mocap, &pos);
+	}
 }
