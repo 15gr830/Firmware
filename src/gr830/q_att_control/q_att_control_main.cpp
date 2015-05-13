@@ -27,7 +27,6 @@
 #include "params.hpp"
 #include "lqr.hpp"
 
-
 /* Function prototypes */
 extern "C" __EXPORT int q_att_control_main(int argc, char *argv[]);
 int q_att_control_thread_main(int argc, char *argv[]);
@@ -54,12 +53,11 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         memset(&v_att, 0, sizeof(v_att));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
-        // struct vehicle_status_s v_status;
-        // memset(&v_status, 0, sizeof(v_status)); // STATE subscription her
+        // TODO: state topic
+        // TODO: setpoint topic
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
-        // int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));  // STATE
 
         /**
          * Topics to be published on
@@ -73,16 +71,26 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         fd_v_att[0].fd = v_att_sub;
         fd_v_att[0].events = POLLIN;
 
-        Lqr lqr;
+        Lqr *lqr = new Lqr;
+        float x_est[] = {0.5f,1.f,1.5f,1.f,2.f,3.f,1.f,2.f,3.f,1.f,2.8f,3.f,1.f,2.8f,3.f,1.f};
+        lqr->x_est = x_est;
+        float x_ref[] = {1.f,2.f,3.f,1.f,2.f,3.f,1.f,2.4f,3.f,1.f,2.f,3.f,1.f,2.f,3.f,1.f};
+        lqr->x_ref = x_ref;
+        lqr->r = {0,0,0,0};
+        lqr->q_ref->data[0] = 1;
+        lqr->q_ref->data[1] = 0;
+        lqr->q_ref->data[2] = 0;
+        lqr->q_ref->data[3] = 0;
+        lqr->q_est->data[0] = 0.5;
+        lqr->q_est->data[1] = 0;
+        lqr->q_est->data[2] = 0.5;
+        lqr->q_est->data[3] = 0;
 
-        math::Vector<4> u = {0, 0, 0, 0};
-        float t[16] = {25,33,77,99,5,6,7,8,9,10,11,12, 13, 14, 15, 16};
-        math::Vector<16> e(t);
+        math::Vector<4> u;
         bool once = false;
 
-        hrt_abstime time = 0, time_old = 0, dt = 0;
-
         while ( !thread_should_exit ) {
+
                 bool v_status_updated;
                 orb_check(v_status_sub, &v_status_updated);
                 if ( v_status_updated )
@@ -96,29 +104,37 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
 
-                        // bool sp_updated;
+                        // bool sp_updated; // Position setpoint from gnd
                 	// orb_check(sp_sub, &sp_updated);
 
 	                // if ( sp_updated ) {
 	                //         orb_copy(ORB_ID(quad_velocity_sp), sp_sub, &sp);
 	                // }
-
-                        time = (hrt_absolute_time() / (float)1000000);
-                        dt = time - time_old;
-                        time_old = time;
+                        
+                        // TODO: states indsamles (hvilke kommer fra Nikolai?)
+                        // TODO: state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
                         if (once == false) {
-                                printf("%f %f %f", (double)time, (double)time_old, (double)dt);
-                                lqr.print();
-                                u = lqr.run(e);
-                                printf("%f %f %f %f\n\n", (double)u(0), (double)u(1), (double)u(2), (double)u(3));
+                                lqr->print();
+                                printf("x_est = ");
+                                lqr->x_est.print();
+                                printf("x_ref = ");
+                                lqr->x_ref.print();
+                                printf("r = ");
+                                lqr->r.print();
+                                printf("q_ref = ");
+                                lqr->q_ref->print();
+                                printf("q_est = ");
+                                lqr->q_est->print();
+                                u = lqr->run();
+                                printf("u = ");
+                                u.print();
 
                                 once = true;
                         }
 
-                        /* Juster LQR outputs */
-                        /* Input til out */
-
+                        // TODO: Mappe LQR outputs over til de rigtige enheder
+                        // TODO: matrix-vector multiplikation ?
 
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
@@ -131,6 +147,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         /* nothing happened */
                 }
         }
+        delete lqr;
         return -1;
 }
 
