@@ -120,6 +120,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_rc_pub(-1),
 	_manual_pub(-1),
 	_land_detector_pub(-1),
+	_att_pos_mocap(-1),
 	_control_mode_sub(orb_subscribe(ORB_ID(vehicle_control_mode))),
 	_hil_frames(0),
 	_old_timestamp(0),
@@ -127,8 +128,7 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_hil_local_alt0(0.0f),
 	_hil_local_proj_ref{},
 	_time_offset_avg_alpha(0.6),
-	_time_offset(0),
-	_att_pos_mocap(-1)
+	_time_offset(0)
 {
 
 	// make sure the FTP server is started
@@ -1545,7 +1545,7 @@ MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
 	pos.timestamp = to_hrt(pos_mocap.usec);
 
 	for(int i=0;i<3;i++)
-+		pos.q[i] = pos_mocap.q[i];
+		pos.q[i] = pos_mocap.q[i];
 
 	pos.x = pos_mocap.x;
 	pos.y = pos_mocap.y;
@@ -1553,9 +1553,9 @@ MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
 
 
 	if (_att_pos_mocap < 0) {
-		_att_pos_mocap = orb_advertise(ORB_ID(_att_pos_mocap), &pos);
+		_att_pos_mocap = orb_advertise(ORB_ID(att_pos_mocap), &pos);
 
 	} else {
-			orb_publish(ORB_ID(att_pos_mocap), _att_pos_mocap, &pos);
+		orb_publish(ORB_ID(att_pos_mocap), _att_pos_mocap, &pos);
 	}
 }
