@@ -1542,7 +1542,7 @@ MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
 	struct att_pos_mocap_s pos;
 	memset(&pos, 0, sizeof(pos));
 
-	pos.timestamp = to_hrt(pos_mocap.usec);
+	pos.timestamp = to_hrt(pos_mocap.time_usec);
 
 	for(int i=0;i<3;i++)
 		pos.q[i] = pos_mocap.q[i];
