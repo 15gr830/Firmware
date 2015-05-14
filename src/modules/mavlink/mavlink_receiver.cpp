@@ -598,8 +598,8 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 			}
 			if (_control_mode.flag_control_offboard_enabled) {
 				if (offboard_control_sp.isForceSetpoint &&
-						offboard_control_sp_ignore_position_all(offboard_control_sp) &&
-						offboard_control_sp_ignore_velocity_all(offboard_control_sp)) {
+                                    offboard_control_sp_ignore_position_all(offboard_control_sp) &&
+                                    offboard_control_sp_ignore_velocity_all(offboard_control_sp)) {
 					/* The offboard setpoint is a force setpoint only, directly writing to the force
 					 * setpoint topic and not publishing the setpoint triplet topic */
 					struct vehicle_force_setpoint_s	force_sp;
@@ -623,11 +623,11 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 					/* set the local pos values if the setpoint type is 'local pos' and none
 					 * of the local pos fields is set to 'ignore' */
 					if (offboard_control_sp.mode == OFFBOARD_CONTROL_MODE_DIRECT_LOCAL_NED &&
-							!offboard_control_sp_ignore_position_some(offboard_control_sp)) {
-					pos_sp_triplet.current.position_valid = true;
-					pos_sp_triplet.current.x = offboard_control_sp.position[0];
-					pos_sp_triplet.current.y = offboard_control_sp.position[1];
-					pos_sp_triplet.current.z = offboard_control_sp.position[2];
+                                            !offboard_control_sp_ignore_position_some(offboard_control_sp)) {
+                                                pos_sp_triplet.current.position_valid = true;
+                                                pos_sp_triplet.current.x = offboard_control_sp.position[0];
+                                                pos_sp_triplet.current.y = offboard_control_sp.position[1];
+                                                pos_sp_triplet.current.z = offboard_control_sp.position[2];
 					} else {
 						pos_sp_triplet.current.position_valid = false;
 					}
@@ -635,7 +635,7 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 					/* set the local vel values if the setpoint type is 'local pos' and none
 					 * of the local vel fields is set to 'ignore' */
 					if (offboard_control_sp.mode == OFFBOARD_CONTROL_MODE_DIRECT_LOCAL_NED &&
-							!offboard_control_sp_ignore_velocity_some(offboard_control_sp)) {
+                                            !offboard_control_sp_ignore_velocity_some(offboard_control_sp)) {
 						pos_sp_triplet.current.velocity_valid = true;
 						pos_sp_triplet.current.vx = offboard_control_sp.velocity[0];
 						pos_sp_triplet.current.vy = offboard_control_sp.velocity[1];
@@ -647,13 +647,13 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 					/* set the local acceleration values if the setpoint type is 'local pos' and none
 					 * of the accelerations fields is set to 'ignore' */
 					if (offboard_control_sp.mode == OFFBOARD_CONTROL_MODE_DIRECT_LOCAL_NED &&
-							!offboard_control_sp_ignore_acceleration_some(offboard_control_sp)) {
+                                            !offboard_control_sp_ignore_acceleration_some(offboard_control_sp)) {
 						pos_sp_triplet.current.acceleration_valid = true;
 						pos_sp_triplet.current.a_x = offboard_control_sp.acceleration[0];
 						pos_sp_triplet.current.a_y = offboard_control_sp.acceleration[1];
 						pos_sp_triplet.current.a_z = offboard_control_sp.acceleration[2];
 						pos_sp_triplet.current.acceleration_is_force =
-						offboard_control_sp.isForceSetpoint;
+                                                        offboard_control_sp.isForceSetpoint;
 
 					} else {
 						pos_sp_triplet.current.acceleration_valid = false;
@@ -662,7 +662,7 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 					/* set the yaw sp value if the setpoint type is 'local pos' and the yaw
 					 * field is not set to 'ignore' */
 					if (offboard_control_sp.mode == OFFBOARD_CONTROL_MODE_DIRECT_LOCAL_NED &&
-							!offboard_control_sp_ignore_yaw(offboard_control_sp)) {
+                                            !offboard_control_sp_ignore_yaw(offboard_control_sp)) {
 						pos_sp_triplet.current.yaw_valid = true;
 						pos_sp_triplet.current.yaw = offboard_control_sp.yaw;
 
@@ -673,7 +673,7 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 					/* set the yawrate sp value if the setpoint type is 'local pos' and the yawrate
 					 * field is not set to 'ignore' */
 					if (offboard_control_sp.mode == OFFBOARD_CONTROL_MODE_DIRECT_LOCAL_NED &&
-							!offboard_control_sp_ignore_yawrate(offboard_control_sp)) {
+                                            !offboard_control_sp_ignore_yawrate(offboard_control_sp)) {
 						pos_sp_triplet.current.yawspeed_valid = true;
 						pos_sp_triplet.current.yawspeed = offboard_control_sp.yaw_rate;
 
@@ -685,10 +685,10 @@ MavlinkReceiver::handle_message_set_position_target_local_ned(mavlink_message_t 
 
 					if (_pos_sp_triplet_pub < 0) {
 						_pos_sp_triplet_pub = orb_advertise(ORB_ID(position_setpoint_triplet),
-								&pos_sp_triplet);
+                                                                                    &pos_sp_triplet);
 					} else {
 						orb_publish(ORB_ID(position_setpoint_triplet), _pos_sp_triplet_pub,
-								&pos_sp_triplet);
+                                                            &pos_sp_triplet);
 					}
 
 				}
