@@ -79,5 +79,10 @@
 #define LQR_CONTROLLER_4_15    0
 #define LQR_CONTROLLER_4_16    0
 
+// Safety values
+#define RP_MAX  0.8
+#define YAW_MAX 0.8
+#define RP_SAFE 0.8
+
 
 #endif  /* ATTITUDE_CONTROL_PARAMS_H */

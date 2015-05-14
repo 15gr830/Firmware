@@ -19,6 +19,7 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/position_setpoint_triplet.h>
+#include <uORB/topics/vehicle_local_position.h>
 #include <systemlib/param/param.h>
 #include <systemlib/systemlib.h>
 #include <lib/mathlib/mathlib.h>
@@ -53,6 +54,8 @@ int q_att_control_thread_main(int argc, char *argv[]) {
          */
         struct vehicle_attitude_s v_att; // FIXME: Indeholder ikke positione og hastigheder
         memset(&v_att, 0, sizeof(v_att));
+        struct vehicle_local_position_s v_local_pos;
+        memset(&v_local_pos, 0, sizeof(v_local_pos));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
         struct vehicle_control_mode_s control_mode;
@@ -61,6 +64,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         memset(&pos_sp, 0, sizeof(pos_sp));
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
+        int v_local_pos_sub = orb_subscribe(ORB_ID(vehicle_local_position));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
         int control_mode_sub = orb_subscribe(ORB_ID(vehicle_control_mode));
         int pos_sp_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
@@ -93,9 +97,9 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         act_scale->identity();
 
         bool  error   = false;
-        float rp_max  = 0.8, // roll and pitch maximum actuator output
-              yaw_max = 0.8, // yaw maximum actuator output
-              rp_safe = 0.8;
+        float rp_max  = RP_MAX, // roll and pitch maximum actuator output
+              yaw_max = YAW_MAX, // yaw maximum actuator output
+              rp_safe = RP_SAFE;
 
         while ( !thread_should_exit ) {
 
@@ -111,7 +115,12 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         /* no return value - nothing has happened */
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
-                        // TODO: orb_copy positioner og hastigheder (hvilket topic?)
+
+                        bool v_local_pos_updated; // Estimates positions from EKF
+                	orb_check(v_local_pos_sub, &v_local_pos_updated);
+	                if ( v_local_pos_updated ) {
+	                        orb_copy(ORB_ID(vehicle_local_position), v_local_pos_sub, &v_local_pos);
+	                }
 
                         bool pos_sp_updated; // Position setpoint from gnd
                 	orb_check(pos_sp_sub, &pos_sp_updated);
@@ -126,12 +135,12 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         x_est[3]  = v_att.rollspeed;
                         x_est[4]  = v_att.pitchspeed;
                         x_est[5]  = v_att.yawspeed;
-                        x_est[6]  = 0; // FIXME: xyz positioner
-                        x_est[7]  = 0;
-                        x_est[8]  = 0;
-                        x_est[9]  = 0; // FIXME: xyz hastigheder
-                        x_est[10] = 0;
-                        x_est[12] = 0;
+                        x_est[6]  = v_local_pos.x;
+                        x_est[7]  = v_local_pos.y;
+                        x_est[8]  = v_local_pos.z;
+                        x_est[9]  = v_local_pos.vx;
+                        x_est[10] = v_local_pos.vy;
+                        x_est[12] = v_local_pos.vz;
 
                         lqr->x_est = x_est; // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
@@ -150,6 +159,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
 
                         u = lqr->run(); 
 
+                        // FIXME: tjek om "rækkefølgen" er rigtig på rækkerne
                         out.roll   = act_scale->data[0][0]*u.data[0] + act_scale->data[0][1]*u.data[1] + act_scale->data[0][2]*u.data[2] + act_scale->data[0][3]*u.data[3];
                         out.pitch  = act_scale->data[1][0]*u.data[0] + act_scale->data[1][1]*u.data[1] + act_scale->data[1][2]*u.data[2] + act_scale->data[1][3]*u.data[3];
                         out.yaw    = act_scale->data[2][0]*u.data[0] + act_scale->data[2][1]*u.data[1] + act_scale->data[2][2]*u.data[2] + act_scale->data[2][3]*u.data[3];
