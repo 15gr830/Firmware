@@ -17,6 +17,8 @@
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_control_mode.h>
+#include <uORB/topics/position_setpoint_triplet.h>
 #include <systemlib/param/param.h>
 #include <systemlib/systemlib.h>
 #include <lib/mathlib/mathlib.h>
@@ -49,15 +51,19 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         /**
          * Subscriptions
          */
-        struct vehicle_attitude_s v_att;
+        struct vehicle_attitude_s v_att; // FIXME: Indeholder ikke positione og hastigheder
         memset(&v_att, 0, sizeof(v_att));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
-        // TODO: state topic
-        // TODO: setpoint topic
+        struct vehicle_control_mode_s control_mode;
+        memset(&control_mode, 0, sizeof(control_mode));
+        struct position_setpoint_triplet_s pos_sp;
+        memset(&pos_sp, 0, sizeof(pos_sp));
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
+        int control_mode_sub = orb_subscribe(ORB_ID(vehicle_control_mode));
+        int pos_sp_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
 
         /**
          * Topics to be published on
@@ -72,22 +78,17 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         fd_v_att[0].events = POLLIN;
 
         Lqr *lqr = new Lqr;
-        float x_est[] = {0.5f,1.f,1.5f,1.f,2.f,3.f,1.f,2.f,3.f,1.f,2.8f,3.f,1.f,2.8f,3.f,1.f};
-        lqr->x_est = x_est;
-        float x_ref[] = {1.f,2.f,3.f,1.f,2.f,3.f,1.f,2.4f,3.f,1.f,2.f,3.f,1.f,2.f,3.f,1.f};
-        lqr->x_ref = x_ref;
+        float x_est[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        float x_ref[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+        // ekstra references to LQR
         lqr->r = {0,0,0,0};
         lqr->q_ref->data[0] = 1;
         lqr->q_ref->data[1] = 0;
         lqr->q_ref->data[2] = 0;
         lqr->q_ref->data[3] = 0;
-        lqr->q_est->data[0] = 0.5;
-        lqr->q_est->data[1] = 0;
-        lqr->q_est->data[2] = 0.5;
-        lqr->q_est->data[3] = 0;
 
         math::Vector<4> u;
-        bool once = false;
 
         while ( !thread_should_exit ) {
 
@@ -103,45 +104,54 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         /* no return value - nothing has happened */
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
+                        // TODO: orb_copy positioner og hastigheder (hvilket topic?)
 
-                        // bool sp_updated; // Position setpoint from gnd
-                	// orb_check(sp_sub, &sp_updated);
+                        bool pos_sp_updated; // Position setpoint from gnd
+                	orb_check(pos_sp_sub, &pos_sp_updated);
+	                if ( pos_sp_updated ) {
+	                        orb_copy(ORB_ID(position_setpoint_triplet), pos_sp_sub, &pos_sp);
+	                }
 
-	                // if ( sp_updated ) {
-	                //         orb_copy(ORB_ID(quad_velocity_sp), sp_sub, &sp);
-	                // }
-                        
                         // TODO: states indsamles (hvilke kommer fra Nikolai?)
-                        // TODO: state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
-                        if (once == false) {
-                                lqr->print();
-                                printf("x_est = ");
-                                lqr->x_est.print();
-                                printf("x_ref = ");
-                                lqr->x_ref.print();
-                                printf("r = ");
-                                lqr->r.print();
-                                printf("q_ref = ");
-                                lqr->q_ref->print();
-                                printf("q_est = ");
-                                lqr->q_est->print();
-                                u = lqr->run();
-                                printf("u = ");
-                                u.print();
+                        for (int i = 0; i < 4; i++)
+                                lqr->q_est->data[i] = v_att.q[i];
 
-                                once = true;
-                        }
+                        // x_est[0] til x_est[2] bliver beregnet i lqr klassen
+                        x_est[3] = v_att.rollspeed;
+                        x_est[4] = v_att.pitchspeed;
+                        x_est[5] = v_att.yawspeed;
+                        x_est[6] = 0; // FIXME: xyz positioner
+                        x_est[7] = 0;
+                        x_est[8] = 0;
+                        x_est[9] = 0; // FIXME: xyz hastigheder
+                        x_est[10] = 0;
+                        x_est[12] = 0;
+
+                        lqr->x_est = x_est; // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
+
+                        // TODO: få reference voctoren
+                        lqr->x_ref = x_ref;
+
+                        u = lqr->run(); 
+
 
                         // TODO: Mappe LQR outputs over til de rigtige enheder
                         // TODO: matrix-vector multiplikation ?
-
+                        
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw;
                         actuators.control[3] = (float)out.thrust;
 
-                        orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
+                        bool control_mode_updated; // Position setpoint from gnd
+                	orb_check(control_mode_sub, &control_mode_updated);
+	                if ( control_mode_updated ) {
+	                        orb_copy(ORB_ID(vehicle_control_mode), control_mode_sub, &control_mode);
+	                }
+                        if (control_mode.flag_control_altitude_enabled) {
+                                orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
+                        }
 
                 } else {
                         /* nothing happened */
