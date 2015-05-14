@@ -52,7 +52,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         /**
          * Subscriptions
          */
-        struct vehicle_attitude_s v_att; // FIXME: Indeholder ikke positione og hastigheder
+        struct vehicle_attitude_s v_att;
         memset(&v_att, 0, sizeof(v_att));
         struct vehicle_local_position_s v_local_pos;
         memset(&v_local_pos, 0, sizeof(v_local_pos));
@@ -94,7 +94,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
 
         math::Vector<4> u,id;
         math::Matrix<4,4> *act_scale = new math::Matrix<4,4>;
-        act_scale->identity();
+        act_scale->identity(); // TODO: Den rigtige matrix skal lige tastes ind istedet
 
         bool  error   = false;
         float rp_max  = RP_MAX, // roll and pitch maximum actuator output
@@ -159,7 +159,6 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         
                         u = lqr->run(); 
 
-                        // FIXME: tjek om "rækkefølgen" er rigtig på rækkerne
                         out.thrust = act_scale->data[0][0]*u.data[0] + act_scale->data[0][1]*u.data[1] + act_scale->data[0][2]*u.data[2] + act_scale->data[0][3]*u.data[3];
                         out.roll   = act_scale->data[1][0]*u.data[0] + act_scale->data[1][1]*u.data[1] + act_scale->data[1][2]*u.data[2] + act_scale->data[1][3]*u.data[3];
                         out.pitch  = act_scale->data[2][0]*u.data[0] + act_scale->data[2][1]*u.data[1] + act_scale->data[2][2]*u.data[2] + act_scale->data[2][3]*u.data[3];
