@@ -157,7 +157,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
 
                         lqr->x_ref = x_ref;
                         
-                        u = lqr->run(); 
+                        u = lqr->run();
 
                         out.thrust = act_scale->data[0][0]*u.data[0] + act_scale->data[0][1]*u.data[1] + act_scale->data[0][2]*u.data[2] + act_scale->data[0][3]*u.data[3];
                         out.roll   = act_scale->data[1][0]*u.data[0] + act_scale->data[1][1]*u.data[1] + act_scale->data[1][2]*u.data[2] + act_scale->data[1][3]*u.data[3];

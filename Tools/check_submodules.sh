@@ -3,7 +3,7 @@
 echo ""
 echo ""
 echo ""
-echo "Her er lavet et grov stort hack i filen Tools/check_submoduled.sh - BGT"
+echo "Her er lavet et hack i filen Tools/check_submoduled.sh - BGT"
 echo ""
 echo ""
 echo ""
