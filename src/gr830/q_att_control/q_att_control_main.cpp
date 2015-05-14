@@ -57,7 +57,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         memset(&v_status, 0, sizeof(v_status));
         struct vehicle_control_mode_s control_mode;
         memset(&control_mode, 0, sizeof(control_mode));
-        struct position_setpoint_triplet_s pos_sp;
+        struct position_setpoint_s pos_sp;
         memset(&pos_sp, 0, sizeof(pos_sp));
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
@@ -88,7 +88,14 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         lqr->q_ref->data[2] = 0;
         lqr->q_ref->data[3] = 0;
 
-        math::Vector<4> u;
+        math::Vector<4> u,id;
+        math::Matrix<4,4> *act_scale = new math::Matrix<4,4>;
+        act_scale->identity();
+
+        bool  error   = false;
+        float rp_max  = 0.8, // roll and pitch maximum actuator output
+              yaw_max = 0.8, // yaw maximum actuator output
+              rp_safe = 0.8;
 
         while ( !thread_should_exit ) {
 
@@ -112,43 +119,73 @@ int q_att_control_thread_main(int argc, char *argv[]) {
 	                        orb_copy(ORB_ID(position_setpoint_triplet), pos_sp_sub, &pos_sp);
 	                }
 
-                        // TODO: states indsamles (hvilke kommer fra Nikolai?)
-
                         for (int i = 0; i < 4; i++)
                                 lqr->q_est->data[i] = v_att.q[i];
 
-                        // x_est[0] til x_est[2] bliver beregnet i lqr klassen
-                        x_est[3] = v_att.rollspeed;
-                        x_est[4] = v_att.pitchspeed;
-                        x_est[5] = v_att.yawspeed;
-                        x_est[6] = 0; // FIXME: xyz positioner
-                        x_est[7] = 0;
-                        x_est[8] = 0;
-                        x_est[9] = 0; // FIXME: xyz hastigheder
+                        // x_est[0] to x_est[2] is calculated in the lqr class
+                        x_est[3]  = v_att.rollspeed;
+                        x_est[4]  = v_att.pitchspeed;
+                        x_est[5]  = v_att.yawspeed;
+                        x_est[6]  = 0; // FIXME: xyz positioner
+                        x_est[7]  = 0;
+                        x_est[8]  = 0;
+                        x_est[9]  = 0; // FIXME: xyz hastigheder
                         x_est[10] = 0;
                         x_est[12] = 0;
 
                         lqr->x_est = x_est; // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
-                        // TODO: få reference voctoren
+                        // x_ref[0] to x_ref[2] is calculated in the lqr class
+                        x_ref[3]  = 0;
+                        x_ref[4]  = 0;
+                        x_ref[5]  = 0;
+                        x_ref[6]  = pos_sp.x;
+                        x_ref[7]  = pos_sp.y;
+                        x_ref[8]  = pos_sp.z;
+                        x_ref[9]  = 0;
+                        x_ref[10] = 0;
+                        x_ref[12] = 0;
+
                         lqr->x_ref = x_ref;
 
                         u = lqr->run(); 
 
+                        out.roll   = act_scale->data[0][0]*u.data[0] + act_scale->data[0][1]*u.data[1] + act_scale->data[0][2]*u.data[2] + act_scale->data[0][3]*u.data[3];
+                        out.pitch  = act_scale->data[1][0]*u.data[0] + act_scale->data[1][1]*u.data[1] + act_scale->data[1][2]*u.data[2] + act_scale->data[1][3]*u.data[3];
+                        out.yaw    = act_scale->data[2][0]*u.data[0] + act_scale->data[2][1]*u.data[1] + act_scale->data[2][2]*u.data[2] + act_scale->data[2][3]*u.data[3];
+                        out.thrust = act_scale->data[3][0]*u.data[0] + act_scale->data[3][1]*u.data[1] + act_scale->data[3][2]*u.data[2] + act_scale->data[3][3]*u.data[3];
+                        
+                        // TODO: De rigtige værdier skal findes til sikkerhed
+                        /* Limiting attitude controllers output */
+                        if ( (float)fabs(out.roll) > rp_max )
+                                out.roll = rp_max * (out.roll / (float)fabs(out.roll));
 
-                        // TODO: Mappe LQR outputs over til de rigtige enheder
-                        // TODO: matrix-vector multiplikation ?
+                        if ( (float)fabs(out.pitch) > rp_max )
+                                out.pitch = rp_max * (out.pitch / (float)fabs(out.pitch));
+
+                        if ( (float)fabs(out.yaw) > yaw_max )
+                                out.yaw = yaw_max * (out.yaw / (float)fabs(out.yaw));
+
+                        if ( ( ((float)fabs(v_att.roll) > rp_safe) || ((float)fabs(v_att.pitch) > rp_safe) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
+                                out.roll = 0;
+                                out.pitch = 0;
+                                out.yaw = 0;
+                                out.thrust = 0;
+
+                                error = true;
+                        }
                         
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw;
                         actuators.control[3] = (float)out.thrust;
 
-                        bool control_mode_updated; // Position setpoint from gnd
+                        bool control_mode_updated;
                 	orb_check(control_mode_sub, &control_mode_updated);
 	                if ( control_mode_updated ) {
 	                        orb_copy(ORB_ID(vehicle_control_mode), control_mode_sub, &control_mode);
 	                }
+
                         if (control_mode.flag_control_altitude_enabled) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
                         }
