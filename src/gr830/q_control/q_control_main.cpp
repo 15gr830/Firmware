@@ -34,8 +34,8 @@
 extern "C" __EXPORT int q_control_main(int argc, char *argv[]);
 int q_control_thread_main(int argc, char *argv[]);
 static void usage(const char *reason);
-void init_act_map( math::Matrix<4,4> *u );
-struct output_s act_map_run( math::Matrix<4,4> *act_map, math::Vector<4> u );
+math::Matrix<4,4> init_act_map(void);
+struct output_s act_map_run( math::Matrix<4,4> act_map, math::Vector<4> u );
 struct output_s out_safety_check( struct output_s out );
 
 /**
@@ -96,8 +96,18 @@ int q_control_thread_main(int argc, char *argv[]) {
         lqr->q_ref->data[3] = 0;
 
         math::Vector<4> u,id;
-        math::Matrix<4,4> *act_map = new math::Matrix<4,4>;
-        init_act_map(act_map);
+        math::Matrix<4,4> act_map;
+        act_map = init_act_map();
+        act_map.print();
+
+        u = {1,0,1,0};
+        u.print();
+
+        // out.thrust = (double)act_map.data[0][0]*(double)u.data[0] + (double)act_map.data[0][1]*(double)u.data[1] + (double)act_map.data[0][2]*(double)u.data[2] + (double)act_map.data[0][3]*(double)u.data[3];
+        // out.roll   = (double)act_map.data[1][0]*(double)u.data[0] + (double)act_map.data[1][1]*(double)u.data[1] + (double)act_map.data[1][2]*(double)u.data[2] + (double)act_map.data[1][3]*(double)u.data[3];
+        // out.pitch  = (double)act_map.data[2][0]*(double)u.data[0] + (double)act_map.data[2][1]*(double)u.data[1] + (double)act_map.data[2][2]*(double)u.data[2] + (double)act_map.data[2][3]*(double)u.data[3];
+        // out.yaw    = (double)act_map.data[3][0]*(double)u.data[0] + (double)act_map.data[3][1]*(double)u.data[1] + (double)act_map.data[3][2]*(double)u.data[2] + (double)act_map.data[3][3]*(double)u.data[3];
+        // printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
 
         bool  error   = false;
 
@@ -158,7 +168,17 @@ int q_control_thread_main(int argc, char *argv[]) {
                         lqr->x_ref = x_ref;
                         
                         u = lqr->run();
+                        u.print();
+
                         out = act_map_run(act_map, u);
+//                        printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+
+                        // out.thrust = (double)act_map.data[0][0]*(double)u.data[0];// + (double)act_map.data[0][1]*(double)u.data[1] + (double)act_map.data[0][2]*(double)u.data[2] + (double)act_map.data[0][3]*(double)u.data[3];
+                        // out.roll   = (double)act_map.data[1][0]*(double)u.data[0];// + (double)act_map.data[1][1]*(double)u.data[1] + (double)act_map.data[1][2]*(double)u.data[2] + (double)act_map.data[1][3]*(double)u.data[3];
+                        // out.pitch  = (double)act_map.data[2][0]*(double)u.data[0];// + (double)act_map.data[2][1]*(double)u.data[1] + (double)act_map.data[2][2]*(double)u.data[2] + (double)act_map.data[2][3]*(double)u.data[3];
+                        // out.yaw    = (double)act_map.data[3][0]*(double)u.data[0];// + (double)act_map.data[3][1]*(double)u.data[1] + (double)act_map.data[3][2]*(double)u.data[2] + (double)act_map.data[3][3]*(double)u.data[3];
+                        // printf("%f %f %f %f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+
                         out = out_safety_check(out);
                         
                         if ( ( (fabs(v_att.roll) > RP_SAFE) || (fabs(v_att.pitch) > RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
@@ -212,38 +232,41 @@ struct output_s out_safety_check( struct output_s out ) {
 }
 
 
-struct output_s act_map_run( math::Matrix<4,4> *act_map, math::Vector<4> u ) {
+struct output_s act_map_run( math::Matrix<4,4> act_map, math::Vector<4> u ) {
         struct output_s out_scaled;
 
-        out_scaled.thrust = act_map->data[0][0]*u.data[0] + act_map->data[0][1]*u.data[1] + act_map->data[0][2]*u.data[2] + act_map->data[0][3]*u.data[3];
-        out_scaled.roll   = act_map->data[1][0]*u.data[0] + act_map->data[1][1]*u.data[1] + act_map->data[1][2]*u.data[2] + act_map->data[1][3]*u.data[3];
-        out_scaled.pitch  = act_map->data[2][0]*u.data[0] + act_map->data[2][1]*u.data[1] + act_map->data[2][2]*u.data[2] + act_map->data[2][3]*u.data[3];
-        out_scaled.yaw    = act_map->data[3][0]*u.data[0] + act_map->data[3][1]*u.data[1] + act_map->data[3][2]*u.data[2] + act_map->data[3][3]*u.data[3];
+        out_scaled.thrust = act_map.data[0][0]*u.data[0] + act_map.data[0][1]*u.data[1] + act_map.data[0][2]*u.data[2] + act_map.data[0][3]*u.data[3];
+        out_scaled.roll   = act_map.data[1][0]*u.data[0] + act_map.data[1][1]*u.data[1] + act_map.data[1][2]*u.data[2] + act_map.data[1][3]*u.data[3];
+        out_scaled.pitch  = act_map.data[2][0]*u.data[0] + act_map.data[2][1]*u.data[1] + act_map.data[2][2]*u.data[2] + act_map.data[2][3]*u.data[3];
+        out_scaled.yaw    = act_map.data[3][0]*u.data[0] + act_map.data[3][1]*u.data[1] + act_map.data[3][2]*u.data[2] + act_map.data[3][3]*u.data[3];
 
         return out_scaled;
 }
 
 
-void init_act_map( math::Matrix<4,4> *act_map ) {
-        act_map->data[0][0] = ACT_MAP_1_1;
-        act_map->data[0][1] = ACT_MAP_1_2;
-        act_map->data[0][2] = ACT_MAP_1_3;
-        act_map->data[0][3] = ACT_MAP_1_4;
+math::Matrix<4,4> init_act_map(void) {
+        math::Matrix<4,4> act_map_temp;
+        act_map_temp.data[0][0] = (double)ACT_MAP_1_1;
+        act_map_temp.data[0][1] = (double)ACT_MAP_1_2;
+        act_map_temp.data[0][2] = (double)ACT_MAP_1_3;
+        act_map_temp.data[0][3] = (double)ACT_MAP_1_4;
 
-        act_map->data[1][0] = ACT_MAP_2_1;
-        act_map->data[1][1] = ACT_MAP_2_2;
-        act_map->data[1][2] = ACT_MAP_2_3;
-        act_map->data[1][3] = ACT_MAP_2_4;
+        act_map_temp.data[1][0] = (double)ACT_MAP_2_1;
+        act_map_temp.data[1][1] = (double)ACT_MAP_2_2;
+        act_map_temp.data[1][2] = (double)ACT_MAP_2_3;
+        act_map_temp.data[1][3] = (double)ACT_MAP_2_4;
 
-        act_map->data[2][0] = ACT_MAP_3_1;
-        act_map->data[2][1] = ACT_MAP_3_2;
-        act_map->data[2][2] = ACT_MAP_3_3;
-        act_map->data[2][3] = ACT_MAP_3_4;
+        act_map_temp.data[2][0] = (double)ACT_MAP_3_1;
+        act_map_temp.data[2][1] = (double)ACT_MAP_3_2;
+        act_map_temp.data[2][2] = (double)ACT_MAP_3_3;
+        act_map_temp.data[2][3] = (double)ACT_MAP_3_4;
 
-        act_map->data[3][0] = ACT_MAP_4_1;
-        act_map->data[3][1] = ACT_MAP_4_2;
-        act_map->data[3][2] = ACT_MAP_4_3;
-        act_map->data[3][3] = ACT_MAP_4_4;
+        act_map_temp.data[3][0] = (double)ACT_MAP_4_1;
+        act_map_temp.data[3][1] = (double)ACT_MAP_4_2;
+        act_map_temp.data[3][2] = (double)ACT_MAP_4_3;
+        act_map_temp.data[3][3] = (double)ACT_MAP_4_4;
+
+        return act_map_temp;
 }
 
 
