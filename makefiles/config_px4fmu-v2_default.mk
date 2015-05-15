@@ -123,7 +123,7 @@ MODULES		+= lib/launchdetection
 MODULES		+= gr830/matlab_csv_serial # Accelerometer data
 MODULES		+= gr830/q_test_app
 MODULES		+= gr830/q_control
-MODULES		+= gr830/q_ekf
+# MODULES		+= gr830/q_ekf
 
 #
 # OBC challenge
