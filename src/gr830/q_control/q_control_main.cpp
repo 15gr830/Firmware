@@ -26,7 +26,7 @@
 #include <systemlib/err.h>
 #include <drivers/drv_hrt.h>
 
-#include "q_att_control_main.hpp"
+#include "q_control_main.hpp"
 #include "params.hpp"
 #include "lqr.hpp"
 
@@ -47,7 +47,7 @@ static int daemon_task;
 
 
 int q_control_thread_main(int argc, char *argv[]) {
-        warnx("[q_att_control] has begun");
+        warnx("[q_control] has begun");
 
         struct output_s out;
         memset(&out, 0, sizeof(out));
@@ -251,7 +251,7 @@ static void usage(const char *reason) {
         if (reason)
                 fprintf(stderr, "%s\n", reason);
 
-        fprintf(stderr, "usage: q_att_control {start|stop|status}\n\n");
+        fprintf(stderr, "usage: q_control {start|stop|status}\n\n");
         exit(1);
 }
 
