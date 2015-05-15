@@ -3,12 +3,12 @@
  * Author:   Group 830 <15gr830@es.aau.dk>
  *************************************************************************
  *
- * 
+ * Data types for the quadrotor controller application
  *
  */
 
-#ifndef QUAD_ATT_CONTROL_MAIN_H
-#define QUAD_ATT_CONTROL_MAIN_H
+#ifndef Q_CONTROL_MAIN_H
+#define Q_CONTROL_MAIN_H
 
 
 struct output_s {
@@ -19,4 +19,4 @@ struct output_s {
 };
 
 
-#endif  /* QUAD_ATT_CONTROL_MAIN_H */
+#endif  /* Q_CONTROL_MAIN_H */

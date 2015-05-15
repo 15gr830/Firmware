@@ -31,9 +31,12 @@
 #include "lqr.hpp"
 
 /* Function prototypes */
-extern "C" __EXPORT int q_att_control_main(int argc, char *argv[]);
-int q_att_control_thread_main(int argc, char *argv[]);
+extern "C" __EXPORT int q_control_main(int argc, char *argv[]);
+int q_control_thread_main(int argc, char *argv[]);
 static void usage(const char *reason);
+void init_act_map( math::Matrix<4,4> *u );
+struct output_s act_map_run( math::Matrix<4,4> *act_map, math::Vector<4> u );
+struct output_s out_safety_check( struct output_s out );
 
 /**
  * Globals
@@ -43,7 +46,7 @@ static bool thread_running = false;
 static int daemon_task;
 
 
-int q_att_control_thread_main(int argc, char *argv[]) {
+int q_control_thread_main(int argc, char *argv[]) {
         warnx("[q_att_control] has begun");
 
         struct output_s out;
@@ -93,13 +96,10 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         lqr->q_ref->data[3] = 0;
 
         math::Vector<4> u,id;
-        math::Matrix<4,4> *act_scale = new math::Matrix<4,4>;
-        act_scale->identity(); // TODO: Den rigtige matrix skal lige tastes ind istedet
+        math::Matrix<4,4> *act_map = new math::Matrix<4,4>;
+        init_act_map(act_map);
 
         bool  error   = false;
-        float rp_max  = RP_MAX, // roll and pitch maximum actuator output
-              yaw_max = YAW_MAX, // yaw maximum actuator output
-              rp_safe = RP_SAFE;
 
         while ( !thread_should_exit ) {
 
@@ -140,7 +140,7 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         x_est[8]  = v_local_pos.z;
                         x_est[9]  = v_local_pos.vx;
                         x_est[10] = v_local_pos.vy;
-                        x_est[12] = v_local_pos.vz;
+                        x_est[11] = v_local_pos.vz;
 
                         lqr->x_est = x_est; // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
@@ -153,29 +153,15 @@ int q_att_control_thread_main(int argc, char *argv[]) {
                         x_ref[8]  = pos_sp.z;
                         x_ref[9]  = 0;
                         x_ref[10] = 0;
-                        x_ref[12] = 0;
+                        x_ref[11] = 0;
 
                         lqr->x_ref = x_ref;
                         
                         u = lqr->run();
-
-                        out.thrust = act_scale->data[0][0]*u.data[0] + act_scale->data[0][1]*u.data[1] + act_scale->data[0][2]*u.data[2] + act_scale->data[0][3]*u.data[3];
-                        out.roll   = act_scale->data[1][0]*u.data[0] + act_scale->data[1][1]*u.data[1] + act_scale->data[1][2]*u.data[2] + act_scale->data[1][3]*u.data[3];
-                        out.pitch  = act_scale->data[2][0]*u.data[0] + act_scale->data[2][1]*u.data[1] + act_scale->data[2][2]*u.data[2] + act_scale->data[2][3]*u.data[3];
-                        out.yaw    = act_scale->data[3][0]*u.data[0] + act_scale->data[3][1]*u.data[1] + act_scale->data[3][2]*u.data[2] + act_scale->data[3][3]*u.data[3];
+                        out = act_map_run(act_map, u);
+                        out = out_safety_check(out);
                         
-                        // TODO: De rigtige værdier skal findes til sikkerhed
-                        /* Limiting attitude controllers output */
-                        if ( (float)fabs(out.roll) > rp_max )
-                                out.roll = rp_max * (out.roll / (float)fabs(out.roll));
-
-                        if ( (float)fabs(out.pitch) > rp_max )
-                                out.pitch = rp_max * (out.pitch / (float)fabs(out.pitch));
-
-                        if ( (float)fabs(out.yaw) > yaw_max )
-                                out.yaw = yaw_max * (out.yaw / (float)fabs(out.yaw));
-
-                        if ( ( ((float)fabs(v_att.roll) > rp_safe) || ((float)fabs(v_att.pitch) > rp_safe) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
+                        if ( ( (fabs(v_att.roll) > RP_SAFE) || (fabs(v_att.pitch) > RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
                                 out.roll = 0;
                                 out.pitch = 0;
                                 out.yaw = 0;
@@ -207,6 +193,60 @@ int q_att_control_thread_main(int argc, char *argv[]) {
         return -1;
 }
 
+
+// TODO: De rigtige værdier skal findes til sikkerhed
+/* Limiting attitude controllers output */
+struct output_s out_safety_check( struct output_s out ) {
+        struct output_s out_temp;
+
+        if ( fabs(out.roll) > RP_MAX )
+                out_temp.roll = (float)RP_MAX * (out.roll / (float)fabs(out.roll));
+
+        if ( fabs(out.pitch) > RP_MAX )
+                out_temp.pitch = (float)RP_MAX * (out.pitch / (float)fabs(out.pitch));
+
+        if ( fabs(out.yaw) > YAW_MAX )
+                out_temp.yaw = (float)YAW_MAX * (out.yaw / (float)fabs(out.yaw));
+
+        return out_temp;
+}
+
+
+struct output_s act_map_run( math::Matrix<4,4> *act_map, math::Vector<4> u ) {
+        struct output_s out_scaled;
+
+        out_scaled.thrust = act_map->data[0][0]*u.data[0] + act_map->data[0][1]*u.data[1] + act_map->data[0][2]*u.data[2] + act_map->data[0][3]*u.data[3];
+        out_scaled.roll   = act_map->data[1][0]*u.data[0] + act_map->data[1][1]*u.data[1] + act_map->data[1][2]*u.data[2] + act_map->data[1][3]*u.data[3];
+        out_scaled.pitch  = act_map->data[2][0]*u.data[0] + act_map->data[2][1]*u.data[1] + act_map->data[2][2]*u.data[2] + act_map->data[2][3]*u.data[3];
+        out_scaled.yaw    = act_map->data[3][0]*u.data[0] + act_map->data[3][1]*u.data[1] + act_map->data[3][2]*u.data[2] + act_map->data[3][3]*u.data[3];
+
+        return out_scaled;
+}
+
+
+void init_act_map( math::Matrix<4,4> *act_map ) {
+        act_map->data[0][0] = ACT_MAP_1_1;
+        act_map->data[0][1] = ACT_MAP_1_2;
+        act_map->data[0][2] = ACT_MAP_1_3;
+        act_map->data[0][3] = ACT_MAP_1_4;
+
+        act_map->data[1][0] = ACT_MAP_2_1;
+        act_map->data[1][1] = ACT_MAP_2_2;
+        act_map->data[1][2] = ACT_MAP_2_3;
+        act_map->data[1][3] = ACT_MAP_2_4;
+
+        act_map->data[2][0] = ACT_MAP_3_1;
+        act_map->data[2][1] = ACT_MAP_3_2;
+        act_map->data[2][2] = ACT_MAP_3_3;
+        act_map->data[2][3] = ACT_MAP_3_4;
+
+        act_map->data[3][0] = ACT_MAP_4_1;
+        act_map->data[3][1] = ACT_MAP_4_2;
+        act_map->data[3][2] = ACT_MAP_4_3;
+        act_map->data[3][3] = ACT_MAP_4_4;
+}
+
+
 static void usage(const char *reason) {
         if (reason)
                 fprintf(stderr, "%s\n", reason);
@@ -215,24 +255,25 @@ static void usage(const char *reason) {
         exit(1);
 }
 
-int q_att_control_main(int argc, char *argv[]) {
+
+int q_control_main(int argc, char *argv[]) {
         if (argc < 1)
                 usage("missing argument");
 
         if (!strcmp(argv[1], "start")) {
 
                 if (thread_running) {
-                        printf("q_att_control already running\n");
+                        printf("q_control already running\n");
 
                         exit(0);
                 }
 
                 thread_should_exit = false;
-                daemon_task = task_spawn_cmd("q_att_control",
+                daemon_task = task_spawn_cmd("q_control",
                                              SCHED_DEFAULT,
                                              SCHED_PRIORITY_MAX - 5,
                                              2048,
-                                             q_att_control_thread_main,
+                                             q_control_thread_main,
                                              (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
                 thread_running = true;
                 exit(0);
@@ -245,10 +286,10 @@ int q_att_control_main(int argc, char *argv[]) {
 
         if (!strcmp(argv[1], "status")) {
                 if (thread_running) {
-                        printf("\tatt_control is running\n");
+                        printf("\tq_control is running\n");
 
                 } else {
-                        printf("\tatt_control not started\n");
+                        printf("\tq_control not started\n");
                 }
 
                 exit(0);

@@ -585,7 +585,7 @@ const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
 					att.g_comp[1] = raw.accelerometer_m_s2[1] - acc(1);
 					att.g_comp[2] = raw.accelerometer_m_s2[2] - acc(2);
 
-                                        // TODO: tilføj publihing på "vehicle_local_position"
+                                        // TODO: tilføj publishing på "vehicle_local_position"
 
 					/* copy offsets */
 					memcpy(&att.rate_offsets, &(x_aposteriori[3]), sizeof(att.rate_offsets));

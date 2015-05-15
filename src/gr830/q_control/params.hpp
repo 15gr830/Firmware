@@ -3,12 +3,12 @@
  * Author:   Group 830 <15gr830@es.aau.dk>
  *************************************************************************
  *
- * Parameters for the attitude controller.
+ * Parameters for the controller application.
  *
  */
 
-#ifndef ATTITUDE_CONTROL_PARAMS_H
-#define ATTITUDE_CONTROL_PARAMS_H
+#ifndef Q_CONTROL_PARAMS_H
+#define Q_CONTROL_PARAMS_H
 
 /* Entrys for the 4x12 LQR controller matrix; default identity matrix */
 #define LQR_CONTROLLER_1_1     1
@@ -79,10 +79,33 @@
 #define LQR_CONTROLLER_4_15    0
 #define LQR_CONTROLLER_4_16    0
 
+
+// Mapping between rpm values and motor control values
+#define ACT_MAP_1_1 1
+#define ACT_MAP_1_2 0
+#define ACT_MAP_1_3 0
+#define ACT_MAP_1_4 0
+
+#define ACT_MAP_2_1 0
+#define ACT_MAP_2_2 1
+#define ACT_MAP_2_3 0
+#define ACT_MAP_2_4 0
+
+#define ACT_MAP_3_1 0
+#define ACT_MAP_3_2 0
+#define ACT_MAP_3_3 1
+#define ACT_MAP_3_4 0
+
+#define ACT_MAP_4_1 0
+#define ACT_MAP_4_2 0
+#define ACT_MAP_4_3 0
+#define ACT_MAP_4_4 1
+
+
 // Safety values
 #define RP_MAX  0.8
 #define YAW_MAX 0.8
 #define RP_SAFE 0.8
 
 
-#endif  /* ATTITUDE_CONTROL_PARAMS_H */
+#endif  /* Q_CONTROL_PARAMS_H */
