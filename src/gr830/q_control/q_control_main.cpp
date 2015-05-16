@@ -193,7 +193,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 error = true;
                         }
 
-                        printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                        // printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
 
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
