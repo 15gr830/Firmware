@@ -211,7 +211,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 if ( first )
                                         printf("Motor off\n");
                                 for (int i = 0; i < 4; i++)
-                                        actuators.control[i] = 0;
+                                        actuators.control[i] = (double)0;
 
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
                         }
