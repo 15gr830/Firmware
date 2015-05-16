@@ -134,7 +134,7 @@ public:
         math::Vector<4> run(void) {
                 math::Vector<4>  u, i;
                 math::Vector<16> x_e;
-                double           q0_sign = 0;
+                double           q0_sign = 0;//, q0_size = 0;
 
                 // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
@@ -146,7 +146,14 @@ public:
                 q_err->data[2] = q_est->data[0] * q_ref->data[2] - q_est->data[1] * q_ref->data[3] + q_est->data[2] * q_ref->data[0] + q_est->data[3] * q_ref->data[1];
                 q_err->data[3] = q_est->data[0] * q_ref->data[3] + q_est->data[1] * q_ref->data[2] - q_est->data[2] * q_ref->data[1] + q_est->data[3] * q_ref->data[0];
 
-                q0_sign = (double)q_err->data[0]/fabs(q_err->data[0]);
+                q0_sign = (double)q_err->data[0]/(double)fabs(q_err->data[0]);
+
+                if ( isnan(q0_sign) || (q0_sign < (double)0.001f) )
+                        q0_sign = (double)1;
+
+                // printf("q0_sign = %4.4f\n", (double)q0_sign);
+
+                // q_err->print();
 
                 // Collecting the error state vector x_e
                 x_e.data[0]  = (double)q0_sign*(double)q_err->data[1];
