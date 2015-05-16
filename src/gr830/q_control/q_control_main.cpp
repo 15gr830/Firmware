@@ -113,8 +113,10 @@ int q_control_thread_main(int argc, char *argv[]) {
                         orb_copy(ORB_ID(vehicle_command), cmd_sub, &cmd);
 
                 if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 <= 0) ) {
+                        printf("Output off modtaget");
                         output_on = false;
                 } else if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 > 0) ) {
+                        printf("Output on modtaget");
                         output_on = true;
                 }
 
@@ -200,7 +202,9 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         if ( output_on ) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
+                                printf("Output on");
                         } else if ( !output_on ) {
+                                printf("Output off");
                                 for (int i = 0; i < 4; i++)
                                         actuators.control[i] = 0;
 
