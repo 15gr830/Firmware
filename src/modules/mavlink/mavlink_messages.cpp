@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file mavlink_messages.cpp
+ * @file mavlink_messages.cppMAV_CMD_PAYLOAD_CONTROL_DEPLOY
  * MAVLink 1.0 message formatters implementation.
  *
  * @author Lorenz Meier <lm@inf.ethz.ch>
