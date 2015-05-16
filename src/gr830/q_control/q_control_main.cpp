@@ -104,6 +104,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         bool error = false;
         bool once  = false;
         bool output_on = false;
+        bool first = false;
 
         while ( !thread_should_exit ) {
 
@@ -113,11 +114,13 @@ int q_control_thread_main(int argc, char *argv[]) {
                         orb_copy(ORB_ID(vehicle_command), cmd_sub, &cmd);
 
                 if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 <= 0) ) {
-                        printf("Output off modtaget");
+                        printf("Output off modtaget\n");
                         output_on = false;
+                        first = true;
                 } else if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 > 0) ) {
-                        printf("Output on modtaget");
+                        printf("Output on modtaget\n");
                         output_on = true;
+                        first = true;
                 }
 
                 bool v_status_updated;
@@ -202,9 +205,11 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         if ( output_on ) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
-                                printf("Motor on");
+                                if ( first )
+                                        printf("Motor on\n");
                         } else if ( !output_on ) {
-                                printf("motor off");
+                                if ( first )
+                                        printf("Motor off\n");
                                 for (int i = 0; i < 4; i++)
                                         actuators.control[i] = 0;
 
