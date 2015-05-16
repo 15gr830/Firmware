@@ -202,9 +202,9 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         if ( output_on ) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
-                                printf("Output on");
+                                printf("Motor on");
                         } else if ( !output_on ) {
-                                printf("Output off");
+                                printf("motor off");
                                 for (int i = 0; i < 4; i++)
                                         actuators.control[i] = 0;
 
