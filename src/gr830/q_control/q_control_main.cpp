@@ -160,6 +160,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         lqr->x_ref = x_ref;
                         
                         u = lqr->run();
+
                         if (once == false) {
                                 lqr->print();
                                 once = true;
