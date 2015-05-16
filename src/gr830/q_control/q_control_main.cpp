@@ -214,7 +214,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         } else if ( !output_on ) {
                                 if ( first ) {
                                         printf("Motor off\n");
-                                        first = false
+                                        first = false;
                                 }
 
                                 for (int i = 0; i < 4; i++)
