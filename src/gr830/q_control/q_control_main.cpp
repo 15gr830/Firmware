@@ -36,7 +36,7 @@ int q_control_thread_main(int argc, char *argv[]);
 static void usage(const char *reason);
 math::Matrix<4,4> init_act_map(void);
 struct output_s act_map_run( math::Matrix<4,4> act_map, math::Vector<4> u );
-struct output_s out_safety_check( struct output_s out );
+void out_safety_check( struct output_s *out );
 
 /**
  * Globals
@@ -98,18 +98,10 @@ int q_control_thread_main(int argc, char *argv[]) {
         math::Vector<4> u,id;
         math::Matrix<4,4> act_map;
         act_map = init_act_map();
-        act_map.print();
+        // act_map.print();
 
-        u = {1,0,1,0};
-        u.print();
-
-        // out.thrust = (double)act_map.data[0][0]*(double)u.data[0] + (double)act_map.data[0][1]*(double)u.data[1] + (double)act_map.data[0][2]*(double)u.data[2] + (double)act_map.data[0][3]*(double)u.data[3];
-        // out.roll   = (double)act_map.data[1][0]*(double)u.data[0] + (double)act_map.data[1][1]*(double)u.data[1] + (double)act_map.data[1][2]*(double)u.data[2] + (double)act_map.data[1][3]*(double)u.data[3];
-        // out.pitch  = (double)act_map.data[2][0]*(double)u.data[0] + (double)act_map.data[2][1]*(double)u.data[1] + (double)act_map.data[2][2]*(double)u.data[2] + (double)act_map.data[2][3]*(double)u.data[3];
-        // out.yaw    = (double)act_map.data[3][0]*(double)u.data[0] + (double)act_map.data[3][1]*(double)u.data[1] + (double)act_map.data[3][2]*(double)u.data[2] + (double)act_map.data[3][3]*(double)u.data[3];
-        // printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-
-        bool  error   = false;
+        bool error = false;
+        bool once  = false;
 
         while ( !thread_should_exit ) {
 
@@ -126,7 +118,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
 
-                        bool v_local_pos_updated; // Estimates positions from EKF
+                        bool v_local_pos_updated; // Position estimates from EKF
                 	orb_check(v_local_pos_sub, &v_local_pos_updated);
 	                if ( v_local_pos_updated ) {
 	                        orb_copy(ORB_ID(vehicle_local_position), v_local_pos_sub, &v_local_pos);
@@ -154,34 +146,29 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         lqr->x_est = x_est; // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
-                        // x_ref[0] to x_ref[2] is calculated in the lqr class
-                        x_ref[3]  = 0;
-                        x_ref[4]  = 0;
-                        x_ref[5]  = 0;
-                        x_ref[6]  = pos_sp.x;
-                        x_ref[7]  = pos_sp.y;
-                        x_ref[8]  = pos_sp.z;
-                        x_ref[9]  = 0;
-                        x_ref[10] = 0;
-                        x_ref[11] = 0;
+                        // Reference state vector
+                        x_ref[3]  = 0;        // q1
+                        x_ref[4]  = 0;        // q2
+                        x_ref[5]  = 0;        // q3
+                        x_ref[6]  = pos_sp.x; // setpoint position
+                        x_ref[7]  = pos_sp.y; // setpoint position
+                        x_ref[8]  = pos_sp.z; // setpoint position
+                        x_ref[9]  = 0;        // x velocity
+                        x_ref[10] = 0;        // y velocity
+                        x_ref[11] = 0;        // z velocity
 
                         lqr->x_ref = x_ref;
                         
                         u = lqr->run();
-                        u.print();
+                        if (once == false) {
+                                lqr->print();
+                                once = true;
+                        }
 
                         out = act_map_run(act_map, u);
-//                        printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-
-                        // out.thrust = (double)act_map.data[0][0]*(double)u.data[0];// + (double)act_map.data[0][1]*(double)u.data[1] + (double)act_map.data[0][2]*(double)u.data[2] + (double)act_map.data[0][3]*(double)u.data[3];
-                        // out.roll   = (double)act_map.data[1][0]*(double)u.data[0];// + (double)act_map.data[1][1]*(double)u.data[1] + (double)act_map.data[1][2]*(double)u.data[2] + (double)act_map.data[1][3]*(double)u.data[3];
-                        // out.pitch  = (double)act_map.data[2][0]*(double)u.data[0];// + (double)act_map.data[2][1]*(double)u.data[1] + (double)act_map.data[2][2]*(double)u.data[2] + (double)act_map.data[2][3]*(double)u.data[3];
-                        // out.yaw    = (double)act_map.data[3][0]*(double)u.data[0];// + (double)act_map.data[3][1]*(double)u.data[1] + (double)act_map.data[3][2]*(double)u.data[2] + (double)act_map.data[3][3]*(double)u.data[3];
-                        // printf("%f %f %f %f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-
-                        out = out_safety_check(out);
+                        out_safety_check(&out);
                         
-                        if ( ( (fabs(v_att.roll) > RP_SAFE) || (fabs(v_att.pitch) > RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
+                        if ( ( (fabs(v_att.roll) > (double)RP_SAFE) || (fabs(v_att.pitch) > (double)RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
                                 out.roll = 0;
                                 out.pitch = 0;
                                 out.yaw = 0;
@@ -189,7 +176,9 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                                 error = true;
                         }
-                        
+
+                        printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw;
@@ -216,19 +205,16 @@ int q_control_thread_main(int argc, char *argv[]) {
 
 // TODO: De rigtige værdier skal findes til sikkerhed
 /* Limiting attitude controllers output */
-struct output_s out_safety_check( struct output_s out ) {
-        struct output_s out_temp;
+void out_safety_check( struct output_s *out ) {
+        if ( (double)fabs(out->roll) > (double)RP_MAX )
+                out->roll = (float)RP_MAX * (out->roll / (float)fabs(out->roll));
 
-        if ( fabs(out.roll) > RP_MAX )
-                out_temp.roll = (float)RP_MAX * (out.roll / (float)fabs(out.roll));
+        if ( (double)fabs(out->pitch) > (double)RP_MAX )
+                out->pitch = (float)RP_MAX * (out->pitch / (float)fabs(out->pitch));
 
-        if ( fabs(out.pitch) > RP_MAX )
-                out_temp.pitch = (float)RP_MAX * (out.pitch / (float)fabs(out.pitch));
+        if ( (double)fabs(out->yaw) > (double)YAW_MAX )
+                out->yaw = (float)YAW_MAX * (out->yaw / (float)fabs(out->yaw));
 
-        if ( fabs(out.yaw) > YAW_MAX )
-                out_temp.yaw = (float)YAW_MAX * (out.yaw / (float)fabs(out.yaw));
-
-        return out_temp;
 }
 
 
