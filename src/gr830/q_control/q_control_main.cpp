@@ -18,6 +18,7 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_control_mode.h>
+#include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <systemlib/param/param.h>
@@ -61,16 +62,16 @@ int q_control_thread_main(int argc, char *argv[]) {
         memset(&v_local_pos, 0, sizeof(v_local_pos));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
-        struct vehicle_control_mode_s control_mode;
-        memset(&control_mode, 0, sizeof(control_mode));
         struct position_setpoint_s pos_sp;
         memset(&pos_sp, 0, sizeof(pos_sp));
+        struct vehicle_command_s cmd;
+        memset(&cmd, 0, sizeof(cmd));
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
         int v_local_pos_sub = orb_subscribe(ORB_ID(vehicle_local_position));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
-        int control_mode_sub = orb_subscribe(ORB_ID(vehicle_control_mode));
         int pos_sp_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
+        int cmd_sub = orb_subscribe(ORB_ID(vehicle_command));
 
         /**
          * Topics to be published on
@@ -102,8 +103,20 @@ int q_control_thread_main(int argc, char *argv[]) {
 
         bool error = false;
         bool once  = false;
+        bool output_on = false;
 
         while ( !thread_should_exit ) {
+
+                bool cmd_updated;
+                orb_check(cmd_sub, &cmd_updated);
+                if ( cmd_updated )
+                        orb_copy(ORB_ID(vehicle_command), cmd_sub, &cmd);
+
+                if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 <= 0) ) {
+                        output_on = false;
+                } else if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 > 0) ) {
+                        output_on = true;
+                }
 
                 bool v_status_updated;
                 orb_check(v_status_sub, &v_status_updated);
@@ -185,16 +198,14 @@ int q_control_thread_main(int argc, char *argv[]) {
                         actuators.control[2] = (float)out.yaw;
                         actuators.control[3] = (float)out.thrust;
 
-                        bool control_mode_updated;
-                	orb_check(control_mode_sub, &control_mode_updated);
-	                if ( control_mode_updated ) {
-	                        orb_copy(ORB_ID(vehicle_control_mode), control_mode_sub, &control_mode);
-	                }
+                        if ( output_on ) {
+                                orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
+                        } else if ( !output_on ) {
+                                for (int i = 0; i < 4; i++)
+                                        actuators.control[i] = 0;
 
-                        if (control_mode.flag_control_altitude_enabled) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
                         }
-
                 } else {
                         /* nothing happened */
                 }
