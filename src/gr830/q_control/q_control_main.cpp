@@ -110,17 +110,18 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                 bool cmd_updated;
                 orb_check(cmd_sub, &cmd_updated);
-                if ( cmd_updated )
+                if ( cmd_updated ) {
                         orb_copy(ORB_ID(vehicle_command), cmd_sub, &cmd);
 
-                if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 <= 0) ) {
-                        printf("Output off modtaget\n");
-                        output_on = false;
-                        first = true;
-                } else if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 > 0) ) {
-                        printf("Output on modtaget\n");
-                        output_on = true;
-                        first = true;
+                        if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 <= 0) ) {
+                                printf("Output off modtaget\n");
+                                output_on = false;
+                                first = true;
+                        } else if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 > 0) ) {
+                                printf("Output on modtaget\n");
+                                output_on = true;
+                                first = true;
+                        }
                 }
 
                 bool v_status_updated;
