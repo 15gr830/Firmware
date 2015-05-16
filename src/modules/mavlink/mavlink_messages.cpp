@@ -304,7 +304,8 @@ protected:
 		msg.custom_mode = 0;
 		get_mavlink_mode_state(&status, &pos_sp_triplet, &msg.system_status, &msg.base_mode, &msg.custom_mode);
 		msg.type = _mavlink->get_system_type();
-		msg.autopilot = MAV_AUTOPILOT_PX4;
+		// msg.autopilot = MAV_AUTOPILOT_PX4;
+		msg.autopilot = MAV_AUTOPILOT_GENERIC;
 		msg.mavlink_version = 3;
 
 		_mavlink->send_message(MAVLINK_MSG_ID_HEARTBEAT, &msg);
