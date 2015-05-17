@@ -50,42 +50,42 @@
  *
  * @group attitude_ekf
  */
-PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q0, 1e-4f);
+PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q0, 1e-2f); // q_rotspeed
 
 /**
  * Body angular acceleration process noise
  *
  * @group attitude_ekf
  */
-PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q1, 0.08f);
+PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q1, 0.0008f); // q_rotacc
 
 /**
  * Acceleration process noise
  *
  * @group attitude_ekf
  */
-PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q2, 0.009f);
+PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q2, 0.009f); // q_acc
 
 /**
  * Magnet field vector process noise
  *
  * @group attitude_ekf
  */
-PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q3, 0.005f);
+PARAM_DEFINE_FLOAT(EKF_ATT_V3_Q3, 0.0008f); // q_mag
 
 /**
  * Gyro measurement noise
  *
  * @group attitude_ekf
  */
-PARAM_DEFINE_FLOAT(EKF_ATT_V4_R0, 0.0008f);
+PARAM_DEFINE_FLOAT(EKF_ATT_V4_R0, 0.008f); // r_gyro
 
 /**
  * Accel measurement noise
  *
  * @group attitude_ekf
  */
-PARAM_DEFINE_FLOAT(EKF_ATT_V4_R1, 10000.0f);
+PARAM_DEFINE_FLOAT(EKF_ATT_V4_R1, 10000.0f); // r_accel
 
 /**
  * Mag measurement noise
@@ -105,7 +105,7 @@ PARAM_DEFINE_INT32(ATT_ACC_COMP, 2);
  * @group attitude_ekf
  * @unit kg*m^2
  */
-PARAM_DEFINE_FLOAT(ATT_J11, 0.0018);
+PARAM_DEFINE_FLOAT(ATT_J11, 0.0018f);
 
 /**
  * Moment of inertia matrix diagonal entry (2, 2)
@@ -113,7 +113,7 @@ PARAM_DEFINE_FLOAT(ATT_J11, 0.0018);
  * @group attitude_ekf
  * @unit kg*m^2
  */
-PARAM_DEFINE_FLOAT(ATT_J22, 0.0018);
+PARAM_DEFINE_FLOAT(ATT_J22, 0.0018f);
 
 /**
  * Moment of inertia matrix diagonal entry (3, 3)
@@ -121,7 +121,7 @@ PARAM_DEFINE_FLOAT(ATT_J22, 0.0018);
  * @group attitude_ekf
  * @unit kg*m^2
  */
-PARAM_DEFINE_FLOAT(ATT_J33, 0.0037);
+PARAM_DEFINE_FLOAT(ATT_J33, 0.0018f);
 
 /**
  * Moment of inertia enabled in estimator
@@ -132,7 +132,14 @@ PARAM_DEFINE_FLOAT(ATT_J33, 0.0037);
  * @min 0
  * @max 1
  */
-PARAM_DEFINE_INT32(ATT_J_EN, 0);
+PARAM_DEFINE_INT32(ATT_J_EN, 1);
+
+/**
+ * PTAM noise
+ *
+ * @group attitude_ekf
+ */
+PARAM_DEFINE_INT32(ATT_R_PTAM, 0.0008f);
 
 int parameters_init(struct attitude_estimator_ekf_param_handles *h)
 {
@@ -154,6 +161,7 @@ int parameters_init(struct attitude_estimator_ekf_param_handles *h)
 	h->moment_inertia_J[1]  =   param_find("ATT_J22");
 	h->moment_inertia_J[2]  =   param_find("ATT_J33");
 	h->use_moment_inertia	=   param_find("ATT_J_EN");
+        h->r_ptam               =   param_find("ATT_R_PTAM");
 
 	return OK;
 }
@@ -178,6 +186,7 @@ int parameters_update(const struct attitude_estimator_ekf_param_handles *h, stru
 		param_get(h->moment_inertia_J[i], &(p->moment_inertia_J[3 * i + i]));
 	}
 	param_get(h->use_moment_inertia, &(p->use_moment_inertia));
+        param_get(h->r_ptam, &(p->r_ptam));
 
 	return OK;
 }

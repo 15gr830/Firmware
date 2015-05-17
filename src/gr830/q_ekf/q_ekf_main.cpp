@@ -64,6 +64,7 @@
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/vision_position_estimate.h>
+#include <uORB/topics/att_pos_mocap.h>
 #include <drivers/drv_hrt.h>
 
 #include <lib/mathlib/mathlib.h>
@@ -76,7 +77,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "codegen/AttitudeEKF.h"
+#include "att_codegen/AttitudeEKF2grav.h"
 #include "q_ekf_params.h"
 #ifdef __cplusplus
 }
@@ -97,6 +98,8 @@ int q_ekf_thread_main(int argc, char *argv[]);
  * Print the correct usage.
  */
 static void usage(const char *reason);
+math::Matrix<3,3> quat2Rot(float q);
+math::Vector<3> matVectMult(math::Matrix<3,3> mat, math::Vector<3> v);
 
 static void
 usage(const char *reason)
@@ -208,10 +211,11 @@ int q_ekf_thread_main(int argc, char *argv[])
         };		/**< init: identity matrix */
 
 	float debugOutput[4] = { 0.0f };
+        float q_att[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	int overloadcounter = 19;
 
 	/* Initialize filter */
-	AttitudeEKF_initializ();
+	AttitudeEKF2grav_initialize();
 
 	/* store start time to guard against too slow update rates */
 	uint64_t last_run = hrt_absolute_time();
@@ -228,6 +232,8 @@ int q_ekf_thread_main(int argc, char *argv[])
 	memset(&att, 0, sizeof(att));
 	struct vehicle_control_mode_s control_mode;
 	memset(&control_mode, 0, sizeof(control_mode));
+        struct att_pos_mocap_s ptam; // data from ptam (xyz and quaternion); floats x, y,z and q[4]
+        memset(&ptam, 0, sizeof(ptam));
         // TODO: mangler "vehicle_local_position"
 
 	uint64_t last_data = 0;
@@ -267,9 +273,13 @@ int q_ekf_thread_main(int argc, char *argv[])
 	/* subscribe to vision estimate */
 	int vision_sub = orb_subscribe(ORB_ID(vision_position_estimate));
 
+        /* subscribe to ptam data */
+        int ptam_sub = orb_subscribe(ORB_ID(att_pos_mocap));
+
+        // TODO: vehicle_local_position
+
 	/* advertise attitude */
 	orb_advert_t pub_att = orb_advertise(ORB_ID(vehicle_attitude), &att);
-        // TODO: vehicle_local_position
 
 	int loopcounter = 0;
 
@@ -296,6 +306,11 @@ int q_ekf_thread_main(int argc, char *argv[])
 	/* rotation matrix for magnetic declination */
 	math::Matrix<3, 3> R_decl;
 	R_decl.identity();
+
+        math::Matrix<3,3> R;
+        R.identity();
+        float q_rot_ptam[4] = {0,0,0,0};
+        math::Vector<3> mag_in_h = {1, 0, 0}, grav_in_h = {0, 0, -9.82f}, gm, gg;
 
 	struct vision_position_estimate vision {};
 
@@ -362,18 +377,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 				if (!initialized) {
 					// XXX disabling init for now
 					initialized = true;
-
-					// gyro_offsets[0] += raw.gyro_rad_s[0];
-					// gyro_offsets[1] += raw.gyro_rad_s[1];
-					// gyro_offsets[2] += raw.gyro_rad_s[2];
-					// offset_count++;
-
-					// if (hrt_absolute_time() - start_time > 3000000LL) {
-					// 	initialized = true;
-					// 	gyro_offsets[0] /= offset_count;
-					// 	gyro_offsets[1] /= offset_count;
-					// 	gyro_offsets[2] /= offset_count;
-					// }
 
 				} else {
 
@@ -447,6 +450,46 @@ int q_ekf_thread_main(int argc, char *argv[])
 					z_k[4] = raw.accelerometer_m_s2[1] - acc(1);
 					z_k[5] = raw.accelerometer_m_s2[2] - acc(2);
 
+                                        // TODO: by magic from PTAM data instead
+                                        
+                                        bool ptam_updated = false;
+					orb_check(ptam_sub, &ptram_updated);
+
+					if (ptam_updated) {
+						orb_copy(ORB_ID(att_pos_mocap), ptam_sub, &ptam);
+					}
+
+                                        // TODO: her skal der sættes noget nikolaj magi ind...
+                                        R = quat2Rot(q_rot_ptam);
+                                        gm = matVectMult(R, mag_in_h);
+                                        gg = matVectMult(R, grav_in_h);
+
+                                        z_k[6] = gg.data[0];
+                                        z_k[7] = gg.data[1];
+                                        z_k[8] = gg.data[2];
+
+                                        z_k[9] = gm.data[0];
+                                        z_k[10] = gm.data[1];
+                                        z_k[11] = gm.data[2];
+
+                                        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 					/* update magnetometer measurements */
 					if (sensor_last_timestamp[2] != raw.magnetometer_timestamp) {
 						update_vect[2] = 1;
@@ -478,6 +521,19 @@ int q_ekf_thread_main(int argc, char *argv[])
 						z_k[7] = raw.magnetometer_ga[1];
 						z_k[8] = raw.magnetometer_ga[2];
 					}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 					uint64_t now = hrt_absolute_time();
 					unsigned int time_elapsed = now - last_run;
@@ -618,4 +674,32 @@ int q_ekf_thread_main(int argc, char *argv[])
 	thread_running = false;
 
 	return 0;
+}
+
+math::Matrix<3,3> quat2Rot(float q[4]) {
+        math::Matrix<3,3> R;
+
+        R.data[0][0] = 2*q[0]*q[0] - 1 + 2*q[1]*q[1];
+        R.data[0][1] = 2*q[1]*q[2] + 2*q[0]*q[3];
+        R.data[0][2] = 2*q[1]*q[3] - 2*q[0]*q[2];
+
+        R.data[1][0] = 2*q[1]*q[2] - 2*q[0]*q[3];
+        R.data[1][1] = 2*q[0]*q[0] - 1 + 2*q[2]*q[2];
+        R.data[1][2] = 2*q[2]*q[3] + 2*q[0]q[1];
+
+        R.data[2][0] = 2*q[1]*q[3] + 2*q[0]*q[2];
+        R.data[2][1] = 2*q[2]*q[3] - q*q[0]*q[1];
+        R.data[2][2] = 2*q[0]*q[0] - 1 + 2*q[3]*q[3];
+
+        return R;
+}
+
+math::Vector<3> matVectMult(math::Matrix<3,3> mat, math::Vector<3> v) {
+        math::Vector vr;
+
+        vr.data[0] = mat.data[0][0]*v.data[0] + mat.data[0][1]*v.data[1] + mat.data[0][2]*v.data[2];
+        vr.data[1] = mat.data[1][0]*v.data[0] + mat.data[1][1]*v.data[1] + mat.data[1][2]*v.data[2];
+        vr.data[2] = mat.data[2][0]*v.data[0] + mat.data[2][1]*v.data[1] + mat.data[2][2]*v.data[2];
+
+        return vr;
 }
