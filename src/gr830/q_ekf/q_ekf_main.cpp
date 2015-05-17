@@ -131,11 +131,11 @@ int q_ekf_main(int argc, char *argv[])
 
 		thread_should_exit = false;
 		attitude_estimator_ekf_task = task_spawn_cmd("q_ekf",
-					      SCHED_DEFAULT,
-					      SCHED_PRIORITY_MAX - 5,
-					      7700,
-					      q_ekf_thread_main,
-					      (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
+                                                             SCHED_DEFAULT,
+                                                             SCHED_PRIORITY_MAX - 5,
+                                                             7700,
+                                                             q_ekf_thread_main,
+                                                             (argv) ? (char * const *)&argv[2] : (char * const *)NULL);
 		exit(0);
 	}
 
@@ -176,25 +176,25 @@ int q_ekf_main(int argc, char *argv[])
 int q_ekf_thread_main(int argc, char *argv[])
 {
 
-const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
+        const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
 
 	float dt = 0.005f;
 /* state vector x has the following entries [ax,ay,az||mx,my,mz||wox,woy,woz||wx,wy,wz]' */
 	float z_k[9] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 9.81f, 0.2f, -0.2f, 0.2f}; /**< Measurement vector */
 	float x_aposteriori_k[12];		/**< states */
 	float P_aposteriori_k[144] = {100.f, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-				     0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-				     0,   0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-				     0,   0,   0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,
-				     0,   0,   0,   0,  100.f,  0,   0,   0,   0,   0,   0,   0,
-				     0,   0,   0,   0,   0, 100.f,   0,   0,   0,   0,   0,   0,
-				     0,   0,   0,   0,   0,   0, 100.f,   0,   0,   0,   0,   0,
-				     0,   0,   0,   0,   0,   0,   0, 100.f,   0,   0,   0,   0,
-				     0,   0,   0,   0,   0,   0,   0,   0, 100.f,   0,   0,   0,
-				     0,   0,   0,   0,   0,   0,   0,   0,  0.0f, 100.0f,   0,   0,
-				     0,   0,   0,   0,   0,   0,   0,   0,  0.0f,   0,   100.0f,   0,
-				     0,   0,   0,   0,   0,   0,   0,   0,  0.0f,   0,   0,   100.0f,
-				    }; /**< init: diagonal matrix with big values */
+                                      0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+                                      0,   0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+                                      0,   0,   0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,
+                                      0,   0,   0,   0,  100.f,  0,   0,   0,   0,   0,   0,   0,
+                                      0,   0,   0,   0,   0, 100.f,   0,   0,   0,   0,   0,   0,
+                                      0,   0,   0,   0,   0,   0, 100.f,   0,   0,   0,   0,   0,
+                                      0,   0,   0,   0,   0,   0,   0, 100.f,   0,   0,   0,   0,
+                                      0,   0,   0,   0,   0,   0,   0,   0, 100.f,   0,   0,   0,
+                                      0,   0,   0,   0,   0,   0,   0,   0,  0.0f, 100.0f,   0,   0,
+                                      0,   0,   0,   0,   0,   0,   0,   0,  0.0f,   0,   100.0f,   0,
+                                      0,   0,   0,   0,   0,   0,   0,   0,  0.0f,   0,   0,   100.0f,
+        }; /**< init: diagonal matrix with big values */
 
 	float x_aposteriori[12];
 	float P_aposteriori[144];
@@ -203,15 +203,15 @@ const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
 	float euler[3] = {0.0f, 0.0f, 0.0f};
 
 	float Rot_matrix[9] = {1.f,  0,  0,
-			      0,  1.f,  0,
-			      0,  0,  1.f
-			     };		/**< init: identity matrix */
+                               0,  1.f,  0,
+                               0,  0,  1.f
+        };		/**< init: identity matrix */
 
 	float debugOutput[4] = { 0.0f };
 	int overloadcounter = 19;
 
 	/* Initialize filter */
-	AttitudeEKF_initialize();
+	AttitudeEKF_initializ();
 
 	/* store start time to guard against too slow update rates */
 	uint64_t last_run = hrt_absolute_time();
@@ -534,23 +534,23 @@ const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
 
 					/* Call the estimator */
 					AttitudeEKF(false, // approx_prediction
-							(unsigned char)ekf_params.use_moment_inertia,
-							update_vect,
-							dt,
-							z_k,
-							ekf_params.q[0], // q_rotSpeed,
-							ekf_params.q[1], // q_rotAcc
-							ekf_params.q[2], // q_acc
-							ekf_params.q[3], // q_mag
-							ekf_params.r[0], // r_gyro
-							ekf_params.r[1], // r_accel
-							ekf_params.r[2], // r_mag
-							ekf_params.moment_inertia_J,
-							x_aposteriori,
-							P_aposteriori,
-							Rot_matrix,
-							euler,
-							debugOutput);
+                                                    (unsigned char)ekf_params.use_moment_inertia,
+                                                    update_vect,
+                                                    dt,
+                                                    z_k,
+                                                    ekf_params.q[0], // q_rotSpeed,
+                                                    ekf_params.q[1], // q_rotAcc
+                                                    ekf_params.q[2], // q_acc
+                                                    ekf_params.q[3], // q_mag
+                                                    ekf_params.r[0], // r_gyro
+                                                    ekf_params.r[1], // r_accel
+                                                    ekf_params.r[2], // r_mag
+                                                    ekf_params.moment_inertia_J,
+                                                    x_aposteriori,
+                                                    P_aposteriori,
+                                                    Rot_matrix,
+                                                    euler,
+                                                    debugOutput);
 
 					/* swap values for next iteration, check for fatal inputs */
 					if (isfinite(euler[0]) && isfinite(euler[1]) && isfinite(euler[2])) {
