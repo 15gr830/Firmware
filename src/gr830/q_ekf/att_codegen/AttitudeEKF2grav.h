@@ -18,7 +18,7 @@
 
 /* Function Declarations */
 extern void AttitudeEKF2grav(unsigned char approx_prediction, unsigned char
-                             use_inertia_matrix, const unsigned char zFlag[4], double dt, const double z[12],
+                             use_inertia_matrix, const unsigned char zFlag[4], double dt, float z[12],
                              double q_rotSpeed, double q_rotAcc, double q_acc, double q_mag, double r_gyro,
                              double r_accel, double r_ptam, const double J[9], float xa_apo[12], float
                              Pa_apo[144], float Rot_matrix[9], float eulerAngles[3], float debugOutput[4],

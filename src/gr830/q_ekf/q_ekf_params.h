@@ -44,7 +44,7 @@
 struct attitude_estimator_ekf_params {
 	float r[3];
 	float q[4];
-	float moment_inertia_J[9];
+	double moment_inertia_J[9];
 	int32_t use_moment_inertia;
 	float roll_off;
 	float pitch_off;
@@ -61,7 +61,7 @@ struct attitude_estimator_ekf_param_handles {
 	param_t use_moment_inertia;
 	param_t mag_decl;
 	param_t acc_comp;
-        param_t r_ptam
+        param_t r_ptam;
 };
 
 /**

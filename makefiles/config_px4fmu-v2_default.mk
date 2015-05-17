@@ -76,9 +76,9 @@ MODULES 	+= modules/land_detector
 #
 # Estimation modules (EKF/ SO3 / other filters)
 #
-MODULES		+= modules/attitude_estimator_ekf
-MODULES		+= modules/ekf_att_pos_estimator
-MODULES		+= modules/position_estimator_inav
+# MODULES		+= modules/attitude_estimator_ekf
+# MODULES		+= modules/ekf_att_pos_estimator
+# MODULES		+= modules/position_estimator_inav
 
 #
 # Vehicle Control
@@ -123,7 +123,7 @@ MODULES		+= lib/launchdetection
 MODULES		+= gr830/matlab_csv_serial # Accelerometer data
 MODULES		+= gr830/q_test_app
 MODULES		+= gr830/q_control
-# MODULES		+= gr830/q_ekf
+MODULES		+= gr830/q_ekf
 
 #
 # OBC challenge

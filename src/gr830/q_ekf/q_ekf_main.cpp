@@ -78,6 +78,7 @@
 extern "C" {
 #endif
 #include "att_codegen/AttitudeEKF2grav.h"
+#include "pos_codegen/posEKF.h"
 #include "q_ekf_params.h"
 #ifdef __cplusplus
 }
@@ -98,7 +99,7 @@ int q_ekf_thread_main(int argc, char *argv[]);
  * Print the correct usage.
  */
 static void usage(const char *reason);
-math::Matrix<3,3> quat2Rot(float q);
+math::Matrix<3,3> quat2Rot(float q[4]);
 math::Vector<3> matVectMult(math::Matrix<3,3> mat, math::Vector<3> v);
 
 static void
@@ -183,7 +184,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 	float dt = 0.005f;
 /* state vector x has the following entries [ax,ay,az||mx,my,mz||wox,woy,woz||wx,wy,wz]' */
-	float z_k[9] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 9.81f, 0.2f, -0.2f, 0.2f}; /**< Measurement vector */
+	float z_k[12] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 9.81f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; /**< Measurement vector */
 	float x_aposteriori_k[12];		/**< states */
 	float P_aposteriori_k[144] = {100.f, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
                                       0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -216,6 +217,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 	/* Initialize filter */
 	AttitudeEKF2grav_initialize();
+        posEKF_initialize();
 
 	/* store start time to guard against too slow update rates */
 	uint64_t last_run = hrt_absolute_time();
@@ -307,7 +309,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 	math::Matrix<3, 3> R_decl;
 	R_decl.identity();
 
-        math::Matrix<3,3> R;
+        math::Matrix<3,3> R_n;
         R.identity();
         float q_rot_ptam[4] = {0,0,0,0};
         math::Vector<3> mag_in_h = {1, 0, 0}, grav_in_h = {0, 0, -9.82f}, gm, gg;
@@ -385,7 +387,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 					/* Calculate data time difference in seconds */
 					dt = (raw.timestamp - last_measurement) / 1000000.0f;
 					last_measurement = raw.timestamp;
-					uint8_t update_vect[3] = {0, 0, 0};
+					uint8_t update_vect[4] = {0, 0, 0, 0};
 
 					/* Fill in gyro measurements */
 					if (sensor_last_timestamp[0] != raw.timestamp) {
@@ -453,16 +455,17 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         // TODO: by magic from PTAM data instead
                                         
                                         bool ptam_updated = false;
-					orb_check(ptam_sub, &ptram_updated);
+					orb_check(ptam_sub, &ptam_updated);
 
 					if (ptam_updated) {
 						orb_copy(ORB_ID(att_pos_mocap), ptam_sub, &ptam);
+                                                update_vect[3] = 1; // FIXME: snak med nikolaj
 					}
 
                                         // TODO: her skal der sættes noget nikolaj magi ind...
-                                        R = quat2Rot(q_rot_ptam);
-                                        gm = matVectMult(R, mag_in_h);
-                                        gg = matVectMult(R, grav_in_h);
+                                        R_n = quat2Rot(q_rot_ptam);
+                                        gm = matVectMult(R_n, mag_in_h);
+                                        gg = matVectMult(R_n, grav_in_h);
 
                                         z_k[6] = gg.data[0];
                                         z_k[7] = gg.data[1];
@@ -471,24 +474,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         z_k[9] = gm.data[0];
                                         z_k[10] = gm.data[1];
                                         z_k[11] = gm.data[2];
-
-                                        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 					/* update magnetometer measurements */
 					if (sensor_last_timestamp[2] != raw.magnetometer_timestamp) {
@@ -504,36 +489,23 @@ int q_ekf_thread_main(int argc, char *argv[])
 						orb_copy(ORB_ID(vision_position_estimate), vision_sub, &vision);
 					}
 
-					if (vision.timestamp_boot > 0 && (hrt_elapsed_time(&vision.timestamp_boot) < 500000)) {
+					// if (vision.timestamp_boot > 0 && (hrt_elapsed_time(&vision.timestamp_boot) < 500000)) {
 
-						math::Quaternion q(vision.q);
-						math::Matrix<3, 3> Rvis = q.to_dcm();
+					// 	math::Quaternion q(vision.q);
+					// 	math::Matrix<3, 3> Rvis = q.to_dcm();
 
-						math::Vector<3> v(1.0f, 0.0f, 0.4f);
+					// 	math::Vector<3> v(1.0f, 0.0f, 0.4f);
 
-						math::Vector<3> vn = Rvis * v;
+					// 	math::Vector<3> vn = Rvis * v;
 
-						z_k[6] = vn(0);
-						z_k[7] = vn(1);
-						z_k[8] = vn(2);
-					} else {
-						z_k[6] = raw.magnetometer_ga[0];
-						z_k[7] = raw.magnetometer_ga[1];
-						z_k[8] = raw.magnetometer_ga[2];
-					}
-
-
-
-
-
-
-
-
-
-
-
-
-
+					// 	z_k[6] = vn(0);
+					// 	z_k[7] = vn(1);
+					// 	z_k[8] = vn(2);
+					// } else {
+					// 	z_k[6] = raw.magnetometer_ga[0];
+					// 	z_k[7] = raw.magnetometer_ga[1];
+					// 	z_k[8] = raw.magnetometer_ga[2];
+					// }
 
 					uint64_t now = hrt_absolute_time();
 					unsigned int time_elapsed = now - last_run;
@@ -589,24 +561,41 @@ int q_ekf_thread_main(int argc, char *argv[])
 					}
 
 					/* Call the estimator */
-					AttitudeEKF(false, // approx_prediction
-                                                    (unsigned char)ekf_params.use_moment_inertia,
-                                                    update_vect,
-                                                    dt,
-                                                    z_k,
-                                                    ekf_params.q[0], // q_rotSpeed,
-                                                    ekf_params.q[1], // q_rotAcc
-                                                    ekf_params.q[2], // q_acc
-                                                    ekf_params.q[3], // q_mag
-                                                    ekf_params.r[0], // r_gyro
-                                                    ekf_params.r[1], // r_accel
-                                                    ekf_params.r[2], // r_mag
-                                                    ekf_params.moment_inertia_J,
-                                                    x_aposteriori,
-                                                    P_aposteriori,
-                                                    Rot_matrix,
-                                                    euler,
-                                                    debugOutput);
+					AttitudeEKF2grav(false, // approx_prediction
+                                                         (unsigned char)ekf_params.use_moment_inertia,
+                                                         update_vect,
+                                                         dt,
+                                                         z_k,
+                                                         ekf_params.q[0], // q_rotSpeed,
+                                                         ekf_params.q[1], // q_rotAcc
+                                                         ekf_params.q[2], // q_acc
+                                                         ekf_params.q[3], // q_mag
+                                                         ekf_params.r[0], // r_gyro
+                                                         ekf_params.r[1], // r_accel
+                                                         ekf_params.r_ptam, // r_ptam
+                                                         ekf_params.moment_inertia_J,
+                                                         x_aposteriori,
+                                                         P_aposteriori,
+                                                         Rot_matrix,
+                                                         euler,
+                                                         debugOutput,
+                                                         q_att);
+
+
+                                        // Position kalman filter EKF
+                                        // posEKF(const unsigned char zFlag[3], 
+                                        //        double dt, 
+                                        //        const double z[9],
+                                        //        double q_acc, 
+                                        //        double q_speed, 
+                                        //        double q_pos, 
+                                        //        double r_acc,
+                                        //        const double r_ptam[3], 
+                                        //        double r_got, 
+                                        //        float xa_apo[9], 
+                                        //        float Pa_apo[81], 
+                                        //        float debugOutput[4]);
+
 
 					/* swap values for next iteration, check for fatal inputs */
 					if (isfinite(euler[0]) && isfinite(euler[1]) && isfinite(euler[2])) {
@@ -636,6 +625,11 @@ int q_ekf_thread_main(int argc, char *argv[])
 					att.rollacc = x_aposteriori[3];
 					att.pitchacc = x_aposteriori[4];
 					att.yawacc = x_aposteriori[5];
+                                        
+                                        att.q[0] = q_att[0];
+                                        att.q[1] = q_att[1];
+                                        att.q[2] = q_att[2];
+                                        att.q[3] = q_att[3];
 
 					att.g_comp[0] = raw.accelerometer_m_s2[0] - acc(0);
 					att.g_comp[1] = raw.accelerometer_m_s2[1] - acc(1);
@@ -685,17 +679,17 @@ math::Matrix<3,3> quat2Rot(float q[4]) {
 
         R.data[1][0] = 2*q[1]*q[2] - 2*q[0]*q[3];
         R.data[1][1] = 2*q[0]*q[0] - 1 + 2*q[2]*q[2];
-        R.data[1][2] = 2*q[2]*q[3] + 2*q[0]q[1];
+        R.data[1][2] = 2*q[2]*q[3] + 2*q[0]*q[1];
 
         R.data[2][0] = 2*q[1]*q[3] + 2*q[0]*q[2];
-        R.data[2][1] = 2*q[2]*q[3] - q*q[0]*q[1];
+        R.data[2][1] = 2*q[2]*q[3] - 2*q[0]*q[1];
         R.data[2][2] = 2*q[0]*q[0] - 1 + 2*q[3]*q[3];
 
         return R;
 }
 
 math::Vector<3> matVectMult(math::Matrix<3,3> mat, math::Vector<3> v) {
-        math::Vector vr;
+        math::Vector<3> vr;
 
         vr.data[0] = mat.data[0][0]*v.data[0] + mat.data[0][1]*v.data[1] + mat.data[0][2]*v.data[2];
         vr.data[1] = mat.data[1][0]*v.data[0] + mat.data[1][1]*v.data[1] + mat.data[1][2]*v.data[2];
