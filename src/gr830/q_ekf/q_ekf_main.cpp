@@ -186,7 +186,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 	float dt = 0.005f;
 /* state vector x has the following entries [ax,ay,az||mx,my,mz||wox,woy,woz||wx,wy,wz]' */
-	float z_k[12] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 9.81f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; /**< Measurement vector */
+	float z_k[12] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -9.81f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; /**< Measurement vector */
 	float x_aposteriori_k[12];		/**< states */
 	float P_aposteriori_k[144] = {100.f, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
                                       0, 100.f,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -632,10 +632,10 @@ int q_ekf_thread_main(int argc, char *argv[])
 
                                                 printf("P_apo =\n");
                                                 for (int i = 0; i < 144; i++){
-                                                        if ()
+                                                        if (!(i%12))
                                                                 printf("[ ");
-                                                        printf("%4.4f ", (double)Rot_matrix[i]);
-                                                        if ((i == 2) || (i == 5) || (i == 8))
+                                                        printf("%4.4f ", (double)P_aposteriori_k[i]);
+                                                        if (!((i+1)%12))
                                                                 printf("]\n");
                                                 }
 
