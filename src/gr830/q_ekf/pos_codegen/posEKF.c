@@ -972,13 +972,30 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                 }
         }
 
+        xa_apo[0] = x_apo[0];
+        xa_apo[1] = x_apo[1];
+        xa_apo[2] = x_apo[2];
+        xa_apo[3] = x_apo[3];
+        xa_apo[4] = x_apo[4];
+        xa_apo[5] = x_apo[5];
+        xa_apo[6] = x_apo[6];
+        xa_apo[7] = x_apo[7];
+        xa_apo[8] = x_apo[8];
+
         /* 'posEKF:195' xa_apo =x_apo; */
-        for (i = 0; i < 9; i++) {
-                xa_apo[i] = x_apo[i];
-        }
+        /* for (i = 0; i < 9; i++) { */
+        /*         xa_apo[i] = x_apo[i]; */
+        /* } */
+
+        /* position.x = x_apo[6]; */
+        /* position.y = x_apo[7]; */
+        /* position.z = x_apo[8]; */
 
         /* 'posEKF:196' Pa_apo =P_apo; */
         memcpy(&Pa_apo[0], &P_apo[0], 81U * sizeof(float));
+        
+
+        /* return position; */
 }
 
 /*

@@ -86,7 +86,7 @@ extern "C" {
 #endif
 
 // #define Q_EKF_ATT_DEBUG
-#define Q_EKF_POS_DEBUG
+// #define Q_EKF_POS_DEBUG
 
 extern "C" __EXPORT int q_ekf_main(int argc, char *argv[]);
 
@@ -262,8 +262,6 @@ int q_ekf_thread_main(int argc, char *argv[])
         memset(&ptam, 0, sizeof(ptam));
         struct vehicle_local_position_s pos;
         memset(&pos, 0, sizeof(pos));
-        struct position_s position;
-        memset(&position, 0, sizeof(position));
 
 	uint64_t last_data = 0;
 	uint64_t last_measurement = 0;
@@ -592,8 +590,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         z_pos_k[3] = got_pos.y;
                                         z_pos_k[3] = got_pos.z;
 
-                                        
-
 					uint64_t now = hrt_absolute_time();
 					unsigned int time_elapsed = now - last_run;
 					last_run = now;
@@ -659,8 +655,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 						x_aposteriori_k[9] = z_k[9];
 						x_aposteriori_k[10] = z_k[10];
 						x_aposteriori_k[11] = z_k[11];
-
-                                                // TODO: init pos ekf data
 
 						const_initialized = true;
 					}
@@ -829,33 +823,22 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                          debugOutput,
                                                          q_att);
 
-                                        // Position kalman filter EKF
-                                        // posEKF(const unsigned char zFlag[3], 
-                                        //        double dt, 
-                                        //        const double z[9],
-                                        //        double q_acc, 
-                                        //        double q_speed, 
-                                        //        double q_pos, 
-                                        //        double r_acc,
-                                        //        const double r_ptam[3], 
-                                        //        double r_got, 
-                                        //        float xa_apo[9], 
-                                        //        float Pa_apo[81], 
-                                        //        float debugOutput[4]);
+                                        posEKF(update_pos_vect,
+                                               dt,
+                                               z_pos_k,
+                                               q_pos_acc,
+                                               q_pos_speed,
+                                               q_pos,
+                                               r_pos_acc,
+                                               r_pos_ptam,
+                                               r_pos_got,
+                                               x_pos_apo_k,
+                                               P_pos_apo_k,
+                                               debug_pos);
 
-                                        position = posEKF(update_pos_vect,
-                                                      dt,
-                                                      z_pos_k,
-                                                      q_pos_acc,
-                                                      q_pos_speed,
-                                                      q_pos,
-                                                      r_pos_acc,
-                                                      r_pos_ptam,
-                                                      r_pos_got,
-                                                      x_pos_apo_k,
-                                                      P_pos_apo_k,
-                                                      debug_pos);
-
+                                        // for (int i = 0; i < 3; i++)
+                                        //         printf("%f", (double)x_pos_apo_k[i]);
+                                        // printf("\n");
 
                                         // if (debug < 5) {
                                         //         printf("euler = [%4.4f %4.4f %4.4f]\n", (double)euler[0], (double)euler[1], (double)euler[2]);
@@ -868,8 +851,13 @@ int q_ekf_thread_main(int argc, char *argv[])
 						memcpy(P_aposteriori_k, P_aposteriori, sizeof(P_aposteriori_k));
 						memcpy(x_aposteriori_k, x_aposteriori, sizeof(x_aposteriori_k));
 
-                                                memcpy(P_pos_apo_k, P_pos_aposteriori, sizeof(P_pos_apo_k));
-						memcpy(x_pos_apo_k, x_pos_aposteriori, sizeof(x_pos_apo_k));
+                                                for (int i = 0; i < 81; i++)
+                                                        P_pos_aposteriori[i] = P_pos_apo_k[i];
+
+                                                P_pos_aposteriori[1] = P_pos_aposteriori[1];
+
+                                                for (int i = 0; i < 9; i++)
+                                                        x_pos_aposteriori[i] = x_pos_apo_k[i];
 
                                                 // if (debug < 5)
                                                 //         printf("finite\n");
@@ -910,17 +898,14 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         att.g_comp[1] = raw.accelerometer_m_s2[1] - acc(1);
                                         att.g_comp[2] = raw.accelerometer_m_s2[2] - acc(2);
 
-                                        pos.x = position.x;//x_pos_aposteriori[6];
-                                        pos.y = position.y;//x_pos_aposteriori[7];
-                                        pos.z = position.z;//x_pos_aposteriori[8];
-                                        
+                                        pos.x = x_pos_aposteriori[6]; 
+                                        pos.y = x_pos_aposteriori[7];
+                                        pos.z = x_pos_aposteriori[8];
 
                                         // if (debug < 5) {
                                         //         printf("8\n");
                                         //         printf("%4.4f %4.4f %4.4f %4.4f\n", (double)att.q[0], (double)att.q[1], (double)att.q[2], (double)att.q[3]);
                                         // }
-
-                                        // TODO: tilføj publishing på "vehicle_local_position"
 
 					/* copy offsets */
 					memcpy(&att.rate_offsets, &(x_aposteriori[3]), sizeof(att.rate_offsets));
@@ -937,6 +922,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 					if (isfinite(pos.x) && isfinite(pos.y) && isfinite(pos.z)) {
 						// Broadcast
 						orb_publish(ORB_ID(vehicle_local_position), pub_pos, &pos);
+
                                                 // if (debug < 5)
                                                 //         printf("Publishing\n");
 
