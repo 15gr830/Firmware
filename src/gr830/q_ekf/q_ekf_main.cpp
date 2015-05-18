@@ -609,10 +609,10 @@ int q_ekf_thread_main(int argc, char *argv[])
 
                                                 printf("J = \n");
                                                 for (int i = 0; i < 9; i++){
-                                                        if ((i == 0) || (i == 3) || (i == 6))
+                                                        if ( !(i%3) )
                                                                 printf("[ ");
-                                                        printf("%4.4f ", ekf_params.moment_inertia_J[i]);
-                                                        if ((i == 2) || (i == 5) || (i == 8))
+                                                        printf("%4.2f ", ekf_params.moment_inertia_J[i]);
+                                                        if ( !((i + 1)%3) )
                                                                 printf("]\n");
                                                 }
 
@@ -623,19 +623,19 @@ int q_ekf_thread_main(int argc, char *argv[])
 
                                                 printf("Rot_matrix =\n");
                                                 for (int i = 0; i < 9; i++){
-                                                        if ((i == 0) || (i == 3) || (i == 6))
+                                                        if ( !(i%3) )
                                                                 printf("[ ");
                                                         printf("%4.4f ", (double)Rot_matrix[i]);
-                                                        if ((i == 2) || (i == 5) || (i == 8))
+                                                        if ( !((i + 1)%3) )
                                                                 printf("]\n");
                                                 }
 
                                                 printf("P_apo =\n");
                                                 for (int i = 0; i < 144; i++){
-                                                        if (!(i%12))
+                                                        if ( !(i%12) )
                                                                 printf("[ ");
-                                                        printf("%4.4f ", (double)P_aposteriori_k[i]);
-                                                        if (!((i+1)%12))
+                                                        printf("%4.2f ", (double)P_aposteriori_k[i]);
+                                                        if ( !((i + 1)%12) )
                                                                 printf("]\n");
                                                 }
 
