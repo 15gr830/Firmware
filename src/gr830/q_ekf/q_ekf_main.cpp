@@ -313,7 +313,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
         math::Matrix<3,3> R_n;
         R.identity();
-        float q_rot_ptam[4] = {0,0,0,0};
+        float q_rot_ptam[4] = {1,0,0,0};
         math::Vector<3> mag_in_h = {1, 0, 0}, grav_in_h = {0, 0, -9.82f}, gm, gg;
 
 	// struct vision_position_estimate vision {};
@@ -560,12 +560,12 @@ int q_ekf_thread_main(int argc, char *argv[])
 						x_aposteriori_k[3] = 0.0f;
 						x_aposteriori_k[4] = 0.0f;
 						x_aposteriori_k[5] = 0.0f;
-						x_aposteriori_k[6] = z_k[3];
-						x_aposteriori_k[7] = z_k[4];
-						x_aposteriori_k[8] = z_k[5];
-						x_aposteriori_k[9] = z_k[6];
-						x_aposteriori_k[10] = z_k[7];
-						x_aposteriori_k[11] = z_k[8];
+						x_aposteriori_k[6] = z_k[6];
+						x_aposteriori_k[7] = z_k[7];
+						x_aposteriori_k[8] = z_k[8];
+						x_aposteriori_k[9] = z_k[9];
+						x_aposteriori_k[10] = z_k[10];
+						x_aposteriori_k[11] = z_k[11];
 
 						const_initialized = true;
 					}
@@ -642,8 +642,8 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 debug++;
                                         }
 #endif //Q_EKF_DEBUG
-
-
+                                        // for (int i = 0; i < 12; i++)
+                                        //         z_k[i] = 0;
 
 					/* Call the estimator */
 					AttitudeEKF2grav(false, // approx_prediction
