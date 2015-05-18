@@ -15,6 +15,7 @@ static float x_apo[12];
 static float P_apo[144];
 static double Q[144];
 static boolean_T Q_not_empty;
+int jens = 0;
 
 /* Function Declarations */
 static void AttitudeEKF2grav_init(void);
@@ -704,6 +705,7 @@ static void rdivide(const float x[3], float y, float z[3])
  *                float q[4]
  * Return Type  : void
  */
+
 void AttitudeEKF2grav(unsigned char approx_prediction, 
                       unsigned char use_inertia_matrix, 
                       const unsigned char zFlag[4], 
@@ -724,6 +726,27 @@ void AttitudeEKF2grav(unsigned char approx_prediction,
                       float debugOutput[4], 
                       float q[4])
 {
+
+        /* printf("zFlag = [%i %i %i %i]\n", zFlag[0], zFlag[1], zFlag[2], zFlag[3]); */
+        /* printf("%4.4f\n", (double)dt); */
+        /* printf("z_k = ["); */
+        /* for (int i = 0; i < 12; i++) */
+        /*         printf(" %4.4f ", (double)z[i]); */
+        /* printf("]\n"); */
+        /* printf("%4.4f %4.4f %4.4f %4.4f %4.4f %4.4f %4.4f\n", (double)q_rotSpeed, (double)q_rotAcc, (double)q_acc, (double)q_mag, (double)r_gyro, (double)r_accel, (double)r_ptam); */
+        /* if (jens < 7) { */
+        /*         printf("J = \n"); */
+        /*         for (int i = 0; i < 9; i++){ */
+        /*                 if ( !(i%3) ) */
+        /*                         printf("[ "); */
+        /*                 printf("%4.6f ", J[i]); */
+        /*                 if ( !((i + 1)%3) ) */
+        /*                         printf("]\n"); */
+        /*         } */
+        /*         printf("\n"); */
+        /*         jens++; */
+        /* } */
+
         double dv0[9];
         int i;
         float fv0[3];
