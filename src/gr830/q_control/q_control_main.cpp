@@ -149,7 +149,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                 	orb_check(pos_sp_sub, &pos_sp_updated);
 	                if ( pos_sp_updated ) {
 	                        orb_copy(ORB_ID(position_setpoint_triplet), pos_sp_sub, &pos_sp);
-                                printf("setpoint modtaget");
+                                printf("setpoint modtaget\n");
 	                }
 
                         for (int i = 0; i < 4; i++)
