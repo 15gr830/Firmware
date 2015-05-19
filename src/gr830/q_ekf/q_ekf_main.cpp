@@ -362,6 +362,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 	perf_counter_t ekf_loop_perf = perf_alloc(PC_ELAPSED, "attitude_estimator_ekf");
 
         // printf("3\n");
+
         int debug = 0;
 
 	/* Main loop*/
@@ -440,9 +441,9 @@ int q_ekf_thread_main(int argc, char *argv[])
 						sensor_last_timestamp[1] = raw.accelerometer_timestamp;
 					}
 
-					z_k[3] = raw.accelerometer_m_s2[0] - acc(0);
-					z_k[4] = raw.accelerometer_m_s2[1] - acc(1);
-					z_k[5] = raw.accelerometer_m_s2[2] - acc(2);
+					z_k[3] = raw.accelerometer_m_s2[0]; //  - acc(0);
+					z_k[4] = raw.accelerometer_m_s2[1]; //  - acc(1);
+					z_k[5] = raw.accelerometer_m_s2[2]; //  - acc(2);
 
                                         bool ptam_updated = false;
 					orb_check(ptam_sub, &ptam_updated);
@@ -713,11 +714,12 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         acc(1) = x_aposteriori_k[7];
                                         acc(2) = x_aposteriori_k[8];
 
+                                        // if ( debug < 10000 )
+                                        //         acc.print();
+
                                         z_pos_k[0] = raw.accelerometer_m_s2[0] - acc(0);
 					z_pos_k[1] = raw.accelerometer_m_s2[1] - acc(1);
 					z_pos_k[2] = raw.accelerometer_m_s2[2] - acc(2);
-
-                                        acc.print();
 
                                         posEKF(update_pos_vect,
                                                dt,
@@ -744,8 +746,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 					/* swap values for next iteration, check for fatal inputs */
 					if (isfinite(euler[0]) && isfinite(euler[1]) && isfinite(euler[2]) && isfinite(x_pos_apo_k[6]) && isfinite(x_pos_apo_k[7]) && isfinite(x_pos_apo_k[8])) {
-						// memcpy(P_aposteriori_k, P_aposteriori, sizeof(P_aposteriori_k));
-						// memcpy(x_aposteriori_k, x_aposteriori, sizeof(x_aposteriori_k));
                                                 for (int i = 0; i < 144; i++)
                                                         P_aposteriori[i] = P_aposteriori_k[i];
 
