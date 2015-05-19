@@ -32,9 +32,11 @@
  ****************************************************************************/
 
 /*
- * @file attitude_estimator_ekf_main.cpp
+ * Implementation of Extended Kalman Filters for both position and
+ * attitude, for use in the semester project
+ * Adapted by 15gr830 Aalborg university
  *
- * Extended Kalman Filter for Attitude Estimation.
+ * Originally written by:
  *
  * @author Tobias Naegeli <naegelit@student.ethz.ch>
  * @author Lorenz Meier <lm@inf.ethz.ch>
@@ -735,19 +737,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 #ifdef Q_EKF_POS_DEBUG
                                         if (debug < 5) {
                                                 printf("\n");
-                                                // for (int i = 0; i < 4; i++){
-                                                //         printf("ekf_param.q[%i] = ",i);
-                                                //         printf("%4.4f", (double)ekf_params.q[i]);
-                                                //         printf("\n");
-                                                // }
-
-                                                // for (int i = 0; i < 2; i++){
-                                                //         printf("ekf_param.r[%i] = ",i);
-                                                //         printf("%4.4f", (double)ekf_params.r[i]);
-                                                //         printf("\n");
-                                                // }
-
-                                                // printf("ekf_params.r_ptam = %4.4f\n", (double)ekf_params.r_ptam);
 
                                                 printf("z_pos_k = [ ");
                                                 for (int i = 0; i < 9; i++)
@@ -761,28 +750,10 @@ int q_ekf_thread_main(int argc, char *argv[])
 
                                                 printf("dt = %4.4f\n", (double)dt);
 
-                                                // printf("J = \n");
-                                                // for (int i = 0; i < 9; i++){
-                                                //         if ( !(i%3) )
-                                                //                 printf("[ ");
-                                                //         printf("%4.10f ", ekf_params.moment_inertia_J[i]);
-                                                //         if ( !((i + 1)%3) )
-                                                //                 printf("]\n");
-                                                // }
-
                                                 printf("x_pos_apo = [ ");
                                                 for (int i = 0; i < 9; i++)
                                                         printf("%4.4f ", (double)x_pos_apo_k[i]);
                                                 printf("]\n");
-
-                                                // printf("Rot_matrix =\n");
-                                                // for (int i = 0; i < 9; i++){
-                                                //         if ( !(i%3) )
-                                                //                 printf("[ ");
-                                                //         printf("%4.4f ", (double)Rot_matrix[i]);
-                                                //         if ( !((i + 1)%3) )
-                                                //                 printf("]\n");
-                                                // }
 
                                                 printf("P_apo =\n");
                                                 for (int i = 0; i < 81; i++){
@@ -796,13 +767,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 debug++;
                                         }
 #endif //Q_EKF_POS_DEBUG
-                                        // for (int i = 0; i < 12; i++)
-                                        //         z_k[i] = 0;
-
-                                        // for (int i = 0; i < 4; i++)
-                                        //         update_vect[i] = 0;
-
-					/* Call the estimator */
+					/* Call the estimators */
 					AttitudeEKF2grav(false, // approx_prediction
                                                          (unsigned char)ekf_params.use_moment_inertia,
                                                          update_vect,
@@ -854,7 +819,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 for (int i = 0; i < 81; i++)
                                                         P_pos_aposteriori[i] = P_pos_apo_k[i];
 
-                                                P_pos_aposteriori[1] = P_pos_aposteriori[1];
+                                                P_pos_aposteriori[1] = P_pos_aposteriori[1]; // just to satisfy the compiler
 
                                                 for (int i = 0; i < 9; i++)
                                                         x_pos_aposteriori[i] = x_pos_apo_k[i];

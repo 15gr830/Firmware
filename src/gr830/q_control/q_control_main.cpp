@@ -102,7 +102,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         // act_map.print();
 
         bool error = false;
-        bool once  = false;
+        // bool once  = false;
         bool output_on = false;
         bool first = false;
 
@@ -180,10 +180,10 @@ int q_control_thread_main(int argc, char *argv[]) {
                         
                         u = lqr->run();
 
-                        if (once == false) {
-                                lqr->print();
-                                once = true;
-                        }
+                        // if (once == false) {
+                        //         lqr->print();
+                        //         once = true;
+                        // }
 
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
