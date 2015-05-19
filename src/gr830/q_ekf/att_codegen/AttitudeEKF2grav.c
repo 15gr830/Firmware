@@ -1839,10 +1839,10 @@ void AttitudeEKF2grav(unsigned char approx_prediction,
         b_sign(&f1);
         f2 = q0;
         b_sign(&f2);
-        q[0] = q0;
-        q[1] = f0 * ((Rot_matrix[7] - Rot_matrix[5]) / 4.0F * q0);
-        q[2] = f1 * ((Rot_matrix[2] - Rot_matrix[6]) / 4.0F * q0);
-        q[3] = f2 * ((Rot_matrix[3] - Rot_matrix[1]) / 4.0F * q0);
+        q[0] = q0 * f0;
+        q[1] = f0 * ((Rot_matrix[7] - Rot_matrix[5]) / (4.0F * q0));
+        q[2] = f1 * ((Rot_matrix[2] - Rot_matrix[6]) / (4.0F * q0));
+        q[3] = f2 * ((Rot_matrix[3] - Rot_matrix[1]) / (4.0F * q0));
 
         /* radtodeg([atan2(2*(q(1)*q(2)+q(3)*q(4)),(q(1)^2 - q(2)^2 - q(3)^2 + q(4)^2)) ;... */
         /* -asin(2*(q(2)*q(4)-q(1)*q(3)));... */

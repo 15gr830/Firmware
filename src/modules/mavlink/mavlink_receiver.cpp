@@ -711,7 +711,7 @@ MavlinkReceiver::handle_message_vision_position_estimate(mavlink_message_t *msg)
 	// Use the component ID to identify the vision sensor
 	vision_position.id = msg->compid;
 
-	vision_position.timestamp_boot = to_hrt(pos.usec); // Synced time
+	vision_position.timestamp_boot = hrt_absolute_time();
 	vision_position.timestamp_computer = pos.usec;
 	vision_position.x = pos.x;
 	vision_position.y = pos.y;
@@ -1542,9 +1542,9 @@ MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
 	struct att_pos_mocap_s pos;
 	memset(&pos, 0, sizeof(pos));
 
-	pos.timestamp = to_hrt(pos_mocap.time_usec);
+	pos.timestamp = hrt_absolute_time();
 
-	for(int i=0;i<3;i++)
+	for(int i = 0; i < 4; i++)
 		pos.q[i] = pos_mocap.q[i];
 
 	pos.x = pos_mocap.x;

@@ -21,6 +21,7 @@
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/offboard_control_setpoint.h>
 #include <systemlib/param/param.h>
 #include <systemlib/systemlib.h>
 #include <lib/mathlib/mathlib.h>
@@ -62,17 +63,18 @@ int q_control_thread_main(int argc, char *argv[]) {
         memset(&v_local_pos, 0, sizeof(v_local_pos));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
-        // struct position_setpoint_s pos_sp;
-        // memset(&pos_sp, 0, sizeof(pos_sp));
-        struct position_setpoint_triplet_s pos_sp;
+        struct offboard_control_setpoint_s pos_sp;
         memset(&pos_sp, 0, sizeof(pos_sp));
+        // struct position_setpoint_triplet_s pos_sp;
+        // memset(&pos_sp, 0, sizeof(pos_sp));
         struct vehicle_command_s cmd;
         memset(&cmd, 0, sizeof(cmd));
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
         int v_local_pos_sub = orb_subscribe(ORB_ID(vehicle_local_position));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
-        int pos_sp_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
+        // int pos_sp_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
+        int pos_sp_sub = orb_subscribe(ORB_ID(offboard_control_setpoint));
         int cmd_sub = orb_subscribe(ORB_ID(vehicle_command));
 
         /**
@@ -92,7 +94,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         float x_ref[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
         // ekstra references to LQR
-        lqr->r = {0,0,0,0};
+        lqr->r = {0.6,0,0,0};
         lqr->q_ref->data[0] = 1;
         lqr->q_ref->data[1] = 0;
         lqr->q_ref->data[2] = 0;
@@ -107,6 +109,8 @@ int q_control_thread_main(int argc, char *argv[]) {
         // bool once  = false;
         bool output_on = false;
         bool first = false;
+        double anti_gravity = 0.42;
+        int freq = 0;
 
         while ( !thread_should_exit ) {
 
@@ -133,24 +137,27 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                 int ret_v_att = poll(fd_v_att, 1, 1);
                 if (ret_v_att < 0) {
-                        warnx("poll sp error");
+                        warnx("poll att error");
                 } else if (ret_v_att == 0) {
                         /* no return value - nothing has happened */
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
+                        // printf("q0 = %4.4f, q1 = %4.4f, q2 = %4.4f, q3 = %4.4f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
 
                         bool v_local_pos_updated; // Position estimates from EKF
                 	orb_check(v_local_pos_sub, &v_local_pos_updated);
 	                if ( v_local_pos_updated ) {
 	                        orb_copy(ORB_ID(vehicle_local_position), v_local_pos_sub, &v_local_pos);
+                                if ( freq%10 == 0 )
+                                        printf("x = %4.4f, y = %4.4f z = %4.4f\n", (double)v_local_pos.x, (double)v_local_pos.y, (double)v_local_pos.z);
 	                }
 
                         bool pos_sp_updated; // Position setpoint from gnd
                 	orb_check(pos_sp_sub, &pos_sp_updated);
 	                if ( pos_sp_updated ) {
-	                        orb_copy(ORB_ID(position_setpoint_triplet), pos_sp_sub, &pos_sp);
-                                printf("setpoint modtaget\n");
-	                }
+	                        orb_copy(ORB_ID(offboard_control_setpoint), pos_sp_sub, &pos_sp);
+                                printf("[q_control] Setpoint received x = %4.2f y = %4.2f z = %4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
+	                }                                                                                
 
                         for (int i = 0; i < 4; i++)
                                 lqr->q_est->data[i] = v_att.q[i];
@@ -172,9 +179,9 @@ int q_control_thread_main(int argc, char *argv[]) {
                         x_ref[3]  = 0;        // q1
                         x_ref[4]  = 0;        // q2
                         x_ref[5]  = 0;        // q3
-                        x_ref[6]  = pos_sp.current.x; // setpoint position
-                        x_ref[7]  = pos_sp.current.y; // setpoint position
-                        x_ref[8]  = pos_sp.current.z; // setpoint position
+                        x_ref[6]  = pos_sp.position[0]; // setpoint position
+                        x_ref[7]  = pos_sp.position[1]; // setpoint position
+                        x_ref[8]  = pos_sp.position[2]; // setpoint position
                         x_ref[9]  = 0;        // x velocity
                         x_ref[10] = 0;        // y velocity
                         x_ref[11] = 0;        // z velocity
@@ -200,12 +207,15 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 error = true;
                         }
 
-                        // printf("[ %4.4f %4.4f %4.4f %4.4f ]\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                        if ( freq%10 == 0 ) {
+                                printf(" Outputs = [ %4.4f %4.4f %4.4f %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                freq = 0;
+                        }
 
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw;
-                        actuators.control[3] = (float)out.thrust;
+                        actuators.control[3] = (float)out.thrust + (float)anti_gravity;
 
                         if ( output_on ) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
@@ -225,6 +235,7 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
                         }
+                        ++freq;
                 } else {
                         /* nothing happened */
                 }
