@@ -4,5 +4,5 @@ set MIXER FMU_quad_x
 set PWM_OUT 1234    	# Change parameters for the first 4 outputs
 set PWM_RATE 400        # Set PWM rate to 400 Hz for better performance
 set PWM_DISARMED 900    # Motors should stop at this PWM value
-set PWM_MIN 1100        # Motors should spin at low, idle speed at this PWM value
-set PWM_MAX 1900        # Motors should spin at max speed at this PWM value
+set PWM_MIN 1075        # Motors should spin at low, idle speed at this PWM value
+set PWM_MAX 2000        # Motors should spin at max speed at this PWM value

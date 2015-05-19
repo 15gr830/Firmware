@@ -107,6 +107,7 @@ int q_ekf_thread_main(int argc, char *argv[]);
 static void usage(const char *reason);
 math::Matrix<3,3> quat2Rot(float q[4]);
 math::Vector<3> matVectMult(math::Matrix<3,3> mat, math::Vector<3> v);
+math::Vector<4> qmult( float *q, float *p );
 
 static void
 usage(const char *reason)
@@ -345,15 +346,23 @@ int q_ekf_thread_main(int argc, char *argv[])
                q_pos         = 0.009,
                r_pos_acc     = 10.f,
                r_pos_ptam[3] = {0.1f, 0.1f, 0.1f},
-                r_pos_got     = 0.0001;//,
-                //rad2deg       = 57.2957914331;
+               r_pos_got     = 0.0001;//,
+               // rad2deg       = 57.2957914331;
         
         float debug_pos[4]  = {0, 0, 0, 0};
 
         math::Matrix<3,3> R_n;
         R.identity();
-        float q_rot_ptam[4] = {1,0,0,0};
+        float q_h2c[4] = {0.8660, -0.5, 0, 0};
+        float q_b2c_conj[4] = {0.8660, 0.5, 0, 0};
+//        float q_h2c[4] = {0.8660, -0.5, 0, 0};
+        float q_h2ptam[4] = {1, 0, 0, 0};
+        float q_h2b[4] = {1, 0, 0, 0};
+        float q_ptam2b[4] = {1, 0, 0, 0};
+        float q_ptam_conj[4] = {1, 0, 0, 0};
+        math::Vector<4> q_temp;
         math::Vector<3> mag_in_h = {1, 0, 0}, grav_in_h = {0, 0, -9.82f}, gm, gg;
+        bool ptam_initialized = false;
 
 	// struct vision_position_estimate vision {};
 
@@ -503,8 +512,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 					z_k[4] = raw.accelerometer_m_s2[1] - acc(1);
 					z_k[5] = raw.accelerometer_m_s2[2] - acc(2);
 
-                                        // TODO: by magic from PTAM data instead
-                                        
                                         bool ptam_updated = false;
 					orb_check(ptam_sub, &ptam_updated);
 
@@ -517,6 +524,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 						update_vect[2]     = 1;
                                                 update_vect[3]     = 1;
                                                 update_pos_vect[1] = 1;
+                                                // TODO: Måske skal der vendes på quaternionen
 						
 						sensor_last_timestamp[2] = ptam.timestamp_boot;
 					}
@@ -535,8 +543,30 @@ int q_ekf_thread_main(int argc, char *argv[])
 						sensor_last_timestamp[3] = got_pos.timestamp;
 					}
 
-                                        // TODO: her skal der sættes noget nikolaj magi ind...
-                                        R_n = quat2Rot(q_rot_ptam);
+                                        if ( !ptam_initialized && (update_vect[2] == 1) ) {
+                                                math::Vector<4> res;
+                                                res = qmult( q_h2c, ptam.q );
+                                                for (int i = 0; i < 4; i++)
+                                                        q_h2ptam[i] = res.data[i]; // FIXME: Fusk kan gøres bedre
+
+                                                ptam_initialized = true;
+                                        }
+
+                                        if ( ptam_initialized && (update_vect[2] == 1) ) {
+                                                q_ptam_conj[0] = ptam.q[0];
+                                                for (int i = 1; i < 4; i++)
+                                                        q_ptam_conj[i] = -ptam.q[i];
+
+                                                q_temp = qmult( q_ptam_conj, q_b2c_conj );
+                                                for (int i = 0; i < 4; i++)
+                                                        q_ptam2b[i] = q_temp.data[i];
+
+                                                q_temp = qmult( q_h2ptam, q_ptam2b );
+                                                for (int i = 0; i < 4; i++)
+                                                        q_h2b[i] = q_temp.data[i];
+                                        }
+
+                                        R_n = quat2Rot(q_h2b);
                                         gm = matVectMult(R_n, mag_in_h);
                                         gg = matVectMult(R_n, grav_in_h);
 
@@ -547,6 +577,9 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         z_k[9] = gm.data[0];
                                         z_k[10] = gm.data[1];
                                         z_k[11] = gm.data[2];
+
+                                        // gg.print();
+                                        // gm.print();
 
 					// /* update magnetometer measurements */
 					// if (sensor_last_timestamp[2] != raw.magnetometer_timestamp) {
@@ -952,3 +985,16 @@ math::Vector<3> matVectMult(math::Matrix<3,3> mat, math::Vector<3> v) {
 
         return vr;
 }
+
+math::Vector<4> qmult( float *q, float *p ) {
+        math::Vector<4> res;
+
+        res.data[0] = q[0]*p[0] - q[1]*p[1] - q[2]*p[2] - q[3]*p[3];
+        res.data[1] = q[1]*p[0] + q[0]*p[1] - q[3]*p[2] + q[2]*p[3];
+        res.data[2] = q[2]*p[0] + q[3]*p[1] + q[0]*p[2] - q[1]*p[3];
+        res.data[3] = q[3]*p[0] - q[2]*p[1] + q[1]*p[2] + q[0]*p[3];
+
+        return res; 
+}
+
+

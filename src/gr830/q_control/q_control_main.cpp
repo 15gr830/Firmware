@@ -62,7 +62,9 @@ int q_control_thread_main(int argc, char *argv[]) {
         memset(&v_local_pos, 0, sizeof(v_local_pos));
         struct vehicle_status_s v_status;
         memset(&v_status, 0, sizeof(v_status));
-        struct position_setpoint_s pos_sp;
+        // struct position_setpoint_s pos_sp;
+        // memset(&pos_sp, 0, sizeof(pos_sp));
+        struct position_setpoint_triplet_s pos_sp;
         memset(&pos_sp, 0, sizeof(pos_sp));
         struct vehicle_command_s cmd;
         memset(&cmd, 0, sizeof(cmd));
@@ -147,6 +149,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                 	orb_check(pos_sp_sub, &pos_sp_updated);
 	                if ( pos_sp_updated ) {
 	                        orb_copy(ORB_ID(position_setpoint_triplet), pos_sp_sub, &pos_sp);
+                                printf("setpoint modtaget");
 	                }
 
                         for (int i = 0; i < 4; i++)
@@ -169,9 +172,9 @@ int q_control_thread_main(int argc, char *argv[]) {
                         x_ref[3]  = 0;        // q1
                         x_ref[4]  = 0;        // q2
                         x_ref[5]  = 0;        // q3
-                        x_ref[6]  = pos_sp.x; // setpoint position
-                        x_ref[7]  = pos_sp.y; // setpoint position
-                        x_ref[8]  = pos_sp.z; // setpoint position
+                        x_ref[6]  = pos_sp.current.x; // setpoint position
+                        x_ref[7]  = pos_sp.current.y; // setpoint position
+                        x_ref[8]  = pos_sp.current.z; // setpoint position
                         x_ref[9]  = 0;        // x velocity
                         x_ref[10] = 0;        // y velocity
                         x_ref[11] = 0;        // z velocity
