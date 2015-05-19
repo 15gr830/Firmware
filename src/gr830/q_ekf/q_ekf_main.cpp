@@ -345,7 +345,8 @@ int q_ekf_thread_main(int argc, char *argv[])
                q_pos         = 0.009,
                r_pos_acc     = 10.f,
                r_pos_ptam[3] = {0.1f, 0.1f, 0.1f},
-               r_pos_got     = 0.0001;
+                r_pos_got     = 0.0001;//,
+                //rad2deg       = 57.2957914331;
         
         float debug_pos[4]  = {0, 0, 0, 0};
 
@@ -814,7 +815,10 @@ int q_ekf_thread_main(int argc, char *argv[])
 					/* swap values for next iteration, check for fatal inputs */
 					if (isfinite(euler[0]) && isfinite(euler[1]) && isfinite(euler[2]) && isfinite(x_pos_apo_k[6]) && isfinite(x_pos_apo_k[7]) && isfinite(x_pos_apo_k[8])) {
 						memcpy(P_aposteriori_k, P_aposteriori, sizeof(P_aposteriori_k));
-						memcpy(x_aposteriori_k, x_aposteriori, sizeof(x_aposteriori_k));
+						//memcpy(x_aposteriori_k, x_aposteriori, sizeof(x_aposteriori_k));
+
+                                                for (int i = 0; i < 12; i++)
+                                                        x_aposteriori[i] = x_aposteriori_k[i];
 
                                                 for (int i = 0; i < 81; i++)
                                                         P_pos_aposteriori[i] = P_pos_apo_k[i];
@@ -899,6 +903,8 @@ int q_ekf_thread_main(int argc, char *argv[])
 					if (isfinite(att.roll) && isfinite(att.pitch) && isfinite(att.yaw)) {
 						// Broadcast
 						orb_publish(ORB_ID(vehicle_attitude), pub_att, &att);
+                                                // printf("roll = %4.4f, pitch = %4.4f, yaw = %4.4f\n", (double)att.roll*(double)rad2deg, (double)att.pitch*(double)rad2deg, (double)att.yaw*(double)rad2deg);
+                                                // printf("q0 = %4.4f, q1 = %4.4f, q2 = %4.4f, q3 = %4.4f\n", (double)att.q[0], (double)att.q[1], (double)att.q[2], (double)att.q[3]);
                                                 // if (debug < 5)
                                                 //         printf("Publishing\n");
 
