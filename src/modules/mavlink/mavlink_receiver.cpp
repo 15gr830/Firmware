@@ -204,6 +204,10 @@ MavlinkReceiver::handle_message(mavlink_message_t *msg)
 		handle_message_timesync(msg);
 		break;
 
+	case MAVLINK_MSG_ID_ATT_POS_MOCAP:
+		handle_message_att_pos_mocap(msg);
+		break;
+		
 	default:
 		break;
 	}
