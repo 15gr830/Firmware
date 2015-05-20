@@ -109,7 +109,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         // bool once  = false;
         bool output_on = false;
         bool first = false;
-        double anti_gravity = 0.42;
+        // double anti_gravity = 0.42;
         int freq = 0;
 
         while ( !thread_should_exit ) {
@@ -148,8 +148,8 @@ int q_control_thread_main(int argc, char *argv[]) {
                 	orb_check(v_local_pos_sub, &v_local_pos_updated);
 	                if ( v_local_pos_updated ) {
 	                        orb_copy(ORB_ID(vehicle_local_position), v_local_pos_sub, &v_local_pos);
-                                if ( freq%10 == 0 )
-                                        printf("x = %4.4f, y = %4.4f z = %4.4f\n", (double)v_local_pos.x, (double)v_local_pos.y, (double)v_local_pos.z);
+                                //if ( freq%10 == 0 )
+                                        //printf("x = %4.4f, y = %4.4f z = %4.4f\n", (double)v_local_pos.x, (double)v_local_pos.y, (double)v_local_pos.z);
 	                }
 
                         bool pos_sp_updated; // Position setpoint from gnd
@@ -207,7 +207,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 error = true;
                         }
 
-                        if ( freq%10 == 0 ) {
+                        if ( freq%30 == 0 ) {
                                 printf(" Outputs = [ %4.4f %4.4f %4.4f %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
                                 freq = 0;
                         }
@@ -215,9 +215,10 @@ int q_control_thread_main(int argc, char *argv[]) {
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw;
-                        actuators.control[3] = (float)out.thrust + (float)anti_gravity;
+                        actuators.control[3] = (float)out.thrust;// + (float)anti_gravity;
 
                         if ( output_on ) {
+                                //actuators.control[3] = (double)0.7;
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
                                 if ( first ) {
                                         printf("Motor on\n");

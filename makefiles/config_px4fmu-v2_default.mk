@@ -88,7 +88,7 @@ MODULES 	+= modules/land_detector
 #MODULES		+= modules/fw_att_control
 #MODULES		+= modules/mc_att_control
 #MODULES		+= modules/mc_pos_control
-#MODULES 	+= modules/vtol_att_control
+#MODULES	 	+= modules/vtol_att_control
 
 #
 # Logging
