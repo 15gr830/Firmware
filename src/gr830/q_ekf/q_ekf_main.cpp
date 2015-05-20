@@ -95,7 +95,7 @@ extern "C" {
 #endif
 
 // #define Q_EKF_ATT_DEBUG
-#define Q_EKF_POS_DEBUG
+// #define Q_EKF_POS_DEBUG
 
 extern "C" __EXPORT int q_ekf_main(int argc, char *argv[]);
 
@@ -363,7 +363,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
         // printf("3\n");
 
-        int debug = 0;
+        // int debug = 0;
 
 	/* Main loop*/
 	while (!thread_should_exit) {
@@ -450,6 +450,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 					if (ptam_updated) {
 						orb_copy(ORB_ID(vision_position_estimate), ptam_sub, &ptam);
+                                                // printf("\n\nPTAM modtaget\n\n");
 					}
 
                                         // Use PTAM data
@@ -467,11 +468,11 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 					if (got_updated) {
 						orb_copy(ORB_ID(att_pos_mocap), got_pos_sub, &got_pos);
-                                                printf("GOT: x = %4.1f, y = %4.1f, z = %4.1f\n", (double)got_pos.x, (double)got_pos.y, (double)got_pos.z);
+                                                // printf("\n\nGOT modtaget\n\n");
 					}
 
                                         // Use GOT data
-                                        if (sensor_last_timestamp[2] != got_pos.timestamp) {
+                                        if (sensor_last_timestamp[3] != got_pos.timestamp) {
                                                 update_pos_vect[2] = 1;
 						
 						sensor_last_timestamp[3] = got_pos.timestamp;
@@ -520,9 +521,9 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         z_pos_k[4] = ptam.y;
                                         z_pos_k[5] = ptam.z;
 
-                                        z_pos_k[3] = got_pos.x;
-                                        z_pos_k[3] = got_pos.y;
-                                        z_pos_k[3] = got_pos.z;
+                                        z_pos_k[6] = got_pos.x;
+                                        z_pos_k[7] = got_pos.y;
+                                        z_pos_k[8] = got_pos.z;
 
 					uint64_t now = hrt_absolute_time();
 					unsigned int time_elapsed = now - last_run;
@@ -656,7 +657,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 #endif //Q_EKF_ATT_DEBUG
 
 #ifdef Q_EKF_POS_DEBUG
-                                        if (debug < 5) {
+                                        if (debug < 1000) {
                                                 printf("\n");
 
                                                 printf("z_pos_k = [ ");
@@ -685,6 +686,11 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 //                 printf("]\n");
                                                 // }
                                                 printf("x = %4.4f, y = %4.4f, z = %4.4f\n", (double)pos.x, (double)pos.y, (double)pos.z);
+                                                if ( update_pos_vect[2] == 1 )
+                                                        printf("GOT: x = %4.1f, y = %4.1f, z = %4.1f\n", (double)got_pos.x, (double)got_pos.y, (double)got_pos.z);
+
+                                                if ( update_pos_vect[1] == 1 )
+                                                        printf("PTAM: x = %4.1f, y = %4.1f, z = %4.1f\n", (double)ptam.x, (double)ptam.y, (double)ptam.z);
 
                                                 debug++;
                                         }
@@ -822,8 +828,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 //         printf("Publishing\n");
 
 					} else {
-                                                if (debug < 5)
-                                                        warnx("NaN in x/y/z estimate!");
+                                                warnx("NaN in x/y/z estimate!");
 					}
 
 					if (isfinite(att.roll) && isfinite(att.pitch) && isfinite(att.yaw)) {
