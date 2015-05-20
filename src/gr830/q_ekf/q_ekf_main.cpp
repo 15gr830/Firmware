@@ -194,7 +194,7 @@ int q_ekf_main(int argc, char *argv[])
 int q_ekf_thread_main(int argc, char *argv[])
 {
 
-        const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
+        // const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
 
 	float dt = 0.005f;
 /* state vector x has the following entries [ax,ay,az||mx,my,mz||wox,woy,woz||wx,wy,wz]' */
@@ -241,7 +241,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 	float debugOutput[4] = { 0.0f };
         float q_att[4] = {1.0f, 0.0f, 0.0f, 0.0f};
-	int overloadcounter = 19;
+	// int overloadcounter = 19;
 
         // printf("1\n");
 
@@ -252,7 +252,7 @@ int q_ekf_thread_main(int argc, char *argv[])
         // printf("2\n");
 
 	/* store start time to guard against too slow update rates */
-	uint64_t last_run = hrt_absolute_time();
+	// uint64_t last_run = hrt_absolute_time();
 
 	struct sensor_combined_s raw;
 	memset(&raw, 0, sizeof(raw));
@@ -345,9 +345,8 @@ int q_ekf_thread_main(int argc, char *argv[])
 
         math::Matrix<3,3> R_n;
         R.identity();
-        float q_h2c[4] = {0.8660, -0.5, 0, 0};
-        float q_b2c_conj[4] = {0.8660, 0.5, 0, 0};
-//        float q_h2c[4] = {0.8660, -0.5, 0, 0};
+        float q_h2c[4] = {0.6124, -0.3536, -0.3536, -0.6124};
+        float q_b2c_conj[4] = {0.6124, 0.3536, 0.3536, 0.6124};
         float q_h2ptam[4] = {1, 0, 0, 0};
         float q_h2b[4] = {1, 0, 0, 0};
         float q_ptam2b[4] = {1, 0, 0, 0};
@@ -355,6 +354,9 @@ int q_ekf_thread_main(int argc, char *argv[])
         math::Vector<4> q_temp;
         math::Vector<3> mag_in_h = {1, 0, 0}, grav_in_h = {0, 0, -9.82f}, gm, gg;
         bool ptam_initialized = false;
+        math::Matrix<3,3> rot_b2c_pos;
+        math::Vector<3> ptam_pos_vect;
+        math::Vector<3> ptam_pos_vect_rotated;
 
 	// struct vision_position_estimate vision {};
 
@@ -478,7 +480,8 @@ int q_ekf_thread_main(int argc, char *argv[])
 						sensor_last_timestamp[3] = got_pos.timestamp;
 					}
 
-                                        if ( !ptam_initialized && (update_vect[2] == 1) ) {
+                                        /* runs only the first time we get ptam data */
+                                        if ( !ptam_initialized && ((update_vect[2] == 1) || (update_pos_vect[1] == 1)) ) {
                                                 math::Vector<4> res;
                                                 res = qmult( q_h2c, ptam.q );
                                                 for (int i = 0; i < 4; i++)
@@ -487,6 +490,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 ptam_initialized = true;
                                         }
 
+                                        /* runs everytime we get ptam data */
                                         if ( ptam_initialized && (update_vect[2] == 1) ) {
                                                 q_ptam_conj[0] = ptam.q[0];
                                                 for (int i = 1; i < 4; i++)
@@ -499,6 +503,8 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 q_temp = qmult( q_h2ptam, q_ptam2b );
                                                 for (int i = 0; i < 4; i++)
                                                         q_h2b[i] = q_temp.data[i];
+
+                                                q_h2b[3] *= -1.0f;
                                         }
 
                                         R_n = quat2Rot(q_h2b);
@@ -517,27 +523,34 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         // gm.print();
 
                                         // POS data prep
-                                        z_pos_k[3] = ptam.x;
-                                        z_pos_k[4] = ptam.y;
-                                        z_pos_k[5] = ptam.z;
+                                        ptam_pos_vect.data[0] = ptam.x;
+                                        ptam_pos_vect.data[1] = ptam.y;
+                                        ptam_pos_vect.data[2] = ptam.z;
+
+                                        rot_b2c_pos = quat2Rot(q_h2c);
+                                        ptam_pos_vect_rotated = matVectMult(rot_b2c_pos, ptam_pos_vect);
+
+                                        z_pos_k[3] = ptam_pos_vect_rotated.data[0] * -1.0f; // FIXME: mulig fejl
+                                        z_pos_k[4] = ptam_pos_vect_rotated.data[1];
+                                        z_pos_k[5] = ptam_pos_vect_rotated.data[2];
 
                                         z_pos_k[6] = got_pos.x;
                                         z_pos_k[7] = got_pos.y;
                                         z_pos_k[8] = got_pos.z;
 
-					uint64_t now = hrt_absolute_time();
-					unsigned int time_elapsed = now - last_run;
-					last_run = now;
+					// uint64_t now = hrt_absolute_time();
+					// unsigned int time_elapsed = now - last_run;
+					// last_run = now;
 
-					if (time_elapsed > loop_interval_alarm) {
-						//TODO: add warning, cpu overload here
-						// if (overloadcounter == 20) {
-						// 	printf("CPU OVERLOAD DETECTED IN ATTITUDE ESTIMATOR EKF (%lu > %lu)\n", time_elapsed, loop_interval_alarm);
-						// 	overloadcounter = 0;
-						// }
+					// if (time_elapsed > loop_interval_alarm) {
+					// 	//TODO: add warning, cpu overload here
+					// 	// if (overloadcounter == 20) {
+					// 	// 	printf("CPU OVERLOAD DETECTED IN ATTITUDE ESTIMATOR EKF (%lu > %lu)\n", time_elapsed, loop_interval_alarm);
+					// 	// 	overloadcounter = 0;
+					// 	// }
 
-						overloadcounter++;
-					}
+					// 	overloadcounter++;
+					// }
 
 					static bool const_initialized = false;
 

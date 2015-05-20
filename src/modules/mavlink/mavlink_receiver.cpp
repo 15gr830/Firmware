@@ -87,7 +87,7 @@ __BEGIN_DECLS
 __END_DECLS
 
 static const float mg2ms2 = CONSTANTS_ONE_G / 1000.0f;
-static int mavlink_fd;
+// static int mavlink_fd;
 
 MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 	_mavlink(parent),
@@ -1547,8 +1547,8 @@ MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
 	struct att_pos_mocap_s pos;
 	memset(&pos, 0, sizeof(pos));
 
-        mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
-        mavlink_log_info(mavlink_fd, "GOT data i mavlink_receiver");
+        // mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
+        // mavlink_log_info(mavlink_fd, "GOT data i mavlink_receiver");
 
 	pos.timestamp = hrt_absolute_time();
 
