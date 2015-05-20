@@ -101,10 +101,10 @@
 #define ACT_MAP_3_3  -0.25f
 #define ACT_MAP_3_4  0.25f
                      
-#define ACT_MAP_4_1  0.25f
-#define ACT_MAP_4_2  0.25f
-#define ACT_MAP_4_3  -0.25f
-#define ACT_MAP_4_4  -0.25f
+#define ACT_MAP_4_1  -0.25f
+#define ACT_MAP_4_2  -0.25f
+#define ACT_MAP_4_3  0.25f
+#define ACT_MAP_4_4  0.25f
 
 
 /* Safety values */
@@ -114,14 +114,14 @@
  * for the roll, pitch and yaw actuator topic then the published
  * value will be the ones below.
  */
-#define RP_MAX  0.4f
-#define YAW_MAX 0.4f
+#define RP_MAX  0.8f
+#define YAW_MAX 0.8f
 
 /*
  * If the quad has a roll or a pitch of more than this level, 
  * then a safety shutdown is triggered
  */
-#define RP_SAFE 0.5f
+#define RP_SAFE 1.f
 
 /*
  * Thrust value to counter the gravity
