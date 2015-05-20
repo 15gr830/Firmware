@@ -11,7 +11,9 @@
 #define Q_CONTROL_PARAMS_H
 
 
-/* Entrys for the 4x16 LQR controller matrix */
+/* 
+ * Entrys for the 4x16 LQR controller matrix 
+ */
 #define LQR_CONTROLLER_1_1     -0.8846
 #define LQR_CONTROLLER_1_2     -0.8846
 #define LQR_CONTROLLER_1_3     -0.1477
@@ -81,7 +83,9 @@
 #define LQR_CONTROLLER_4_16    0.0040
 
 
-// Mapping between rpm values and motor control torques
+/*
+ * Linear matrix map between rpm values and motor control topic
+ */
 #define ACT_MAP_1_1  0.25f
 #define ACT_MAP_1_2  0.25f
 #define ACT_MAP_1_3  0.25f
@@ -92,10 +96,10 @@
 #define ACT_MAP_2_3  0.25f
 #define ACT_MAP_2_4  -0.25f
                      
-#define ACT_MAP_3_1  0.25f
-#define ACT_MAP_3_2  -0.25f
-#define ACT_MAP_3_3  0.25f
-#define ACT_MAP_3_4  -0.25f
+#define ACT_MAP_3_1  -0.25f
+#define ACT_MAP_3_2  0.25f
+#define ACT_MAP_3_3  -0.25f
+#define ACT_MAP_3_4  0.25f
                      
 #define ACT_MAP_4_1  0.25f
 #define ACT_MAP_4_2  0.25f
@@ -103,11 +107,26 @@
 #define ACT_MAP_4_4  -0.25f
 
 
-// Safety values
+/* Safety values */
+
+/*
+ * If the output of the lqr controller os larger than this level
+ * for the roll, pitch and yaw actuator topic then the published
+ * value will be the ones below.
+ */
 #define RP_MAX  0.4f
 #define YAW_MAX 0.4f
+
+/*
+ * If the quad has a roll or a pitch of more than this level, 
+ * then a safety shutdown is triggered
+ */
 #define RP_SAFE 0.5f
-#define ANTI_GRAVITY 0.35f
+
+/*
+ * Thrust value to counter the gravity
+ */
+#define ANTI_GRAVITY 0.f
 
 
 #endif  /* Q_CONTROL_PARAMS_H */
