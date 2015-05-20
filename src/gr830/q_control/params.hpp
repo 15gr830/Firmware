@@ -106,7 +106,8 @@
 // Safety values
 #define RP_MAX  0.4f
 #define YAW_MAX 0.4f
-#define RP_SAFE 0.35f
+#define RP_SAFE 0.5f
+#define ANTI_GRAVITY 0.35f
 
 
 #endif  /* Q_CONTROL_PARAMS_H */

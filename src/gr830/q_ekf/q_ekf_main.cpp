@@ -805,6 +805,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 					att.rollspeed = x_aposteriori[0];
 					att.pitchspeed = x_aposteriori[1];
 					att.yawspeed = x_aposteriori[2];
+
 					att.rollacc = x_aposteriori[3];
 					att.pitchacc = x_aposteriori[4];
 					att.yawacc = x_aposteriori[5];
@@ -821,6 +822,10 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         pos.x = x_pos_aposteriori[6]; 
                                         pos.y = x_pos_aposteriori[7];
                                         pos.z = x_pos_aposteriori[8];
+
+                                        pos.vx = x_pos_aposteriori[3];
+                                        pos.vy = x_pos_aposteriori[4];
+                                        pos.vz = x_pos_aposteriori[5];
 
                                         //if ( debug < 5 )
                                         // printf("x = %4.4f, y = %4.4f, z = %4.4f\n", (double)pos.x, (double)pos.y, (double)pos.z);

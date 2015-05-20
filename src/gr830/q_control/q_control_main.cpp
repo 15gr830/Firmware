@@ -197,7 +197,9 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
-                        
+
+                        out.thrust += (float)ANTI_GRAVITY;
+
                         if ( ( (fabs(v_att.roll) > (double)RP_SAFE) || (fabs(v_att.pitch) > (double)RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
                                 out.roll = 0;
                                 out.pitch = 0;
