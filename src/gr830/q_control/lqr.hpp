@@ -151,30 +151,23 @@ public:
                 if ( isnan(q0_sign) || (q0_sign < (double)0.001f) )
                         q0_sign = (double)1;
 
-                // printf("q0_sign = %4.4f\n", (double)q0_sign);
-
-                // q_err->print();
-
                 // Collecting the error state vector x_e
-                x_e.data[0]  = (double)q0_sign*(double)q_err->data[1];
-                x_e.data[1]  = (double)q0_sign*(double)q_err->data[2];
-                x_e.data[2]  = (double)q0_sign*(double)q_err->data[3];
-                x_e.data[3]  = x_ref.data[3] - x_est.data[3];
-                x_e.data[4]  = x_ref.data[4] - x_est.data[4];
-                x_e.data[5]  = x_ref.data[5] - x_est.data[5];
-                x_e.data[6]  = x_ref.data[6] - x_est.data[6];
-                x_e.data[7]  = x_ref.data[7] - x_est.data[7];
-                x_e.data[8]  = x_ref.data[8] - x_est.data[8];
-                x_e.data[9]  = x_ref.data[9] - x_est.data[9];
-                x_e.data[10] = x_ref.data[10] - x_est.data[10];
-                x_e.data[11] = x_ref.data[11] - x_est.data[11];
-                x_e.data[12] = 0;
-                x_e.data[13] = 0;
-                x_e.data[14] = 0;
-                x_e.data[15] = 0;
-
-                // printf("x_e = ");
-                // x_e.print();
+                x_e.data[0]  = (double)q0_sign*(double)q_err->data[1]; // q1 error
+                x_e.data[1]  = (double)q0_sign*(double)q_err->data[2]; // q2 error
+                x_e.data[2]  = (double)q0_sign*(double)q_err->data[3]; // q3 error
+                x_e.data[3]  = x_ref.data[3] - x_est.data[3]; // w1 error
+                x_e.data[4]  = x_ref.data[4] - x_est.data[4]; // w2 error
+                x_e.data[5]  = x_ref.data[5] - x_est.data[5]; // w3 error
+                x_e.data[6]  = 0; // x_ref.data[6] - x_est.data[6]; // x error
+                x_e.data[7]  = 0; // x_ref.data[7] - x_est.data[7]; // y error
+                x_e.data[8]  = 0; // x_ref.data[8] - x_est.data[8]; // z error
+                x_e.data[9]  = 0; // x_ref.data[9] - x_est.data[9]; // vx error
+                x_e.data[10] = 0; // x_ref.data[10] - x_est.data[10]; // vy error
+                x_e.data[11] = 0; // x_ref.data[11] - x_est.data[11]; // vz error
+                x_e.data[12] = 0; // RPM1 (not used)
+                x_e.data[13] = 0; // RPM2 (not used)
+                x_e.data[14] = 0; // RPM3 (not used)
+                x_e.data[15] = 0; // RPM4 (not used)
 
                 // Calculating K*x_e
                 i.data[0] = data[0][0]*x_e.data[0] + data[0][1]*x_e.data[1] + data[0][2]*x_e.data[2] + data[0][3]*x_e.data[3] + data[0][4]*x_e.data[4] + data[0][5]*x_e.data[5] + data[0][6]*x_e.data[6] + data[0][7]*x_e.data[7] + data[0][8]*x_e.data[8] + data[0][9]*x_e.data[9] + data[0][10]*x_e.data[10] + data[0][11]*x_e.data[11] + data[0][12]*x_e.data[12] + data[0][13]*x_e.data[13] + data[0][14]*x_e.data[14] + data[0][15]*x_e.data[15];

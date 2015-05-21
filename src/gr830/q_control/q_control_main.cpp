@@ -54,7 +54,7 @@ int q_control_thread_main(int argc, char *argv[]) {
 
         static int mavlink_fd;
         mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
-        mavlink_log_info(mavlink_fd, "[q_control] has begun");
+        mavlink_log_info(mavlink_fd, "[QC] has begun");
 
         struct output_s out;
         memset(&out, 0, sizeof(out));
@@ -70,15 +70,12 @@ int q_control_thread_main(int argc, char *argv[]) {
         memset(&v_status, 0, sizeof(v_status));
         struct offboard_control_setpoint_s pos_sp;
         memset(&pos_sp, 0, sizeof(pos_sp));
-        // struct position_setpoint_triplet_s pos_sp;
-        // memset(&pos_sp, 0, sizeof(pos_sp));
         struct vehicle_command_s cmd;
         memset(&cmd, 0, sizeof(cmd));
 
         int v_att_sub = orb_subscribe(ORB_ID(vehicle_attitude));
         int v_local_pos_sub = orb_subscribe(ORB_ID(vehicle_local_position));
         int v_status_sub = orb_subscribe(ORB_ID(vehicle_status));
-        // int pos_sp_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
         int pos_sp_sub = orb_subscribe(ORB_ID(offboard_control_setpoint));
         int cmd_sub = orb_subscribe(ORB_ID(vehicle_command));
 
@@ -99,7 +96,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         float x_ref[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
         // ekstra references to LQR
-        lqr->r = {0.6,0,0,0};
+        lqr->r = {0,0,0,0};
         lqr->q_ref->data[0] = 1;
         lqr->q_ref->data[1] = 0;
         lqr->q_ref->data[2] = 0;
@@ -108,13 +105,11 @@ int q_control_thread_main(int argc, char *argv[]) {
         math::Vector<4> u,id;
         math::Matrix<4,4> act_map;
         act_map = init_act_map();
-        // act_map.print();
 
         bool error = false;
         // bool once  = false;
         bool output_on = false;
         bool first = false;
-        // double anti_gravity = 0.42;
         int freq = 0;
 
         while ( !thread_should_exit ) {
@@ -148,9 +143,9 @@ int q_control_thread_main(int argc, char *argv[]) {
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
                         // printf("q0 = %4.4f, q1 = %4.4f, q2 = %4.4f, q3 = %4.4f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
-                        if ( freq%30 == 0 ) {
-                                mavlink_log_info(mavlink_fd, "[q_control] attitude: q0: %4.4f, q1: %4.4f, q2: %4.4f, q3: %4.4f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
-                        }
+                        // if ( freq%100 == 0 ) {
+                        //         mavlink_log_info(mavlink_fd, "[QC] ATT: q0:%4.2f q1:%4.2f q2:%4.2f q3:%4.2f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
+                        // }
                         
 
                         bool v_local_pos_updated; // Position estimates from EKF
@@ -166,7 +161,8 @@ int q_control_thread_main(int argc, char *argv[]) {
 	                if ( pos_sp_updated ) {
 	                        orb_copy(ORB_ID(offboard_control_setpoint), pos_sp_sub, &pos_sp);
                                 // printf("[q_control] Setpoint received x = %4.2f y = %4.2f z = %4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
-                                mavlink_log_info(mavlink_fd, "[q_control] Setpoint received x = %4.2f y = %4.2f z = %4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
+                                // if ( freq%3 == 0 )
+                                //         mavlink_log_info(mavlink_fd, "[QC] SP x:%4.2f y:%4.2f z:%4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
 	                }                                                                                
 
                         for (int i = 0; i < 4; i++)
@@ -199,10 +195,8 @@ int q_control_thread_main(int argc, char *argv[]) {
                         lqr->x_ref = x_ref;
                         
                         u = lqr->run();
-
-                        // if (once == false) {
-                        //         lqr->print();
-                        //         once = true;
+                        // if ( freq%100 == 0 ) {
+                        //         mavlink_log_info(mavlink_fd, "[QC] q_err: q0:%4.2f q1:%4.2f q2:%4.2f q3:%4.2f\n", (double)lqr->q_err->data[0], (double)lqr->q_err->data[1], (double)lqr->q_err->data[2], (double)lqr->q_err->data[3]);
                         // }
 
                         out = act_map_run(act_map, u);
@@ -219,9 +213,9 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 error = true;
                         }
 
-                        if ( freq%30 == 0 ) {
+                        if ( freq%100 == 0 ) {
                                 printf(" Outputs = [ %4.4f %4.4f %4.4f %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-                                mavlink_log_info(mavlink_fd, "[q_control] motor outputs: T: %4.4f R: %4.4f P: %4.4f Y: %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                mavlink_log_info(mavlink_fd, "[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
                                 freq = 0;
                         }
 
