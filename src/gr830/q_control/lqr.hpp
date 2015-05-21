@@ -158,8 +158,8 @@ public:
                 x_e.data[3]  = x_ref.data[3] - x_est.data[3]; // w1 error
                 x_e.data[4]  = x_ref.data[4] - x_est.data[4]; // w2 error
                 x_e.data[5]  = x_ref.data[5] - x_est.data[5]; // w3 error
-                x_e.data[6]  = x_ref.data[6] - x_est.data[6]; // x error
-                x_e.data[7]  = x_ref.data[7] - x_est.data[7]; // y error
+                x_e.data[6]  = (x_ref.data[6] - x_est.data[6])*10.f; // x error
+                x_e.data[7]  = (x_ref.data[7] - x_est.data[7])*10.f; // y error
                 x_e.data[8]  = 0; // x_ref.data[8] - x_est.data[8]; // z error
                 x_e.data[9]  = x_ref.data[9] - x_est.data[9]; // vx error
                 x_e.data[10] = x_ref.data[10] - x_est.data[10]; // vy error
