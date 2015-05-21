@@ -39,6 +39,7 @@ public:
         math::Quaternion *q_ref = new math::Quaternion(1,0,0,0);
         math::Quaternion *q_est = new math::Quaternion();
         math::Quaternion *q_err = new math::Quaternion();
+        math::Vector<16> x_e;
 
         /*
          * Constructor initialises from params.hpp
@@ -133,8 +134,7 @@ public:
          */
         math::Vector<4> run(void) {
                 math::Vector<4>  u, i;
-                math::Vector<16> x_e;
-                double           q0_sign = 0;//, q0_size = 0;
+                double           q0_sign = 0;
 
                 // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
 
@@ -158,11 +158,11 @@ public:
                 x_e.data[3]  = x_ref.data[3] - x_est.data[3]; // w1 error
                 x_e.data[4]  = x_ref.data[4] - x_est.data[4]; // w2 error
                 x_e.data[5]  = x_ref.data[5] - x_est.data[5]; // w3 error
-                x_e.data[6]  = 0; // x_ref.data[6] - x_est.data[6]; // x error
-                x_e.data[7]  = 0; // x_ref.data[7] - x_est.data[7]; // y error
+                x_e.data[6]  = x_ref.data[6] - x_est.data[6]; // x error
+                x_e.data[7]  = x_ref.data[7] - x_est.data[7]; // y error
                 x_e.data[8]  = 0; // x_ref.data[8] - x_est.data[8]; // z error
-                x_e.data[9]  = 0; // x_ref.data[9] - x_est.data[9]; // vx error
-                x_e.data[10] = 0; // x_ref.data[10] - x_est.data[10]; // vy error
+                x_e.data[9]  = x_ref.data[9] - x_est.data[9]; // vx error
+                x_e.data[10] = x_ref.data[10] - x_est.data[10]; // vy error
                 x_e.data[11] = 0; // x_ref.data[11] - x_est.data[11]; // vz error
                 x_e.data[12] = 0; // RPM1 (not used)
                 x_e.data[13] = 0; // RPM2 (not used)

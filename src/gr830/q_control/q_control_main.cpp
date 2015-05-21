@@ -226,14 +226,15 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         if ( freq%100 == 0 ) {
                                 // printf("[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-                                mavlink_log_info(mavlink_fd, "[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                // mavlink_log_info(mavlink_fd, "[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                mavlink_log_info(mavlink_fd, "[QC] pos_err: x:%4.2f y:%4.2f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[7]);
                                 freq = 0;
                         }
 
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw;
-                        actuators.control[3] = (float)out.thrust;// + (float)anti_gravity;
+                        actuators.control[3] = (float)out.thrust;
 
                         if ( output_on ) {
                                 //actuators.control[3] = (double)0.7;

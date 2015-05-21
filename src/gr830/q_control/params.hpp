@@ -97,28 +97,28 @@
  * Linear matrix map between rpm values and motor control topic
  */
 // Thrust
-#define ACT_MAP_1_1  0.25f
-#define ACT_MAP_1_2  0.25f
-#define ACT_MAP_1_3  0.25f
-#define ACT_MAP_1_4  0.25f
+#define ACT_MAP_1_1  0.14f
+#define ACT_MAP_1_2  0.14f
+#define ACT_MAP_1_3  0.14f
+#define ACT_MAP_1_4  0.14f
 
 // Roll                     
-#define ACT_MAP_2_1  -0.25f
-#define ACT_MAP_2_2  0.25f
-#define ACT_MAP_2_3  0.25f
-#define ACT_MAP_2_4  -0.25f
+#define ACT_MAP_2_1  -0.14f
+#define ACT_MAP_2_2  0.14f
+#define ACT_MAP_2_3  0.14f
+#define ACT_MAP_2_4  -0.14f
 
 // Pitch
-#define ACT_MAP_3_1  -0.25f
-#define ACT_MAP_3_2  0.25f
-#define ACT_MAP_3_3  -0.25f
-#define ACT_MAP_3_4  0.25f
+#define ACT_MAP_3_1  -0.14f
+#define ACT_MAP_3_2  0.14f
+#define ACT_MAP_3_3  -0.14f
+#define ACT_MAP_3_4  0.14f
 
 // Yaw
-#define ACT_MAP_4_1  -0.25f
-#define ACT_MAP_4_2  -0.25f
-#define ACT_MAP_4_3  0.25f
-#define ACT_MAP_4_4  0.25f
+#define ACT_MAP_4_1  -0.14f
+#define ACT_MAP_4_2  -0.14f
+#define ACT_MAP_4_3  0.14f
+#define ACT_MAP_4_4  0.14f
 
 
 /* Safety values */
@@ -140,7 +140,7 @@
 /*
  * Thrust value to counter the gravity
  */
-#define ANTI_GRAVITY 0.f
+#define ANTI_GRAVITY 0.24f
 
 
 #endif  /* Q_CONTROL_PARAMS_H */
