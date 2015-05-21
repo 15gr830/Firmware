@@ -198,6 +198,17 @@ int q_control_thread_main(int argc, char *argv[]) {
                         // if ( freq%100 == 0 ) {
                         //         mavlink_log_info(mavlink_fd, "[QC] q_err: q0:%4.2f q1:%4.2f q2:%4.2f q3:%4.2f\n", (double)lqr->q_err->data[0], (double)lqr->q_err->data[1], (double)lqr->q_err->data[2], (double)lqr->q_err->data[3]);
                         // }
+                        // if ( freq%100 == 0) {
+                        //         printf("[QC] LQR = \n");
+                        //         for (int i = 0; i < 4; i++) {
+                        //                 printf("[ ");
+                        //                 for (int j = 0; j < 16; j++) {
+                        //                         printf("%4.6f ", (double)lqr->data[i][j]);
+                        //                 }
+                        //                 printf("]\n");
+                        //         }
+                        // }
+                        
 
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
@@ -214,7 +225,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         }
 
                         if ( freq%100 == 0 ) {
-                                printf(" Outputs = [ %4.4f %4.4f %4.4f %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                //printf(" Outputs = [ %4.4f %4.4f %4.4f %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
                                 mavlink_log_info(mavlink_fd, "[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
                                 freq = 0;
                         }
