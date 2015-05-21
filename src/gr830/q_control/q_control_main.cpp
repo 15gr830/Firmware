@@ -225,8 +225,8 @@ int q_control_thread_main(int argc, char *argv[]) {
                         }
 
                         if ( freq%100 == 0 ) {
-                                //printf(" Outputs = [ %4.4f %4.4f %4.4f %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-                                mavlink_log_info(mavlink_fd, "[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                printf("[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                mavlink_log_info(mavlink_fd, "[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
                                 freq = 0;
                         }
 

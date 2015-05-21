@@ -15,80 +15,82 @@
  * Entrys for the 4x16 LQR controller matrix 
  *
  * LQR =
- * [  roll      pitch     yaw       w_roll    w_pitch   w_yaw     x         y        z         vx        vy       vz        rpm1      rpm2      rpm3      rpm4     ]
- * [ -0.884600 -0.884600 -0.147700 -0.203700 -0.203700 -0.274900  0.020700  0.020700 0.020900  0.044500  0.044500 0.180800  0.004000 -0.000300  0.000000  0.000000 ]
- * [  0.884600  0.884600 -0.147700  0.203700  0.203700 -0.274900 -0.020700 -0.020700 0.020900 -0.044500 -0.044500 0.180800 -0.000300  0.004000  0.000000  0.000000 ]
- * [  0.884600 -0.884600  0.147700  0.203700 -0.203700  0.274900  0.020700 -0.020700 0.020900  0.044500 -0.044500 0.180800  0.000000  0.000000  0.004000 -0.000300 ]
- * [ -0.884600  0.884600  0.147700 -0.203700  0.203700  0.274900 -0.020700  0.020700 0.020900 -0.044500  0.044500 0.180800  0.000000  0.000000 -0.000300  0.004000 ]
+ * [  roll      pitch     yaw       w_roll    w_pitch   w_yaw     x         y        z         vx        vy        vz        rpm1      rpm2      rpm3      rpm4   ]
+ * [ -1.3963   -1.3963   -0.2089   -0.2602   -0.2602   -0.3267    0.0206    0.0206   0.0209    0.0818    0.0818    0.1915    0.0041   -0.0004   -0.0000   -0.0000 ]
+ * [  1.3963    1.3963   -0.2089    0.2602    0.2602   -0.3267   -0.0206   -0.0206   0.0209   -0.0818   -0.0818    0.1915   -0.0004    0.0041   -0.0000   -0.0000 ]
+ * [  1.3963   -1.3963    0.2089    0.2602   -0.2602    0.3267    0.0206   -0.0206   0.0209    0.0818   -0.0818    0.1915   -0.0000   -0.0000    0.0041   -0.0004 ]
+ * [ -1.3963    1.3963    0.2089   -0.2602    0.2602    0.3267   -0.0206    0.0206   0.0209   -0.0818    0.0818    0.1915   -0.0000   -0.0000   -0.0004    0.0041 ]
  *
  */
-#define LQR_CONTROLLER_1_1     -0.8846f
-#define LQR_CONTROLLER_1_2     -0.8846f
-#define LQR_CONTROLLER_1_3     -0.1477f
-#define LQR_CONTROLLER_1_4     -0.2037f
-#define LQR_CONTROLLER_1_5     -0.2037f
-#define LQR_CONTROLLER_1_6     -0.2749f
-#define LQR_CONTROLLER_1_7     0.0207f
-#define LQR_CONTROLLER_1_8     0.0207f
+
+
+#define LQR_CONTROLLER_1_1     -1.3963f
+#define LQR_CONTROLLER_1_2     -1.3963f
+#define LQR_CONTROLLER_1_3     -0.2089f
+#define LQR_CONTROLLER_1_4     -0.2602f
+#define LQR_CONTROLLER_1_5     -0.2602f
+#define LQR_CONTROLLER_1_6     -0.3267f
+#define LQR_CONTROLLER_1_7     0.0206f
+#define LQR_CONTROLLER_1_8     0.0206f
 #define LQR_CONTROLLER_1_9     0.0209f
-#define LQR_CONTROLLER_1_10    0.0445f
-#define LQR_CONTROLLER_1_11    0.0445f
-#define LQR_CONTROLLER_1_12    0.1808f
-#define LQR_CONTROLLER_1_13    0.0040f
-#define LQR_CONTROLLER_1_14    -0.0003f
-#define LQR_CONTROLLER_1_15    0.f
-#define LQR_CONTROLLER_1_16    0.f
+#define LQR_CONTROLLER_1_10    0.0818f
+#define LQR_CONTROLLER_1_11    0.0818f
+#define LQR_CONTROLLER_1_12    0.1915f
+#define LQR_CONTROLLER_1_13    0.0041f
+#define LQR_CONTROLLER_1_14    -0.0004f
+#define LQR_CONTROLLER_1_15    -0.0000f
+#define LQR_CONTROLLER_1_16    -0.0000f
                               
-#define LQR_CONTROLLER_2_1     0.8846f
-#define LQR_CONTROLLER_2_2     0.8846f
-#define LQR_CONTROLLER_2_3     -0.1477f
-#define LQR_CONTROLLER_2_4     0.2037f
-#define LQR_CONTROLLER_2_5     0.2037f
-#define LQR_CONTROLLER_2_6     -0.2749f
-#define LQR_CONTROLLER_2_7     -0.0207f
-#define LQR_CONTROLLER_2_8     -0.0207f
+#define LQR_CONTROLLER_2_1     1.3963f
+#define LQR_CONTROLLER_2_2     1.3963f
+#define LQR_CONTROLLER_2_3     -0.2089f
+#define LQR_CONTROLLER_2_4     0.2602f
+#define LQR_CONTROLLER_2_5     0.2602f
+#define LQR_CONTROLLER_2_6     -0.3267f
+#define LQR_CONTROLLER_2_7     -0.0206f
+#define LQR_CONTROLLER_2_8     -0.0206f
 #define LQR_CONTROLLER_2_9     0.0209f
-#define LQR_CONTROLLER_2_10    -0.0445f
-#define LQR_CONTROLLER_2_11    -0.0445f
-#define LQR_CONTROLLER_2_12    0.1808f
-#define LQR_CONTROLLER_2_13    -0.0003f
-#define LQR_CONTROLLER_2_14    0.0040f
-#define LQR_CONTROLLER_2_15    0.f
-#define LQR_CONTROLLER_2_16    0.f      
+#define LQR_CONTROLLER_2_10    -0.0818f
+#define LQR_CONTROLLER_2_11    -0.0818f
+#define LQR_CONTROLLER_2_12    0.1915f
+#define LQR_CONTROLLER_2_13    -0.0004f
+#define LQR_CONTROLLER_2_14    0.0041f
+#define LQR_CONTROLLER_2_15    -0.0000f
+#define LQR_CONTROLLER_2_16    -0.0000f 
                               
-#define LQR_CONTROLLER_3_1     0.8846f
-#define LQR_CONTROLLER_3_2     -0.8846f
-#define LQR_CONTROLLER_3_3     0.1477f
-#define LQR_CONTROLLER_3_4     0.2037f
-#define LQR_CONTROLLER_3_5     -0.2037f
-#define LQR_CONTROLLER_3_6     0.2749f
-#define LQR_CONTROLLER_3_7     0.0207f
-#define LQR_CONTROLLER_3_8     -0.0207f
+#define LQR_CONTROLLER_3_1     1.3963f
+#define LQR_CONTROLLER_3_2     -1.3963f
+#define LQR_CONTROLLER_3_3     0.2089f
+#define LQR_CONTROLLER_3_4     0.2602f
+#define LQR_CONTROLLER_3_5     -0.2602f
+#define LQR_CONTROLLER_3_6     0.3267f
+#define LQR_CONTROLLER_3_7     0.0206f
+#define LQR_CONTROLLER_3_8     -0.0206f
 #define LQR_CONTROLLER_3_9     0.0209f
-#define LQR_CONTROLLER_3_10    0.0445f
-#define LQR_CONTROLLER_3_11    -0.0445f
-#define LQR_CONTROLLER_3_12    0.1808f
-#define LQR_CONTROLLER_3_13    0.0000f
-#define LQR_CONTROLLER_3_14    0.0000f
-#define LQR_CONTROLLER_3_15    0.0040f
-#define LQR_CONTROLLER_3_16    -0.0003f
-                              
-#define LQR_CONTROLLER_4_1     -0.8846f
-#define LQR_CONTROLLER_4_2     0.8846f
-#define LQR_CONTROLLER_4_3     0.1477f
-#define LQR_CONTROLLER_4_4     -0.2037f 
-#define LQR_CONTROLLER_4_5     0.2037f
-#define LQR_CONTROLLER_4_6     0.2749f 
-#define LQR_CONTROLLER_4_7     -0.0207f 
-#define LQR_CONTROLLER_4_8     0.0207f
-#define LQR_CONTROLLER_4_9     0.0209f 
-#define LQR_CONTROLLER_4_10    -0.0445f
-#define LQR_CONTROLLER_4_11    0.0445f
-#define LQR_CONTROLLER_4_12    0.1808f 
-#define LQR_CONTROLLER_4_13    0.0000f 
-#define LQR_CONTROLLER_4_14    0.0000f 
-#define LQR_CONTROLLER_4_15    -0.0003f
-#define LQR_CONTROLLER_4_16    0.0040f
+#define LQR_CONTROLLER_3_10    0.0818f
+#define LQR_CONTROLLER_3_11    -0.0818f
+#define LQR_CONTROLLER_3_12    0.1915f
+#define LQR_CONTROLLER_3_13    -0.0000f
+#define LQR_CONTROLLER_3_14    -0.0000f
+#define LQR_CONTROLLER_3_15    0.0041f
+#define LQR_CONTROLLER_3_16    -0.0004f
+
+#define LQR_CONTROLLER_4_1     -1.3963f
+#define LQR_CONTROLLER_4_2     1.3963f
+#define LQR_CONTROLLER_4_3     0.2089f
+#define LQR_CONTROLLER_4_4     -0.2602f
+#define LQR_CONTROLLER_4_5     0.2602f
+#define LQR_CONTROLLER_4_6     0.3267f
+#define LQR_CONTROLLER_4_7     -0.0206f
+#define LQR_CONTROLLER_4_8     0.0206f
+#define LQR_CONTROLLER_4_9     0.0209f
+#define LQR_CONTROLLER_4_10    -0.0818f
+#define LQR_CONTROLLER_4_11    0.0818f
+#define LQR_CONTROLLER_4_12    0.1915f
+#define LQR_CONTROLLER_4_13    -0.0000f
+#define LQR_CONTROLLER_4_14    -0.0000f
+#define LQR_CONTROLLER_4_15    -0.0004f
+#define LQR_CONTROLLER_4_16    0.0041f
 
 
 /*
