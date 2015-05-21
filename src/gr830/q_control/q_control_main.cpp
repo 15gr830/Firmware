@@ -12,6 +12,7 @@
 #include <poll.h>
 #include <math.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <mavlink/mavlink_log.h>
 #include <uORB/uORB.h>
 #include <uORB/topics/actuator_controls.h>
@@ -50,6 +51,10 @@ static int daemon_task;
 
 int q_control_thread_main(int argc, char *argv[]) {
         warnx("[q_control] has begun");
+
+        static int mavlink_fd;
+        mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
+        mavlink_log_info(mavlink_fd, "[q_control] has begun");
 
         struct output_s out;
         memset(&out, 0, sizeof(out));
@@ -143,6 +148,10 @@ int q_control_thread_main(int argc, char *argv[]) {
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
                         // printf("q0 = %4.4f, q1 = %4.4f, q2 = %4.4f, q3 = %4.4f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
+                        if ( freq%30 == 0 ) {
+                                mavlink_log_info(mavlink_fd, "[q_control] attitude: q0: %4.4f, q1: %4.4f, q2: %4.4f, q3: %4.4f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
+                        }
+                        
 
                         bool v_local_pos_updated; // Position estimates from EKF
                 	orb_check(v_local_pos_sub, &v_local_pos_updated);
@@ -156,7 +165,8 @@ int q_control_thread_main(int argc, char *argv[]) {
                 	orb_check(pos_sp_sub, &pos_sp_updated);
 	                if ( pos_sp_updated ) {
 	                        orb_copy(ORB_ID(offboard_control_setpoint), pos_sp_sub, &pos_sp);
-                                printf("[q_control] Setpoint received x = %4.2f y = %4.2f z = %4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
+                                // printf("[q_control] Setpoint received x = %4.2f y = %4.2f z = %4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
+                                mavlink_log_info(mavlink_fd, "[q_control] Setpoint received x = %4.2f y = %4.2f z = %4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
 	                }                                                                                
 
                         for (int i = 0; i < 4; i++)
@@ -211,6 +221,7 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         if ( freq%30 == 0 ) {
                                 printf(" Outputs = [ %4.4f %4.4f %4.4f %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                                mavlink_log_info(mavlink_fd, "[q_control] motor outputs: T: %4.4f R: %4.4f P: %4.4f Y: %4.4f ]\n\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
                                 freq = 0;
                         }
 
