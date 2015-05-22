@@ -44,6 +44,6 @@ SRCS		 = q_ekf_main.cpp \
 
 MODULE_STACKSIZE = 1200
 
-EXTRACFLAGS = -Wno-float-equal -Wframe-larger-than=4300
+EXTRACFLAGS = -Wno-float-equal -Wframe-larger-than=3700
 
 EXTRACXXFLAGS = -Wframe-larger-than=3600
