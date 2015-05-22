@@ -111,6 +111,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         bool output_on = false;
         bool first = false;
         int freq = 0;
+        double antigravity = 0.0, max = 0.245, min = 0.21;
 
         while ( !thread_should_exit ) {
 
@@ -194,26 +195,18 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         lqr->x_ref = x_ref;
                         
-                        u = lqr->run();
-                        // if ( freq%100 == 0 ) {
-                        //         mavlink_log_info(mavlink_fd, "[QC] q_err: q0:%4.2f q1:%4.2f q2:%4.2f q3:%4.2f\n", (double)lqr->q_err->data[0], (double)lqr->q_err->data[1], (double)lqr->q_err->data[2], (double)lqr->q_err->data[3]);
-                        // }
-                        // if ( freq%100 == 0) {
-                        //         printf("[QC] LQR = \n");
-                        //         for (int i = 0; i < 4; i++) {
-                        //                 printf("[ ");
-                        //                 for (int j = 0; j < 16; j++) {
-                        //                         printf("%4.6f ", (double)lqr->data[i][j]);
-                        //                 }
-                        //                 printf("]\n");
-                        //         }
-                        // }
-                        
+                        u = lqr->run();                        
 
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
 
-                        out.thrust += (float)ANTI_GRAVITY;
+                        if ( (double)v_local_pos.z < (double)0.5 ) {
+                                antigravity =  (double)min + (double)v_local_pos.z * (double)((max - min)/(double)2);
+                        } else if ( (double)v_local_pos.z >= (double)0.5 ) {
+                                antigravity = (double)max;
+                        }
+
+                        out.thrust += (float)antigravity;
 
                         if ( ( (fabs(v_att.roll) > (double)RP_SAFE) || (fabs(v_att.pitch) > (double)RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
                                 out.roll = 0;

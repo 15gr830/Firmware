@@ -103,16 +103,16 @@
 #define ACT_MAP_1_4  0.14f
 
 // Roll                     
-#define ACT_MAP_2_1  -0.14f
-#define ACT_MAP_2_2  0.14f
-#define ACT_MAP_2_3  0.14f
-#define ACT_MAP_2_4  -0.14f
+#define ACT_MAP_2_1  -0.045f
+#define ACT_MAP_2_2  0.045f
+#define ACT_MAP_2_3  0.045f
+#define ACT_MAP_2_4  -0.045f
 
 // Pitch
-#define ACT_MAP_3_1  -0.14f
-#define ACT_MAP_3_2  0.14f
-#define ACT_MAP_3_3  -0.14f
-#define ACT_MAP_3_4  0.14f
+#define ACT_MAP_3_1  -0.045f
+#define ACT_MAP_3_2  0.045f
+#define ACT_MAP_3_3  -0.045f
+#define ACT_MAP_3_4  0.045f
 
 // Yaw
 #define ACT_MAP_4_1  -0.14f
@@ -140,7 +140,7 @@
 /*
  * Thrust value to counter the gravity
  */
-#define ANTI_GRAVITY 0.2f
+#define ANTI_GRAVITY 0.245f
 
 
 #endif  /* Q_CONTROL_PARAMS_H */
