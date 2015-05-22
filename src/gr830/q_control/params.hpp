@@ -23,73 +23,73 @@
  *
  */
 
-#define LQR_CONTROLLER_1_1    -1.7162f    //   -1.3643f//-1.3963f
-#define LQR_CONTROLLER_1_2    -1.7162f    //   -1.3963f//-1.3963f
-#define LQR_CONTROLLER_1_3    -0.1477f    //   -0.1477f//-0.2089f
-#define LQR_CONTROLLER_1_4    -0.2892f    //   -0.2555f//-0.2602f
-#define LQR_CONTROLLER_1_5    -0.2892f    //   -0.2555f//-0.2602f
-#define LQR_CONTROLLER_1_6    -0.2749f    //   -0.2749f//-0.3267f
-#define LQR_CONTROLLER_1_7     0.1029f    //    0.0652f//0.0206f
-#define LQR_CONTROLLER_1_8     0.1029f    //    0.0652f//0.0206f
-#define LQR_CONTROLLER_1_9     0.1045f    //    0.0661f//0.0209f
-#define LQR_CONTROLLER_1_10    0.1258f    //    0.0893f//0.0818f
-#define LQR_CONTROLLER_1_11    0.1258f    //    0.0893f//0.0818f
-#define LQR_CONTROLLER_1_12    0.4069f    //    0.0322f//0.1915f
-#define LQR_CONTROLLER_1_13    0.0041f    //    0.0041f//0.0041f
-#define LQR_CONTROLLER_1_14   -0.0004f    //   -0.0000f
-#define LQR_CONTROLLER_1_15   -0.0000f    //   -0.0000f
-#define LQR_CONTROLLER_1_16   -0.0000f    //   -0.0000f
+#define LQR_CONTROLLER_1_1     -2.2797    //   -1.3643f//-1.3963f
+#define LQR_CONTROLLER_1_2     -2.2797    //   -1.3963f//-1.3963f
+#define LQR_CONTROLLER_1_3     -0.1477    //   -0.1477f//-0.2089f
+#define LQR_CONTROLLER_1_4     -0.3387    //   -0.2555f//-0.2602f
+#define LQR_CONTROLLER_1_5     -0.3387    //   -0.2555f//-0.2602f
+#define LQR_CONTROLLER_1_6     -0.2749    //   -0.2749f//-0.3267f
+#define LQR_CONTROLLER_1_7     0.1452     //    0.0652f//0.0206f
+#define LQR_CONTROLLER_1_8     0.1452     //    0.0652f//0.0206f
+#define LQR_CONTROLLER_1_9     0.1477     //    0.0661f//0.0209f
+#define LQR_CONTROLLER_1_10    0.1855     //    0.0893f//0.0818f
+#define LQR_CONTROLLER_1_11    0.1855     //    0.0893f//0.0818f
+#define LQR_CONTROLLER_1_12    0.4911     //    0.0322f//0.1915f
+#define LQR_CONTROLLER_1_13    0.0042     //    0.0041f//0.0041f
+#define LQR_CONTROLLER_1_14    -0.0005    //   -0.0000f
+#define LQR_CONTROLLER_1_15    0.0000     //   -0.0000f
+#define LQR_CONTROLLER_1_16    0.0000     //   -0.0000f
 
-#define LQR_CONTROLLER_2_1     1.7162f    //    1.3643f//1.3963f
-#define LQR_CONTROLLER_2_2     1.7162f    //    1.3643f//1.3963f
-#define LQR_CONTROLLER_2_3    -0.1477f    //   -0.1477f//-0.2089f
-#define LQR_CONTROLLER_2_4     0.2892f    //    0.2555f//0.2602f
-#define LQR_CONTROLLER_2_5     0.2892f    //    0.2555f//0.2602f
-#define LQR_CONTROLLER_2_6    -0.2749f    //   -0.2749f//-0.3267f
-#define LQR_CONTROLLER_2_7    -0.1029f    //   -0.0652f//-0.0206f
-#define LQR_CONTROLLER_2_8    -0.1029f    //   -0.0652f//-0.0206f
-#define LQR_CONTROLLER_2_9     0.1045f    //    0.0661f//0.0209f
-#define LQR_CONTROLLER_2_10   -0.1258f    //   -0.0893f//-0.0818f
-#define LQR_CONTROLLER_2_11   -0.1258f    //   -0.0893f//-0.0818f
-#define LQR_CONTROLLER_2_12    0.4069f    //    0.3222f//0.1915f
-#define LQR_CONTROLLER_2_13   -0.0004f    //   -0.0004f//-0.0004f
-#define LQR_CONTROLLER_2_14    0.0041f    //    0.0041f//0.0041f
-#define LQR_CONTROLLER_2_15   -0.0000f    //   -0.0000f
-#define LQR_CONTROLLER_2_16   -0.0000f    //   -0.0000f 
+#define LQR_CONTROLLER_2_1      2.2797    //    1.3643f//1.3963f
+#define LQR_CONTROLLER_2_2      2.2797    //    1.3643f//1.3963f
+#define LQR_CONTROLLER_2_3     -0.1477    //   -0.1477f//-0.2089f
+#define LQR_CONTROLLER_2_4      0.3387    //    0.2555f//0.2602f
+#define LQR_CONTROLLER_2_5      0.3387    //    0.2555f//0.2602f
+#define LQR_CONTROLLER_2_6     -0.2749    //   -0.2749f//-0.3267f
+#define LQR_CONTROLLER_2_7    -0.1452     //   -0.0652f//-0.0206f
+#define LQR_CONTROLLER_2_8    -0.1452     //   -0.0652f//-0.0206f
+#define LQR_CONTROLLER_2_9     0.1477     //    0.0661f//0.0209f
+#define LQR_CONTROLLER_2_10   -0.1855     //   -0.0893f//-0.0818f
+#define LQR_CONTROLLER_2_11   -0.1855     //   -0.0893f//-0.0818f
+#define LQR_CONTROLLER_2_12    0.4911     //    0.3222f//0.1915f
+#define LQR_CONTROLLER_2_13   -0.0005     //   -0.0004f//-0.0004f
+#define LQR_CONTROLLER_2_14     0.0042    //    0.0041f//0.0041f
+#define LQR_CONTROLLER_2_15    0.0000     //   -0.0000f
+#define LQR_CONTROLLER_2_16    0.0000     //   -0.0000f 
 
-#define LQR_CONTROLLER_3_1     1.7162f    //    1.3643f//1.3963f
-#define LQR_CONTROLLER_3_2    -1.7162f    //   -1.3643f//-1.3963f
-#define LQR_CONTROLLER_3_3     0.1477f    //    0.1477f//0.2089f
-#define LQR_CONTROLLER_3_4     0.2892f    //    0.2555f//0.2602f
-#define LQR_CONTROLLER_3_5    -0.2892f    //   -0.2555f//-0.2602f
-#define LQR_CONTROLLER_3_6     0.2749f    //    0.2749f//0.3267f
-#define LQR_CONTROLLER_3_7     0.1029f    //    0.0652f//0.0206f
-#define LQR_CONTROLLER_3_8    -0.1029f    //   -0.0652f//-0.0206f
-#define LQR_CONTROLLER_3_9     0.1045f    //    0.0661f//0.0209f
-#define LQR_CONTROLLER_3_10    0.1258f    //    0.0893f//0.0818f
-#define LQR_CONTROLLER_3_11   -0.1258f    //   -0.0893f//-0.0818f
-#define LQR_CONTROLLER_3_12    0.4069f    //    0.3222f//0.1915f
-#define LQR_CONTROLLER_3_13   -0.0000f    //   -0.0000f
-#define LQR_CONTROLLER_3_14   -0.0000f    //   -0.0000f
-#define LQR_CONTROLLER_3_15    0.0041f    //    0.0041f
-#define LQR_CONTROLLER_3_16   -0.0004f    //   -0.0003f//-0.0004f
+#define LQR_CONTROLLER_3_1      2.2797    //    1.3643f//1.3963f
+#define LQR_CONTROLLER_3_2     -2.2797    //   -1.3643f//-1.3963f
+#define LQR_CONTROLLER_3_3      0.1477    //    0.1477f//0.2089f
+#define LQR_CONTROLLER_3_4      0.3387    //    0.2555f//0.2602f
+#define LQR_CONTROLLER_3_5     -0.3387    //   -0.2555f//-0.2602f
+#define LQR_CONTROLLER_3_6      0.2749    //    0.2749f//0.3267f
+#define LQR_CONTROLLER_3_7     0.1452     //    0.0652f//0.0206f
+#define LQR_CONTROLLER_3_8    -0.1452     //   -0.0652f//-0.0206f
+#define LQR_CONTROLLER_3_9     0.1477     //    0.0661f//0.0209f
+#define LQR_CONTROLLER_3_10    0.1855     //    0.0893f//0.0818f
+#define LQR_CONTROLLER_3_11   -0.1855     //   -0.0893f//-0.0818f
+#define LQR_CONTROLLER_3_12    0.4911     //    0.3222f//0.1915f
+#define LQR_CONTROLLER_3_13    0.0000     //   -0.0000f
+#define LQR_CONTROLLER_3_14     0.0000    //   -0.0000f
+#define LQR_CONTROLLER_3_15    0.0042     //    0.0041f
+#define LQR_CONTROLLER_3_16   -0.0005     //   -0.0003f//-0.0004f
 
-#define LQR_CONTROLLER_4_1    -1.7162f    //   -1.3643f//-1.3963f
-#define LQR_CONTROLLER_4_2     1.7162f    //    1.3643f//1.3963f
-#define LQR_CONTROLLER_4_3     0.1477f    //    0.1477f//0.2089f
-#define LQR_CONTROLLER_4_4    -0.2892f    //   -0.2555f//-0.2602f
-#define LQR_CONTROLLER_4_5     0.2892f    //    0.2555f//0.2602f
-#define LQR_CONTROLLER_4_6     0.2749f    //    0.2749f//0.3267f
-#define LQR_CONTROLLER_4_7    -0.1029f    //   -0.0652f//-0.0206f
-#define LQR_CONTROLLER_4_8     0.1029f    //    0.0652f//0.0206f
-#define LQR_CONTROLLER_4_9     0.1045f    //    0.0661f//0.0209f
-#define LQR_CONTROLLER_4_10   -0.1258f    //   -0.0893f//-0.0818f
-#define LQR_CONTROLLER_4_11    0.1258f    //    0.0893f//0.0818f
-#define LQR_CONTROLLER_4_12    0.4069f    //    0.3222f//0.1915f
-#define LQR_CONTROLLER_4_13   -0.0000f    //   -0.0000f
-#define LQR_CONTROLLER_4_14   -0.0000f    //   -0.0000f
-#define LQR_CONTROLLER_4_15   -0.0004f    //   -0.0004f
-#define LQR_CONTROLLER_4_16    0.0041f    //    0.0041f
+#define LQR_CONTROLLER_4_1     -2.2797    //   -1.3643f//-1.3963f
+#define LQR_CONTROLLER_4_2      2.2797    //    1.3643f//1.3963f
+#define LQR_CONTROLLER_4_3      0.1477    //    0.1477f//0.2089f
+#define LQR_CONTROLLER_4_4     -0.3387    //   -0.2555f//-0.2602f
+#define LQR_CONTROLLER_4_5      0.3387    //    0.2555f//0.2602f
+#define LQR_CONTROLLER_4_6      0.2749    //    0.2749f//0.3267f
+#define LQR_CONTROLLER_4_7    -0.1452     //   -0.0652f//-0.0206f
+#define LQR_CONTROLLER_4_8     0.1452     //    0.0652f//0.0206f
+#define LQR_CONTROLLER_4_9     0.1477     //    0.0661f//0.0209f
+#define LQR_CONTROLLER_4_10   -0.1855     //   -0.0893f//-0.0818f
+#define LQR_CONTROLLER_4_11    0.1855     //    0.0893f//0.0818f
+#define LQR_CONTROLLER_4_12    0.4911     //    0.3222f//0.1915f
+#define LQR_CONTROLLER_4_13    0.0000     //   -0.0000f
+#define LQR_CONTROLLER_4_14     0.0000    //   -0.0000f
+#define LQR_CONTROLLER_4_15   -0.0005     //   -0.0004f
+#define LQR_CONTROLLER_4_16    0.0042     //    0.0041f
 
 
 /*
@@ -119,6 +119,21 @@
 #define ACT_MAP_4_3  0.14f
 #define ACT_MAP_4_4  0.14f
 
+/*
+ * Yaw Ki constant
+ */
+#define YAW_KI 0.00005
+
+/*
+ * Z axis Ki constant
+ */
+#define Z_AXIS_KI 0.00008
+
+/*
+ * Thrust value to counter the gravity
+ */
+#define ANTI_GRAVITY 0.23f
+
 
 /* Safety values */
 
@@ -135,11 +150,6 @@
  * then a safety shutdown is triggered
  */
 #define RP_SAFE 1.f
-
-/*
- * Thrust value to counter the gravity
- */
-#define ANTI_GRAVITY 0.215f
 
 
 #endif  /* Q_CONTROL_PARAMS_H */
