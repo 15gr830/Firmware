@@ -111,7 +111,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         bool output_on = false;
         bool first = false;
         int freq = 0;
-        double antigravity = 0.0, max = 0.245, min = 0.20;
+        double antigravity = 0.0, max = 0.29, min = 0.29, flank = 0.4;
 
         while ( !thread_should_exit ) {
 
@@ -200,10 +200,10 @@ int q_control_thread_main(int argc, char *argv[]) {
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
 
-                        if ( (double)v_local_pos.z < (double)0.5 ) {
-                                antigravity =  (double)min + (double)v_local_pos.z * (double)((max - min)/(double)2);
-                        } else if ( (double)v_local_pos.z >= (double)0.5 ) {
-                                antigravity = (double)max;
+                        if ( (double)v_local_pos.z < flank ) {
+                                antigravity =  min + (double)v_local_pos.z * ((max - min)*flank);
+                        } else if ( (double)v_local_pos.z >= flank ) {
+                                antigravity = max;
                         }
 
                         out.thrust += (float)antigravity;
