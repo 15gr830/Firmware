@@ -40,6 +40,7 @@ public:
         math::Quaternion *q_est = new math::Quaternion();
         math::Quaternion *q_err = new math::Quaternion();
         math::Vector<16> x_e;
+        double z_int = 0, ki_z = 0;
 
         /*
          * Constructor initialises from params.hpp
@@ -167,6 +168,8 @@ public:
                 x_e.data[13] = 0; // RPM2 (not used)
                 x_e.data[14] = 0; // RPM3 (not used)
                 x_e.data[15] = 0; // RPM4 (not used)
+
+                z_int += x_e.data[8]; // Integral action
 
                 // Calculating K*x_e
                 i.data[0] = data[0][0]*x_e.data[0] + data[0][1]*x_e.data[1] + data[0][2]*x_e.data[2] + data[0][3]*x_e.data[3] + data[0][4]*x_e.data[4] + data[0][5]*x_e.data[5] + data[0][6]*x_e.data[6] + data[0][7]*x_e.data[7] + data[0][8]*x_e.data[8] + data[0][9]*x_e.data[9] + data[0][10]*x_e.data[10] + data[0][11]*x_e.data[11] + data[0][12]*x_e.data[12] + data[0][13]*x_e.data[13] + data[0][14]*x_e.data[14] + data[0][15]*x_e.data[15];
