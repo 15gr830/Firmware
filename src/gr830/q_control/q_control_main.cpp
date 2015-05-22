@@ -101,7 +101,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         lqr->q_ref->data[1] = 0;
         lqr->q_ref->data[2] = 0;
         lqr->q_ref->data[3] = 0;
-        lqr->ki_z = 0.02;
+        lqr->ki_z = 0.00004;
 
         math::Vector<4> u,id;
         math::Matrix<4,4> act_map;
@@ -112,7 +112,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         bool output_on = false;
         bool first = false;
         int freq = 0;
-        double antigravity = 0.0, max = 0.29, min = 0.29, flank = 0.4;
+        double antigravity = 0.0, max = 0.23, min = 0.23, flank = 0.4;
 
         while ( !thread_should_exit ) {
 
@@ -201,7 +201,6 @@ int q_control_thread_main(int argc, char *argv[]) {
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
 
-                        out += ki_z * lqr->z_int;
 
                         if ( (double)v_local_pos.z < flank ) {
                                 antigravity =  min + (double)v_local_pos.z * ((max - min)*flank);
@@ -209,7 +208,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 antigravity = max;
                         }
 
-                        out.thrust += (float)antigravity;
+                        out.thrust += (float)antigravity + (float)(lqr->ki_z * lqr->z_int);
 
                         if ( ( (fabs(v_att.roll) > (double)RP_SAFE) || (fabs(v_att.pitch) > (double)RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
                                 out.roll = 0;
