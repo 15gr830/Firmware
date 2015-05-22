@@ -111,7 +111,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         bool output_on = false;
         bool first = false;
         int freq = 0;
-        double antigravity = 0.0, max = 0.245, min = 0.21;
+        double antigravity = 0.0, max = 0.245, min = 0.20;
 
         while ( !thread_should_exit ) {
 
