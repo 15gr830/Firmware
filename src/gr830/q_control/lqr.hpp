@@ -172,16 +172,17 @@ public:
 
                 if ( x_e.data[8] < 0 ) {
                         sign = -1;
-                } else if ( (x_e.data[8] < 0.01f) && (x_e.data[8] > -0.01f) ) {
-                        sign = 0;
-                } else if ( x_e.data[8] > 0 ) {
+                } else if ( (x_e.data[8] >= 0) ) {
                         sign = 1;
                 }
+//                } else if ( x_e.data[8] > 0 ) {
+//                        sign = 1;
+//                }
 
                 if ( (float)fabs(x_e.data[8]) >= 0.2f ) {
-                        x_e.data[8] = 0.3f*50.f * (float)sign;
-                } else if ( x_e.data[8] < 0.2f ) {
-                        x_e.data[8] *= 50.f * (float)sign;
+                        x_e.data[8] = 0.2f*22.f * (float)sign;
+                } else if ( (float)fabs(x_e.data[8]) < 0.2f ) {
+                        x_e.data[8] *= 22.f;
                 }
 
                 // Calculating K*x_e
