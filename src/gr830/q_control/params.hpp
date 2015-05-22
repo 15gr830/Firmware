@@ -140,7 +140,7 @@
 /*
  * Thrust value to counter the gravity
  */
-#define ANTI_GRAVITY 0.24f
+#define ANTI_GRAVITY 0.2f
 
 
 #endif  /* Q_CONTROL_PARAMS_H */
