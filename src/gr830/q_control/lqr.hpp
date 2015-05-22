@@ -181,6 +181,12 @@ public:
                 i.data[2] = data[2][0]*x_e.data[0] + data[2][1]*x_e.data[1] + data[2][2]*x_e.data[2] + data[2][3]*x_e.data[3] + data[2][4]*x_e.data[4] + data[2][5]*x_e.data[5] + data[2][6]*x_e.data[6] + data[2][7]*x_e.data[7] + data[2][8]*x_e.data[8] + data[2][9]*x_e.data[9] + data[2][10]*x_e.data[10] + data[2][11]*x_e.data[11] + data[2][12]*x_e.data[12] + data[2][13]*x_e.data[13] + data[2][14]*x_e.data[14] + data[2][15]*x_e.data[15];
                 i.data[3] = data[3][0]*x_e.data[0] + data[3][1]*x_e.data[1] + data[3][2]*x_e.data[2] + data[3][3]*x_e.data[3] + data[3][4]*x_e.data[4] + data[3][5]*x_e.data[5] + data[3][6]*x_e.data[6] + data[3][7]*x_e.data[7] + data[3][8]*x_e.data[8] + data[3][9]*x_e.data[9] + data[3][10]*x_e.data[10] + data[3][11]*x_e.data[11] + data[3][12]*x_e.data[12] + data[3][13]*x_e.data[13] + data[3][14]*x_e.data[14] + data[3][15]*x_e.data[15];
 
+                // for (int m = 0; m < 4; m++) {
+                //         for (int n = 0; n < 16; n++) {
+                //                 i.data[m] += data[m][n] * x_e.data[n];
+                //         }
+                // }
+
                 // Calculating r + K*x_e
                 u.data[0] = r.data[0] + i.data[0];
                 u.data[1] = r.data[1] + i.data[1];
