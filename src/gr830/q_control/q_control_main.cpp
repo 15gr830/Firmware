@@ -109,7 +109,6 @@ int q_control_thread_main(int argc, char *argv[]) {
         act_map = init_act_map();
 
         bool error = false;
-        // bool once  = false;
         bool output_on = false;
         bool first = false;
         int freq = 0;
@@ -144,27 +143,17 @@ int q_control_thread_main(int argc, char *argv[]) {
                         /* no return value - nothing has happened */
                 } else if (fd_v_att[0].revents & POLLIN) {
                         orb_copy(ORB_ID(vehicle_attitude), v_att_sub, &v_att);
-                        // printf("q0 = %4.4f, q1 = %4.4f, q2 = %4.4f, q3 = %4.4f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
-                        // if ( freq%100 == 0 ) {
-                        //         mavlink_log_info(mavlink_fd, "[QC] ATT: q0:%4.2f q1:%4.2f q2:%4.2f q3:%4.2f\n", (double)v_att.q[0], (double)v_att.q[1], (double)v_att.q[2], (double)v_att.q[3]);
-                        // }
-                        
 
                         bool v_local_pos_updated; // Position estimates from EKF
                 	orb_check(v_local_pos_sub, &v_local_pos_updated);
 	                if ( v_local_pos_updated ) {
 	                        orb_copy(ORB_ID(vehicle_local_position), v_local_pos_sub, &v_local_pos);
-                                //if ( freq%10 == 0 )
-                                        //printf("x = %4.4f, y = %4.4f z = %4.4f\n", (double)v_local_pos.x, (double)v_local_pos.y, (double)v_local_pos.z);
 	                }
 
                         bool pos_sp_updated; // Position setpoint from gnd
                 	orb_check(pos_sp_sub, &pos_sp_updated);
 	                if ( pos_sp_updated ) {
 	                        orb_copy(ORB_ID(offboard_control_setpoint), pos_sp_sub, &pos_sp);
-                                // printf("[q_control] Setpoint received x = %4.2f y = %4.2f z = %4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
-                                // if ( freq%3 == 0 )
-                                //         mavlink_log_info(mavlink_fd, "[QC] SP x:%4.2f y:%4.2f z:%4.2f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
 	                }                                                                                
 
                         for (int i = 0; i < 4; i++)
@@ -213,20 +202,12 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 error = true;
                         }
 
-                        if ( freq%100 == 0 ) {
-                                // printf("[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-                                // mavlink_log_info(mavlink_fd, "[QC] Out: T:%4.2f R:%4.2f P:%4.2f Y:%4.2f\n", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-                                // mavlink_log_info(mavlink_fd, "[QC] pos_err: x:%4.2f y:%4.2f z:%4.2f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[7], (double)lqr->x_e.data[8]);
-                                freq = 0;
-                        }
-
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw;
                         actuators.control[3] = (float)out.thrust;
 
                         if ( output_on ) {
-                                //actuators.control[3] = (double)0.7;
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
                                 if ( first ) {
                                         printf("Motor on\n");
