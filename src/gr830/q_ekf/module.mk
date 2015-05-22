@@ -40,10 +40,10 @@ MODULE_COMMAND	 = q_ekf
 SRCS		 = q_ekf_main.cpp \
 		   q_ekf_params.c \
 		   att_codegen/AttitudeEKF2grav.c \
-		   pos_codegen/posEKF.c		  
+		   pos_codegen/posEKF.c
 
 MODULE_STACKSIZE = 1200
 
-EXTRACFLAGS = -Wno-float-equal -Wframe-larger-than=3700
+EXTRACFLAGS = -Wno-float-equal -Wframe-larger-than=5000
 
 EXTRACXXFLAGS = -Wframe-larger-than=3600
