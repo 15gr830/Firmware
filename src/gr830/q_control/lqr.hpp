@@ -40,7 +40,10 @@ public:
         math::Quaternion *q_est = new math::Quaternion();
         math::Quaternion *q_err = new math::Quaternion();
         math::Vector<16> x_e;
-        double z_int = 0, ki_z = 0;
+        double z_int  = 0, 
+               ki_z   = 0, 
+               q3_int = 0, 
+               ki_q3  = 0;
 
         /*
          * Constructor initialises from params.hpp
@@ -161,7 +164,7 @@ public:
                 x_e.data[6]  = (x_ref.data[6] - x_est.data[6])*1.f; // x error
                 x_e.data[7]  = -(x_ref.data[7] - x_est.data[7])*1.f; // y error
                 x_e.data[8]  = -(x_ref.data[8] - x_est.data[8])*1.f; // z error
-                x_e.data[9]  = (x_ref.data[9] - x_est.data[9])*1.f; // vx error
+                x_e.data[9]  = (x_ref.data[9] - x_est.data[9])*0.1f; // vx error
                 x_e.data[10] = -(x_ref.data[10] - x_est.data[10])*1.f; // vy error
                 x_e.data[11] = -(x_ref.data[11] - x_est.data[11]); // vz error
                 x_e.data[12] = 0; // RPM1 (not used)
@@ -170,6 +173,7 @@ public:
                 x_e.data[15] = 0; // RPM4 (not used)
 
                 z_int += (double)x_e.data[8]; // Integral action
+                q3_int += (double)x_e.data[2];
 
                 // Calculating K*x_e
                 i.data[0] = data[0][0]*x_e.data[0] + data[0][1]*x_e.data[1] + data[0][2]*x_e.data[2] + data[0][3]*x_e.data[3] + data[0][4]*x_e.data[4] + data[0][5]*x_e.data[5] + data[0][6]*x_e.data[6] + data[0][7]*x_e.data[7] + data[0][8]*x_e.data[8] + data[0][9]*x_e.data[9] + data[0][10]*x_e.data[10] + data[0][11]*x_e.data[11] + data[0][12]*x_e.data[12] + data[0][13]*x_e.data[13] + data[0][14]*x_e.data[14] + data[0][15]*x_e.data[15];
