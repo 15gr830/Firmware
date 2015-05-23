@@ -180,8 +180,8 @@ int q_control_thread_main(int argc, char *argv[]) {
                         x_ref[3]  = 0;        // q1
                         x_ref[4]  = 0;        // q2
                         x_ref[5]  = 0;        // q3
-                        x_ref[6]  = pos_sp.position[1]; // setpoint position x
-                        x_ref[7]  = pos_sp.position[0]; // setpoint position y
+                        x_ref[6]  = pos_sp.position[0]; // setpoint position x
+                        x_ref[7]  = pos_sp.position[1]; // setpoint position y
                         x_ref[8]  = pos_sp.position[2]; // setpoint position z
                         x_ref[9]  = 0;        // x velocity
                         x_ref[10] = 0;        // y velocity
