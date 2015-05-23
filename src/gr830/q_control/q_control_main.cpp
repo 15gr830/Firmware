@@ -112,6 +112,7 @@ int q_control_thread_main(int argc, char *argv[]) {
         bool output_on = false;
         bool first = false;
         int freq = 0;
+        double thrust_i = 0, yaw_i = 0;
 
         while ( !thread_should_exit ) {
 
@@ -190,8 +191,16 @@ int q_control_thread_main(int argc, char *argv[]) {
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
 
-                        out.thrust += (float)ANTI_GRAVITY + (float)(lqr->ki_z * lqr->z_int);
-                        out.yaw    += (float)(lqr->ki_q3 * lqr->q3_int);
+                        thrust_i = (double)(lqr->ki_z * lqr->z_int);
+                        if ( fabs(thrust_i) > (double)Z_INTEGRATION_LIMIT )
+                                thrust_i = copysign( (double)Z_INTEGRATION_LIMIT, thrust_i );
+
+                        yaw_i = (double)(lqr->ki_q3 * lqr->q3_int);
+                        if ( (double)fabs(yaw_i) > (double)YAW_INTEGRATION_LIMIT )
+                                yaw_i = copysign( (double)YAW_INTEGRATION_LIMIT, yaw_i );
+
+                        out.thrust += (float)ANTI_GRAVITY + (float)thrust_i;
+                        out.yaw    += (float)yaw_i;
 
                         if ( ( (fabs(v_att.roll) > (double)RP_SAFE) || (fabs(v_att.pitch) > (double)RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {
                                 out.roll = 0;
