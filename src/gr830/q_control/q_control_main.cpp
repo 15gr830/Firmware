@@ -157,7 +157,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                 	orb_check(pos_sp_sub, &pos_sp_updated);
 	                if ( pos_sp_updated ) {
 	                        orb_copy(ORB_ID(offboard_control_setpoint), pos_sp_sub, &pos_sp);
-                                mavlink_log_info(mavlink_fd, "SP x:%4.3f y:%4.3f z:%4.3\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
+                                // mavlink_log_info(mavlink_fd, "SP x:%4.3f y:%4.3f z:%4.3\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
 	                }                                                                                
 
                         for (int i = 0; i < 4; i++)
@@ -180,8 +180,8 @@ int q_control_thread_main(int argc, char *argv[]) {
                         x_ref[3]  = 0;        // q1
                         x_ref[4]  = 0;        // q2
                         x_ref[5]  = 0;        // q3
-                        x_ref[6]  = pos_sp.position[0]; // setpoint position x
-                        x_ref[7]  = pos_sp.position[1]; // setpoint position y
+                        x_ref[6]  = pos_sp.position[1]; // setpoint position x
+                        x_ref[7]  = pos_sp.position[0]; // setpoint position y
                         x_ref[8]  = pos_sp.position[2]; // setpoint position z
                         x_ref[9]  = 0;        // x velocity
                         x_ref[10] = 0;        // y velocity
