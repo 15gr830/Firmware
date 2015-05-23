@@ -23,73 +23,73 @@
  *
  */
 
-#define LQR_CONTROLLER_1_1       -2.7853  
-#define LQR_CONTROLLER_1_2       -2.7853  
-#define LQR_CONTROLLER_1_3       -0.1809  
-#define LQR_CONTROLLER_1_4       -0.3791  
-#define LQR_CONTROLLER_1_5       -0.3791  
-#define LQR_CONTROLLER_1_6       -0.3040  
-#define LQR_CONTROLLER_1_7       0.2049   
-#define LQR_CONTROLLER_1_8       0.2049   
-#define LQR_CONTROLLER_1_9       0.2088   
-#define LQR_CONTROLLER_1_10      0.2470   
-#define LQR_CONTROLLER_1_11      0.2470   
-#define LQR_CONTROLLER_1_12      0.5840   
-#define LQR_CONTROLLER_1_13      0.0042   
-#define LQR_CONTROLLER_1_14      -0.0005  
-#define LQR_CONTROLLER_1_15      0.0000   
-#define LQR_CONTROLLER_1_16      0.0000   
-
-#define LQR_CONTROLLER_2_1       2.7853  
-#define LQR_CONTROLLER_2_2       2.7853  
-#define LQR_CONTROLLER_2_3      -0.1809  
-#define LQR_CONTROLLER_2_4       0.3791  
-#define LQR_CONTROLLER_2_5       0.3791  
-#define LQR_CONTROLLER_2_6      -0.3040  
-#define LQR_CONTROLLER_2_7     -0.2049   
-#define LQR_CONTROLLER_2_8     -0.2049   
-#define LQR_CONTROLLER_2_9      0.2088   
-#define LQR_CONTROLLER_2_10    -0.2470   
-#define LQR_CONTROLLER_2_11    -0.2470   
-#define LQR_CONTROLLER_2_12     0.5840   
-#define LQR_CONTROLLER_2_13    -0.0005   
-#define LQR_CONTROLLER_2_14      0.0042  
-#define LQR_CONTROLLER_2_15     0.0000   
-#define LQR_CONTROLLER_2_16     0.0000   
-
-#define LQR_CONTROLLER_3_1       2.7853  
-#define LQR_CONTROLLER_3_2      -2.7853  
-#define LQR_CONTROLLER_3_3       0.1809  
-#define LQR_CONTROLLER_3_4       0.3791  
-#define LQR_CONTROLLER_3_5      -0.3791  
-#define LQR_CONTROLLER_3_6       0.3040  
-#define LQR_CONTROLLER_3_7      0.2049   
-#define LQR_CONTROLLER_3_8     -0.2049   
-#define LQR_CONTROLLER_3_9      0.2088   
-#define LQR_CONTROLLER_3_10     0.2470   
-#define LQR_CONTROLLER_3_11    -0.2470   
-#define LQR_CONTROLLER_3_12     0.5840   
-#define LQR_CONTROLLER_3_13     0.0000   
-#define LQR_CONTROLLER_3_14      0.0000  
-#define LQR_CONTROLLER_3_15     0.0042   
-#define LQR_CONTROLLER_3_16    -0.0005   
-
-#define LQR_CONTROLLER_4_1      -2.7853
-#define LQR_CONTROLLER_4_2       2.7853
-#define LQR_CONTROLLER_4_3       0.1809
-#define LQR_CONTROLLER_4_4      -0.3791
-#define LQR_CONTROLLER_4_5       0.3791
-#define LQR_CONTROLLER_4_6       0.3040
-#define LQR_CONTROLLER_4_7     -0.2049 
-#define LQR_CONTROLLER_4_8      0.2049 
-#define LQR_CONTROLLER_4_9      0.2088 
-#define LQR_CONTROLLER_4_10    -0.2470 
-#define LQR_CONTROLLER_4_11     0.2470 
-#define LQR_CONTROLLER_4_12     0.5840 
-#define LQR_CONTROLLER_4_13     0.0000 
-#define LQR_CONTROLLER_4_14      0.0000
-#define LQR_CONTROLLER_4_15    -0.0005 
-#define LQR_CONTROLLER_4_16     0.0042 
+#define LQR_CONTROLLER_1_1      -3.3460  
+#define LQR_CONTROLLER_1_2      -3.3460  
+#define LQR_CONTROLLER_1_3      -0.1809  
+#define LQR_CONTROLLER_1_4      -0.4262  
+#define LQR_CONTROLLER_1_5      -0.4262  
+#define LQR_CONTROLLER_1_6      -0.3113  
+#define LQR_CONTROLLER_1_7      0.3542   
+#define LQR_CONTROLLER_1_8      0.3542   
+#define LQR_CONTROLLER_1_9      0.1321   
+#define LQR_CONTROLLER_1_10     0.3269   
+#define LQR_CONTROLLER_1_11     0.3269   
+#define LQR_CONTROLLER_1_12     0.4647   
+#define LQR_CONTROLLER_1_13     0.0043   
+#define LQR_CONTROLLER_1_14     -0.0006  
+#define LQR_CONTROLLER_1_15     -0.0000    
+#define LQR_CONTROLLER_1_16     -0.0000    
+                                
+#define LQR_CONTROLLER_2_1        3.3460  
+#define LQR_CONTROLLER_2_2        3.3460    
+#define LQR_CONTROLLER_2_3       -0.1809    
+#define LQR_CONTROLLER_2_4        0.4262    
+#define LQR_CONTROLLER_2_5        0.4262    
+#define LQR_CONTROLLER_2_6       -0.3113    
+#define LQR_CONTROLLER_2_7      -0.3542     
+#define LQR_CONTROLLER_2_8      -0.3542     
+#define LQR_CONTROLLER_2_9       0.1321     
+#define LQR_CONTROLLER_2_10     -0.3269     
+#define LQR_CONTROLLER_2_11     -0.3269     
+#define LQR_CONTROLLER_2_12      0.4647     
+#define LQR_CONTROLLER_2_13     -0.0006     
+#define LQR_CONTROLLER_2_14       0.0043    
+#define LQR_CONTROLLER_2_15      -0.0000    
+#define LQR_CONTROLLER_2_16      -0.0000    
+                                
+#define LQR_CONTROLLER_3_1        3.3460  
+#define LQR_CONTROLLER_3_2       -3.3460    
+#define LQR_CONTROLLER_3_3        0.1809    
+#define LQR_CONTROLLER_3_4        0.4262    
+#define LQR_CONTROLLER_3_5       -0.4262    
+#define LQR_CONTROLLER_3_6        0.3113    
+#define LQR_CONTROLLER_3_7       0.3542     
+#define LQR_CONTROLLER_3_8      -0.3542     
+#define LQR_CONTROLLER_3_9       0.1321     
+#define LQR_CONTROLLER_3_10      0.3269     
+#define LQR_CONTROLLER_3_11     -0.3269     
+#define LQR_CONTROLLER_3_12      0.4647     
+#define LQR_CONTROLLER_3_13     -0.0000     
+#define LQR_CONTROLLER_3_14      -0.0000    
+#define LQR_CONTROLLER_3_15       0.0043    
+#define LQR_CONTROLLER_3_16      -0.0006    
+                                
+#define LQR_CONTROLLER_4_1       -3.3460
+#define LQR_CONTROLLER_4_2        3.3460
+#define LQR_CONTROLLER_4_3        0.1809
+#define LQR_CONTROLLER_4_4       -0.4262
+#define LQR_CONTROLLER_4_5        0.4262
+#define LQR_CONTROLLER_4_6        0.3113
+#define LQR_CONTROLLER_4_7      -0.3542 
+#define LQR_CONTROLLER_4_8       0.3542 
+#define LQR_CONTROLLER_4_9       0.1321 
+#define LQR_CONTROLLER_4_10     -0.3269 
+#define LQR_CONTROLLER_4_11      0.3269 
+#define LQR_CONTROLLER_4_12      0.4647 
+#define LQR_CONTROLLER_4_13     -0.0000 
+#define LQR_CONTROLLER_4_14      -0.0000
+#define LQR_CONTROLLER_4_15      -0.0006
+#define LQR_CONTROLLER_4_16       0.0043
 
 /*
  * Linear matrix map between rpm values and motor control topic
@@ -121,12 +121,18 @@
 /*
  * Yaw Ki constant
  */
-#define YAW_KI 0.00003
+#define YAW_KI 0.00002
 
 /*
  * Z axis Ki constant
  */
 #define Z_AXIS_KI 0.00008
+
+/*
+ * Anti windup limits
+ */
+#define Z_INTEGRATION_LIMIT    0.1f
+#define YAW_INTEGRATION_LIMIT  0.15f
 
 /*
  * Thrust value to counter the gravity
@@ -149,12 +155,6 @@
  * then a safety shutdown is triggered
  */
 #define RP_SAFE 1.f
-
-/*
- * Anti windup limits
- */
-#define Z_INTEGRATION_LIMIT    0.1f
-#define YAW_INTEGRATION_LIMIT  0.15f
 
 
 #endif  /* Q_CONTROL_PARAMS_H */
