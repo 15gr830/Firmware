@@ -140,6 +140,7 @@ public:
                 // state vector = [q1 q2 q3 w1 w2 w3 x y z vx vy vz rpm1 rpm2 rpm3 rpm4]^T
                 math::Vector<4>  u, i;
                 double           q0_sign = 0;
+                math::Matrix<3,3> R;
 
                 // Calculates quaternion error
                 q_est->conjugate();
@@ -174,6 +175,26 @@ public:
 
                 z_int  += (double)x_e.data[8]; // Integral action
                 q3_int += (double)x_e.data[2];
+
+                q_est->conjugate();
+
+                /* Create a rotation matrix from the attitude quaternion */
+                R.data[0][0] = 2*q_est->data[0]*q_est->data[0] - 1 + 2*q_est->data[1]*q_est->data[1];
+                R.data[0][1] = 2*q_est->data[1]*q_est->data[2] + 2*q_est->data[0]*q_est->data[3];
+                R.data[0][2] = 2*q_est->data[1]*q_est->data[3] - 2*q_est->data[0]*q_est->data[2];
+
+                R.data[1][0] = 2*q_est->data[1]*q_est->data[2] - 2*q_est->data[0]*q_est->data[3];
+                R.data[1][1] = 2*q_est->data[0]*q_est->data[0] - 1 + 2*q_est->data[2]*q_est->data[2];
+                R.data[1][2] = 2*q_est->data[2]*q_est->data[3] + 2*q_est->data[0]*q_est->data[1];
+
+                R.data[2][0] = 2*q_est->data[1]*q_est->data[3] + 2*q_est->data[0]*q_est->data[2];
+                R.data[2][1] = 2*q_est->data[2]*q_est->data[3] - 2*q_est->data[0]*q_est->data[1];
+                R.data[2][2] = 2*q_est->data[0]*q_est->data[0] - 1 + 2*q_est->data[3]*q_est->data[3];
+
+                /* Rotating the position error with the attitude */
+                x_e.data[6] = R.data[0][0]*x_e.data[6] + R.data[0][1]*x_e.data[7] + R.data[0][2]*x_e.data[8];
+                x_e.data[7] = R.data[1][0]*x_e.data[6] + R.data[1][1]*x_e.data[7] + R.data[1][2]*x_e.data[8];
+                x_e.data[8] = R.data[2][0]*x_e.data[6] + R.data[2][1]*x_e.data[7] + R.data[2][2]*x_e.data[8];
 
                 // Calculating K*x_e
                 i.data[0] = data[0][0]*x_e.data[0] + data[0][1]*x_e.data[1] + data[0][2]*x_e.data[2] + data[0][3]*x_e.data[3] + data[0][4]*x_e.data[4] + data[0][5]*x_e.data[5] + data[0][6]*x_e.data[6] + data[0][7]*x_e.data[7] + data[0][8]*x_e.data[8] + data[0][9]*x_e.data[9] + data[0][10]*x_e.data[10] + data[0][11]*x_e.data[11] + data[0][12]*x_e.data[12] + data[0][13]*x_e.data[13] + data[0][14]*x_e.data[14] + data[0][15]*x_e.data[15];
