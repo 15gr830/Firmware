@@ -208,7 +208,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         // out.thrust += (float)ANTI_GRAVITY + (float)thrust_i;
                         // out.yaw    += (float)yaw_i;
 
-                        out.thrust += (float)ANTI_GRAVITY + (float)(lqr->ki_z * lqr->z_int);
+                        out.thrust += (float)ANTI_GRAVITY;// + (float)(lqr->ki_z * lqr->z_int);
                         out.yaw += (float)(lqr->ki_q3 * lqr->q3_int);
 
                         if ( ( (fabs(v_att.roll) > (double)RP_SAFE) || (fabs(v_att.pitch) > (double)RP_SAFE) || error ) && (v_status.arming_state == ARMING_STATE_ARMED) ) {

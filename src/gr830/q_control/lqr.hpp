@@ -43,7 +43,8 @@ public:
         double z_int  = 0, 
                ki_z   = 0, 
                q3_int = 0, 
-               ki_q3  = 0;
+                ki_q3 = 0;
+        //dt    = 0;
 
         /*
          * Constructor initialises from params.hpp
