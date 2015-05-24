@@ -192,7 +192,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         
                         u = lqr->run();
 
-                        mavlink_log_info(mavlink_fd, "err: x:%4.3f y:%4.3f z:%4.3f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[7], (double)lqr->x_e.data[8]);
+                        // mavlink_log_info(mavlink_fd, "err: x:%4.3f y:%4.3f z:%4.3f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[7], (double)lqr->x_e.data[8]);
 
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
