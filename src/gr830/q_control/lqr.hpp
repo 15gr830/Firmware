@@ -162,10 +162,10 @@ public:
                 x_e.data[4]  = x_ref.data[4] - x_est.data[4]; // w2 error
                 x_e.data[5]  = x_ref.data[5] - x_est.data[5]; // w3 error
                 x_e.data[6]  = (x_ref.data[6] - x_est.data[6]); // x error
-                x_e.data[7]  = -(x_ref.data[7] - x_est.data[7]); // y error
+                x_e.data[7]  = (x_ref.data[7] - x_est.data[7]); // y error
                 x_e.data[8]  = -(x_ref.data[8] - x_est.data[8]); // z error
                 x_e.data[9]  = (x_ref.data[9] - x_est.data[9]); // vx error
-                x_e.data[10] = -(x_ref.data[10] - x_est.data[10]); // vy error
+                x_e.data[10] = (x_ref.data[10] - x_est.data[10]); // vy error
                 x_e.data[11] = -(x_ref.data[11] - x_est.data[11]); // vz error
                 x_e.data[12] = 0; // RPM1 (not used)
                 x_e.data[13] = 0; // RPM2 (not used)

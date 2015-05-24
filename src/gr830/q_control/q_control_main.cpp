@@ -151,6 +151,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                 	orb_check(v_local_pos_sub, &v_local_pos_updated);
 	                if ( v_local_pos_updated ) {
 	                        orb_copy(ORB_ID(vehicle_local_position), v_local_pos_sub, &v_local_pos);
+                                // mavlink_log_info(mavlink_fd, "x:%4.3f y:%4.3f z:%4.3\n", (double)v_local_pos.x, (double)v_local_pos.y, (double)v_local_pos.z);
 	                }
 
                         bool pos_sp_updated; // Position setpoint from gnd
