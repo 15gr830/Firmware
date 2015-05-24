@@ -1556,7 +1556,7 @@ MavlinkReceiver::handle_message_att_pos_mocap(mavlink_message_t *msg)
 		pos.q[i] = pos_mocap.q[i];
 
 	pos.x = pos_mocap.x;
-	pos.y = pos_mocap.y;
+	pos.y = pos_mocap.y * -1.f;
 	pos.z = pos_mocap.z;
 
 	if (_att_pos_mocap < 0) {
