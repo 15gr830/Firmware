@@ -193,6 +193,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         u = lqr->run();
 
                         // mavlink_log_info(mavlink_fd, "err: x:%4.3f y:%4.3f z:%4.3f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[7], (double)lqr->x_e.data[8]);
+                        mavlink_log_info(mavlink_fd, "err vx:%4.6f vy:%4.6f", (double)lqr->x_est.data[9], (double)lqr->x_est.data[10]);
 
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
@@ -226,7 +227,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         actuators.control[3] = (float)out.thrust;
 
                         // mavlink_log_info(mavlink_fd, "T:%4.3f R:%4.3f P:%4.3f Y:%4.3f", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-                        mavlink_log_info(mavlink_fd, "Y:%4.6f", (double)out.yaw);
+                        // mavlink_log_info(mavlink_fd, "Y:%4.6f", (double)out.yaw);
 
                         if ( output_on ) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
