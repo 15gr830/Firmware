@@ -226,6 +226,7 @@ int q_control_thread_main(int argc, char *argv[]) {
                         actuators.control[3] = (float)out.thrust;
 
                         // mavlink_log_info(mavlink_fd, "T:%4.3f R:%4.3f P:%4.3f Y:%4.3f", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
+                        mavlink_log_info(mavlink_fd, "Y:%4.6f", (double)out.yaw);
 
                         if ( output_on ) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
