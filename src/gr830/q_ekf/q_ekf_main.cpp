@@ -76,6 +76,7 @@
 #include <uORB/topics/vision_position_estimate.h>
 #include <uORB/topics/att_pos_mocap.h>
 #include <drivers/drv_hrt.h>
+#include <mavlink/mavlink_log.h>
 
 #include <lib/mathlib/mathlib.h>
 #include <lib/geo/geo.h>
@@ -245,6 +246,10 @@ int q_ekf_thread_main(int argc, char *argv[])
 	/* Initialize filters */
 	AttitudeEKF2grav_initialize();
         posEKF_initialize();
+
+        static int mavlink_fd;
+        mavlink_fd = open(MAVLINK_LOG_DEVICE, 0);
+        mavlink_log_info(mavlink_fd, "[EKF] has begun");
 
 	struct sensor_combined_s raw;
 	memset(&raw, 0, sizeof(raw));
@@ -421,9 +426,14 @@ int q_ekf_thread_main(int argc, char *argv[])
 						sensor_last_timestamp[1] = raw.accelerometer_timestamp;
 					}
 
-					z_k[3] = raw.accelerometer_m_s2[0]; //  - acc(0);
-					z_k[4] = raw.accelerometer_m_s2[1]; //  - acc(1);
-					z_k[5] = raw.accelerometer_m_s2[2]; //  - acc(2);
+                                        raw.accelerometer_m_s2[0] -= 0.15f; // correcting for accelerometer bias in x and y
+                                        raw.accelerometer_m_s2[1] -= 0.38f;
+
+					z_k[3] = raw.accelerometer_m_s2[0];
+					z_k[4] = raw.accelerometer_m_s2[1];
+					z_k[5] = raw.accelerometer_m_s2[2];
+
+                                        mavlink_log_info(mavlink_fd, "acc x:%4.2f y:%4.2f z:%4.2f", (double)z_k[3], (double)z_k[4], (double)z_k[5]);
 
                                         bool ptam_updated = false;
 					orb_check(ptam_sub, &ptam_updated);
@@ -690,9 +700,9 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         acc(1) = x_aposteriori_k[7];
                                         acc(2) = x_aposteriori_k[8];
 
-                                        z_pos_k[0] = 0.0; // raw.accelerometer_m_s2[0] - acc(0);
-					z_pos_k[1] = 0.0; // raw.accelerometer_m_s2[1] - acc(1);
-					z_pos_k[2] = 0.0; // raw.accelerometer_m_s2[2] - acc(2);
+                                        z_pos_k[0] = raw.accelerometer_m_s2[0] - acc(0);
+					z_pos_k[1] = raw.accelerometer_m_s2[1] - acc(1);
+					z_pos_k[2] = raw.accelerometer_m_s2[2] - acc(2);
 
                                         posEKF(update_pos_vect,
                                                dt,
