@@ -323,7 +323,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                q_pos         = 0.009,
                r_pos_acc     = 10.f,
                r_pos_ptam[3] = {0.1f, 0.1f, 0.1f},
-                r_pos_got     = 0.0001;
+               r_pos_got     = 0.0001;
         
         float debug_pos[4]  = {0, 0, 0, 0};
 
@@ -331,16 +331,21 @@ int q_ekf_thread_main(int argc, char *argv[])
         R.identity();
         float q_h2c[4] = {0.6124, -0.3536, -0.3536, -0.6124};
         float q_b2c_conj[4] = {0.6124, 0.3536, 0.3536, 0.6124};
-        float q_h2ptam[4] = {1, 0, 0, 0};
-        float q_h2b[4] = {1, 0, 0, 0};
-        float q_ptam2b[4] = {1, 0, 0, 0};
+        float q_i2ptam[4] = {1, 0, 0, 0};
+        // float q_h2b[4] = {1, 0, 0, 0};
+        // float q_ptam2b[4] = {1, 0, 0, 0};
         float q_ptam_conj[4] = {1, 0, 0, 0};
+        float q_i2h_conj[4] = {0, -1, 0, 0};
         math::Vector<4> q_temp;
         math::Vector<3> mag_in_h = {1, 0, 0}, grav_in_h = {0, 0, -9.82f}, gm, gg;
         bool ptam_initialized = false;
         math::Matrix<3,3> rot_b2c_pos;
         math::Vector<3> ptam_pos_vect;
         math::Vector<3> ptam_pos_vect_rotated;
+        math::Vector<4> q_res1, q_res2, q_res3;
+        float q_res1f[4] = {1, 0, 0, 0}, 
+              q_res2f[4] = {1, 0, 0, 0},
+              q_b2i[4] = {1, 0, 0, 0};
 
 	/* register the perf counter */
 	perf_counter_t ekf_loop_perf = perf_alloc(PC_ELAPSED, "attitude_estimator_ekf");
@@ -454,31 +459,43 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         /* runs only the first time we get ptam data */
                                         if ( !ptam_initialized && ((update_vect[2] == 1) || (update_pos_vect[1] == 1)) ) {
                                                 math::Vector<4> res;
-                                                res = qmult( q_h2c, ptam.q );
+                                                float q_temp1[4];
+
+                                                q_ptam_conj[0] = ptam.q[0];
+                                                for (int i = 1; i < 4; i++)
+                                                        q_ptam_conj[i] = -ptam.q[i];
+
+                                                res = qmult( q_ptam_conj, q_h2c );
                                                 for (int i = 0; i < 4; i++)
-                                                        q_h2ptam[i] = res.data[i]; // FIXME: Fusk kan gøres bedre
+                                                        q_temp1[i] = res.data[i];
+
+                                                res = qmult( q_temp1, q_i2h_conj);
+                                                
+                                                for (int i = 0; i < 4; i++)
+                                                        q_i2ptam[i] = res.data[i]; // FIXME: Fusk kan gøres bedre
 
                                                 ptam_initialized = true;
                                         }
 
                                         /* runs everytime we get ptam data */
                                         if ( ptam_initialized && (update_vect[2] == 1) ) {
-                                                q_ptam_conj[0] = ptam.q[0];
+                                                q_res1 = qmult( q_b2c_conj, ptam.q );
+                                                for (int i = 0; i < 4; i++)
+                                                        q_res1f[i] = q_res1.data[i];
+
+                                                q_res2 = qmult( q_res1f, q_i2ptam );
+
+                                                // conjugated of q_res2
+                                                q_res2f[0] = q_res2.data[0];
                                                 for (int i = 1; i < 4; i++)
-                                                        q_ptam_conj[i] = -ptam.q[i];
+                                                        q_res2f[i] = -q_res2.data[i];
 
-                                                q_temp = qmult( q_ptam_conj, q_b2c_conj );
+                                                q_res3 = qmult( q_res2f, q_i2h_conj );
                                                 for (int i = 0; i < 4; i++)
-                                                        q_ptam2b[i] = q_temp.data[i];
-
-                                                q_temp = qmult( q_h2ptam, q_ptam2b );
-                                                for (int i = 0; i < 4; i++)
-                                                        q_h2b[i] = q_temp.data[i];
-
-                                                q_h2b[3] *= -1.0f;
+                                                        q_b2i[i] = q_res3.data[i];
                                         }
 
-                                        R_n = quat2Rot(q_h2b);
+                                        R_n = quat2Rot(q_b2i);
                                         gm = matVectMult(R_n, mag_in_h);
                                         gg = matVectMult(R_n, grav_in_h);
 
@@ -673,9 +690,9 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         acc(1) = x_aposteriori_k[7];
                                         acc(2) = x_aposteriori_k[8];
 
-                                        z_pos_k[0] = raw.accelerometer_m_s2[0] - acc(0);
-					z_pos_k[1] = raw.accelerometer_m_s2[1] - acc(1);
-					z_pos_k[2] = raw.accelerometer_m_s2[2] - acc(2);
+                                        z_pos_k[0] = 0.0; // raw.accelerometer_m_s2[0] - acc(0);
+					z_pos_k[1] = 0.0; // raw.accelerometer_m_s2[1] - acc(1);
+					z_pos_k[2] = 0.0; // raw.accelerometer_m_s2[2] - acc(2);
 
                                         posEKF(update_pos_vect,
                                                dt,
