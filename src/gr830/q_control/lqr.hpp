@@ -31,6 +31,7 @@
 #include <math.h>
 #include <lib/mathlib/mathlib.h>
 #include "params.hpp"
+#define RAD_TO_DEGREES 57.2957914331
 
 class __EXPORT Lqr : public math::Matrix<4,16> {
 public:
@@ -141,6 +142,7 @@ public:
                 math::Vector<4>  u, i;
                 double           q0_sign = 0;
                 math::Matrix<3,3> R;
+                double yaw_angle = 0;
 
                 // Calculates quaternion error
                 q_est->conjugate();
@@ -178,18 +180,20 @@ public:
 
                 q_est->conjugate();
 
-                /* Create a rotation matrix from the attitude quaternion */
-                R.data[0][0] = 2*q_est->data[0]*q_est->data[0] - 1 + 2*q_est->data[1]*q_est->data[1];
-                R.data[0][1] = 2*q_est->data[1]*q_est->data[2] + 2*q_est->data[0]*q_est->data[3];
-                R.data[0][2] = 2*q_est->data[1]*q_est->data[3] - 2*q_est->data[0]*q_est->data[2];
+                yaw_angle = atan2((double)(q_est->data[0]*q_est->data[3] + q_est->data[1]*q_est->data[2]), (double)(1 - 2*(q_est->data[2]*q_est->data[2] + q_est->data[3]*q_est->data[3])));
 
-                R.data[1][0] = 2*q_est->data[1]*q_est->data[2] - 2*q_est->data[0]*q_est->data[3];
-                R.data[1][1] = 2*q_est->data[0]*q_est->data[0] - 1 + 2*q_est->data[2]*q_est->data[2];
-                R.data[1][2] = 2*q_est->data[2]*q_est->data[3] + 2*q_est->data[0]*q_est->data[1];
+                /* Create a rotation matrix from the yaw angle */
+                R.data[0][0] = cos(yaw_angle);
+                R.data[0][1] = -sin(yaw_angle);
+                R.data[0][2] = 0.0;
 
-                R.data[2][0] = 2*q_est->data[1]*q_est->data[3] + 2*q_est->data[0]*q_est->data[2];
-                R.data[2][1] = 2*q_est->data[2]*q_est->data[3] - 2*q_est->data[0]*q_est->data[1];
-                R.data[2][2] = 2*q_est->data[0]*q_est->data[0] - 1 + 2*q_est->data[3]*q_est->data[3];
+                R.data[1][0] = sin(yaw_angle);
+                R.data[1][1] = cos(yaw_angle);
+                R.data[1][2] = 0.0;
+
+                R.data[2][0] = 0.0;
+                R.data[2][1] = 0.0;
+                R.data[2][2] = 1.0;
 
                 /* Rotating the position error with the attitude */
                 x_e.data[6] = R.data[0][0]*x_e.data[6] + R.data[0][1]*x_e.data[7] + R.data[0][2]*x_e.data[8];
