@@ -62,7 +62,7 @@
 /*
  * Counter yaw constant offset
  */
-#define ANTI_YAW -0.07f
+#define ANTI_YAW 0.0f //-0.07f
 
 
 /* Safety values */
