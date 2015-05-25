@@ -197,7 +197,7 @@ int q_ekf_thread_main(int argc, char *argv[])
         // const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
 
 	float dt = 0.005f;
-/* state vector x has the following entries [ax,ay,az||mx,my,mz||wox,woy,woz||wx,wy,wz]' */
+        /* state vector x has the following entries [ax,ay,az||mx,my,mz||wox,woy,woz||wx,wy,wz]' */
 	float z_k[12] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -9.81f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; /**< Measurement vector */
 	float x_aposteriori_k[12];		/**< states */
 	float P_aposteriori_k[144] = {100.f,  0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,
@@ -241,18 +241,10 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 	float debugOutput[4] = { 0.0f };
         float q_att[4] = {1.0f, 0.0f, 0.0f, 0.0f};
-	// int overloadcounter = 19;
-
-        // printf("1\n");
 
 	/* Initialize filters */
 	AttitudeEKF2grav_initialize();
         posEKF_initialize();
-
-        // printf("2\n");
-
-	/* store start time to guard against too slow update rates */
-	// uint64_t last_run = hrt_absolute_time();
 
 	struct sensor_combined_s raw;
 	memset(&raw, 0, sizeof(raw));
@@ -269,7 +261,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 	uint64_t last_data = 0;
 	uint64_t last_measurement = 0;
-	// uint64_t last_vel_t = 0;
 
 	/* current velocity */
 	math::Vector<3> vel;
@@ -277,9 +268,10 @@ int q_ekf_thread_main(int argc, char *argv[])
 	/* previous velocity */
 	math::Vector<3> vel_prev;
 	vel_prev.zero();
-	/* actual acceleration (by GPS velocity) in body frame */
+
 	math::Vector<3> acc;
 	acc.zero();
+
 	/* rotation matrix */
 	math::Matrix<3, 3> R;
 	R.identity();
@@ -326,20 +318,12 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 	float gyro_offsets[3] = { 0.0f, 0.0f, 0.0f };
 
-	/* magnetic declination, in radians */
-	// float mag_decl = 0.0f;
-
-	/* rotation matrix for magnetic declination */
-	// math::Matrix<3, 3> R_decl;
-	// R_decl.identity();
-
         double q_pos_acc     = 0.0001,
                q_pos_speed   = 0.08,
                q_pos         = 0.009,
                r_pos_acc     = 10.f,
                r_pos_ptam[3] = {0.1f, 0.1f, 0.1f},
-                r_pos_got     = 0.0001;//,
-                //rad2deg       = 57.2957914331;
+                r_pos_got     = 0.0001;
         
         float debug_pos[4]  = {0, 0, 0, 0};
 
@@ -358,14 +342,8 @@ int q_ekf_thread_main(int argc, char *argv[])
         math::Vector<3> ptam_pos_vect;
         math::Vector<3> ptam_pos_vect_rotated;
 
-	// struct vision_position_estimate vision {};
-
 	/* register the perf counter */
 	perf_counter_t ekf_loop_perf = perf_alloc(PC_ELAPSED, "attitude_estimator_ekf");
-
-        // printf("3\n");
-
-        // int debug = 0;
 
 	/* Main loop*/
 	while (!thread_should_exit) {
@@ -376,9 +354,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 		fds[1].fd = sub_params;
 		fds[1].events = POLLIN;
 		int ret = poll(fds, 2, 1000);
-
-                // if (debug < 5)
-                //         printf("4\n");
 
 		if (ret < 0) {
 			/* XXX this is seriously bad - should be an emergency */
@@ -391,8 +366,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 			}
 
 		} else {
-                        // if (debug < 5)
-                        //         printf("5\n");
 
 			/* only update parameters if they changed */
 			if (fds[1].revents & POLLIN) {
@@ -427,7 +400,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 					/* Fill in gyro measurements */
 					if (sensor_last_timestamp[0] != raw.timestamp) {
 						update_vect[0] = 1;
-						// sensor_update_hz[0] = 1e6f / (raw.timestamp - sensor_last_timestamp[0]);
+
 						sensor_last_timestamp[0] = raw.timestamp;
 					}
 
@@ -439,7 +412,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 					if (sensor_last_timestamp[1] != raw.accelerometer_timestamp) {
 						update_vect[1] = 1;
                                                 update_pos_vect[0] = 1;
-						// sensor_update_hz[1] = 1e6f / (raw.timestamp - sensor_last_timestamp[1]);
+
 						sensor_last_timestamp[1] = raw.accelerometer_timestamp;
 					}
 
@@ -452,7 +425,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 					if (ptam_updated) {
 						orb_copy(ORB_ID(vision_position_estimate), ptam_sub, &ptam);
-                                                // printf("\n\nPTAM modtaget\n\n");
 					}
 
                                         // Use PTAM data
@@ -470,7 +442,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 					if (got_updated) {
 						orb_copy(ORB_ID(att_pos_mocap), got_pos_sub, &got_pos);
-                                                // printf("\n\nGOT modtaget\n\n");
 					}
 
                                         // Use GOT data
@@ -519,9 +490,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         z_k[10] = gm.data[1];
                                         z_k[11] = gm.data[2];
 
-                                        // gg.print();
-                                        // gm.print();
-
                                         // POS data prep
                                         ptam_pos_vect.data[0] = ptam.x;
                                         ptam_pos_vect.data[1] = ptam.y;
@@ -537,20 +505,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         z_pos_k[6] = got_pos.x;
                                         z_pos_k[7] = got_pos.y;
                                         z_pos_k[8] = got_pos.z;
-
-					// uint64_t now = hrt_absolute_time();
-					// unsigned int time_elapsed = now - last_run;
-					// last_run = now;
-
-					// if (time_elapsed > loop_interval_alarm) {
-					// 	//TODO: add warning, cpu overload here
-					// 	// if (overloadcounter == 20) {
-					// 	// 	printf("CPU OVERLOAD DETECTED IN ATTITUDE ESTIMATOR EKF (%lu > %lu)\n", time_elapsed, loop_interval_alarm);
-					// 	// 	overloadcounter = 0;
-					// 	// }
-
-					// 	overloadcounter++;
-					// }
 
 					static bool const_initialized = false;
 
@@ -568,17 +522,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 ekf_params.moment_inertia_J[6] = 0.0f;
                                                 ekf_params.moment_inertia_J[7] = 0.0f;
                                                 ekf_params.moment_inertia_J[8] = 0.0018f; // FIXME: init fusk
-
-                                                // if (debug < 10) {
-                                                //         printf("J_initialized = \n");
-                                                //         for (int i = 0; i < 9; i++){
-                                                //                 if ( !(i%3) )
-                                                //                         printf("[ ");
-                                                //                 printf("%4.10f ", ekf_params.moment_inertia_J[i]);
-                                                //                 if ( !((i + 1)%3) )
-                                                //                         printf("]\n");
-                                                //         }
-                                                // }
 
 						x_aposteriori_k[0] = z_k[0];
 						x_aposteriori_k[1] = z_k[1];
@@ -600,9 +543,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 					if (!const_initialized) {
 						continue;
 					}
-
-                                        // if (debug < 5)
-                                        //         printf("6\n");
 
 #ifdef Q_EKF_ATT_DEBUG
                                         if (debug < 100) {
@@ -733,9 +673,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         acc(1) = x_aposteriori_k[7];
                                         acc(2) = x_aposteriori_k[8];
 
-                                        // if ( debug < 10000 )
-                                        //         acc.print();
-
                                         z_pos_k[0] = raw.accelerometer_m_s2[0] - acc(0);
 					z_pos_k[1] = raw.accelerometer_m_s2[1] - acc(1);
 					z_pos_k[2] = raw.accelerometer_m_s2[2] - acc(2);
@@ -753,16 +690,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                P_pos_apo_k,
                                                debug_pos);
 
-                                        // for (int i = 0; i < 3; i++)
-                                        //         printf("%f", (double)x_pos_apo_k[i]);
-                                        // printf("\n");
-
-                                        // if (debug < 5) {
-                                        //         printf("euler = [%4.4f %4.4f %4.4f]\n", (double)euler[0], (double)euler[1], (double)euler[2]);
-                                        //         printf("q_att = [%4.4f %4.4f %4.4f %4.4f]\n", (double)q_att[0], (double)q_att[1], (double)q_att[2], (double)q_att[3]);
-                                        //         printf("7\n");
-                                        // }
-
 					/* swap values for next iteration, check for fatal inputs */
 					if (isfinite(euler[0]) && isfinite(euler[1]) && isfinite(euler[2]) && isfinite(x_pos_apo_k[6]) && isfinite(x_pos_apo_k[7]) && isfinite(x_pos_apo_k[8])) {
                                                 for (int i = 0; i < 144; i++)
@@ -779,14 +706,8 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 for (int i = 0; i < 9; i++)
                                                         x_pos_aposteriori[i] = x_pos_apo_k[i];
 
-                                                // if (debug < 5)
-                                                //         printf("finite\n");
-
 					} else {
 						/* due to inputs or numerical failure the output is invalid, skip it */
-                                                // if (debug < 5)
-                                                //         printf("continue\n");
-
 						continue;
 					}
 
@@ -800,7 +721,7 @@ int q_ekf_thread_main(int argc, char *argv[])
 
 					att.roll = euler[0];
 					att.pitch = euler[1];
-					att.yaw = euler[2];// + mag_decl;
+					att.yaw = euler[2];
 
 					att.rollspeed = x_aposteriori[0];
 					att.pitchspeed = x_aposteriori[1];
@@ -827,23 +748,12 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         pos.vy = x_pos_aposteriori[4];
                                         pos.vz = x_pos_aposteriori[5];
 
-                                        //if ( debug < 5 )
-                                        // printf("x = %4.4f, y = %4.4f, z = %4.4f\n", (double)pos.x, (double)pos.y, (double)pos.z);
-
-                                        // if (debug < 100) {
-                                        //         printf("q0 = %4.4f q1 = %4.4f q2 = %4.4f q3 = %4.4f\n", (double)att.q[0], (double)att.q[1], (double)att.q[2], (double)att.q[3]);
-                                        //         printf("roll = %4.4f, pitch = %4.4f, yaw = %4.4f\n", (double)att.roll*(double)rad2deg, (double)att.pitch*(double)rad2deg, (double)att.yaw*(double)rad2deg);
-                                        // }
-
 					/* copy offsets */
 					memcpy(&att.rate_offsets, &(x_aposteriori[3]), sizeof(att.rate_offsets));
 
 					if (isfinite(pos.x) && isfinite(pos.y) && isfinite(pos.z)) {
 						// Broadcast
 						orb_publish(ORB_ID(vehicle_local_position), pub_pos, &pos);
-
-                                                // if (debug < 5)
-                                                //         printf("Publishing\n");
 
 					} else {
                                                 warnx("NaN in x/y/z estimate!");
@@ -852,10 +762,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 					if (isfinite(att.roll) && isfinite(att.pitch) && isfinite(att.yaw)) {
 						// Broadcast
 						orb_publish(ORB_ID(vehicle_attitude), pub_att, &att);
-                                                // printf("roll = %4.4f, pitch = %4.4f, yaw = %4.4f\n", (double)att.roll*(double)rad2deg, (double)att.pitch*(double)rad2deg, (double)att.yaw*(double)rad2deg);
-                                                // printf("q0 = %4.4f, q1 = %4.4f, q2 = %4.4f, q3 = %4.4f\n", (double)att.q[0], (double)att.q[1], (double)att.q[2], (double)att.q[3]);
-                                                // if (debug < 5)
-                                                //         printf("Publishing\n");
 
 					} else {
 						warnx("NaN in roll/pitch/yaw estimate!");
