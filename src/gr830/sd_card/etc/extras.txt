@@ -1,4 +1,4 @@
 sensors start
 q_ekf start
-# q_control start
+q_control start
 commander start
