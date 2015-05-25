@@ -23,68 +23,68 @@
  *
  */
 
-#define LQR_CONTROLLER_1_1     -2.3405  
-#define LQR_CONTROLLER_1_2     -2.3405  
-#define LQR_CONTROLLER_1_3     -0.1809  
-#define LQR_CONTROLLER_1_4     -0.3518  
-#define LQR_CONTROLLER_1_5     -0.3518  
-#define LQR_CONTROLLER_1_6     -0.3287  
-#define LQR_CONTROLLER_1_7     0.1297   
-#define LQR_CONTROLLER_1_8     0.1297   
-#define LQR_CONTROLLER_1_9     0.1321   
-#define LQR_CONTROLLER_1_10    0.1849   
-#define LQR_CONTROLLER_1_11    0.1849   
-#define LQR_CONTROLLER_1_12    0.4647   
-#define LQR_CONTROLLER_1_13    0.0042   
-#define LQR_CONTROLLER_1_14    -0.0005  
-#define LQR_CONTROLLER_1_15    -0.0000  
-#define LQR_CONTROLLER_1_16    -0.0000  
+#define LQR_CONTROLLER_1_1    -2.6224  
+#define LQR_CONTROLLER_1_2    -2.6224  
+#define LQR_CONTROLLER_1_3    -0.1809  
+#define LQR_CONTROLLER_1_4    -0.3745  
+#define LQR_CONTROLLER_1_5    -0.3745  
+#define LQR_CONTROLLER_1_6    -0.3287  
+#define LQR_CONTROLLER_1_7    0.1296   
+#define LQR_CONTROLLER_1_8    0.1296   
+#define LQR_CONTROLLER_1_9    0.1321   
+#define LQR_CONTROLLER_1_10   0.2136   
+#define LQR_CONTROLLER_1_11   0.2136   
+#define LQR_CONTROLLER_1_12   0.4647   
+#define LQR_CONTROLLER_1_13   0.0042   
+#define LQR_CONTROLLER_1_14   -0.0005  
+#define LQR_CONTROLLER_1_15   -0.0000  
+#define LQR_CONTROLLER_1_16   -0.0000  
                               
-#define LQR_CONTROLLER_2_1       2.3405  
-#define LQR_CONTROLLER_2_2       2.3405        
+#define LQR_CONTROLLER_2_1       2.6224  
+#define LQR_CONTROLLER_2_2       2.6224        
 #define LQR_CONTROLLER_2_3      -0.1809        
-#define LQR_CONTROLLER_2_4       0.3518        
-#define LQR_CONTROLLER_2_5       0.3518        
+#define LQR_CONTROLLER_2_4       0.3745        
+#define LQR_CONTROLLER_2_5       0.3745        
 #define LQR_CONTROLLER_2_6      -0.3287        
-#define LQR_CONTROLLER_2_7     -0.1297         
-#define LQR_CONTROLLER_2_8     -0.1297         
+#define LQR_CONTROLLER_2_7     -0.1296         
+#define LQR_CONTROLLER_2_8     -0.1296         
 #define LQR_CONTROLLER_2_9      0.1321         
-#define LQR_CONTROLLER_2_10    -0.1849         
-#define LQR_CONTROLLER_2_11    -0.1849         
+#define LQR_CONTROLLER_2_10    -0.2136         
+#define LQR_CONTROLLER_2_11    -0.2136         
 #define LQR_CONTROLLER_2_12     0.4647         
 #define LQR_CONTROLLER_2_13    -0.0005         
 #define LQR_CONTROLLER_2_14      0.0042        
 #define LQR_CONTROLLER_2_15     -0.0000        
 #define LQR_CONTROLLER_2_16     -0.0000        
                               
-#define LQR_CONTROLLER_3_1        2.3405  
-#define LQR_CONTROLLER_3_2       -2.3405       
+#define LQR_CONTROLLER_3_1        2.6224  
+#define LQR_CONTROLLER_3_2       -2.6224       
 #define LQR_CONTROLLER_3_3        0.1809       
-#define LQR_CONTROLLER_3_4        0.3518       
-#define LQR_CONTROLLER_3_5       -0.3518       
+#define LQR_CONTROLLER_3_4        0.3745       
+#define LQR_CONTROLLER_3_5       -0.3745       
 #define LQR_CONTROLLER_3_6        0.3287       
-#define LQR_CONTROLLER_3_7       0.1297        
-#define LQR_CONTROLLER_3_8      -0.1297        
+#define LQR_CONTROLLER_3_7       0.1296        
+#define LQR_CONTROLLER_3_8      -0.1296        
 #define LQR_CONTROLLER_3_9       0.1321        
-#define LQR_CONTROLLER_3_10      0.1849        
-#define LQR_CONTROLLER_3_11     -0.1849        
+#define LQR_CONTROLLER_3_10      0.2136        
+#define LQR_CONTROLLER_3_11     -0.2136        
 #define LQR_CONTROLLER_3_12      0.4647        
 #define LQR_CONTROLLER_3_13     -0.0000        
 #define LQR_CONTROLLER_3_14      -0.0000       
 #define LQR_CONTROLLER_3_15       0.0042       
 #define LQR_CONTROLLER_3_16      -0.0005       
                               
-#define LQR_CONTROLLER_4_1     -2.3405
-#define LQR_CONTROLLER_4_2      2.3405
+#define LQR_CONTROLLER_4_1     -2.6224
+#define LQR_CONTROLLER_4_2      2.6224
 #define LQR_CONTROLLER_4_3      0.1809
-#define LQR_CONTROLLER_4_4     -0.3518
-#define LQR_CONTROLLER_4_5      0.3518
+#define LQR_CONTROLLER_4_4     -0.3745
+#define LQR_CONTROLLER_4_5      0.3745
 #define LQR_CONTROLLER_4_6      0.3287
-#define LQR_CONTROLLER_4_7    -0.1297 
-#define LQR_CONTROLLER_4_8     0.1297 
+#define LQR_CONTROLLER_4_7    -0.1296 
+#define LQR_CONTROLLER_4_8     0.1296 
 #define LQR_CONTROLLER_4_9     0.1321 
-#define LQR_CONTROLLER_4_10   -0.1849 
-#define LQR_CONTROLLER_4_11    0.1849 
+#define LQR_CONTROLLER_4_10   -0.2136 
+#define LQR_CONTROLLER_4_11    0.2136 
 #define LQR_CONTROLLER_4_12    0.4647 
 #define LQR_CONTROLLER_4_13   -0.0000 
 #define LQR_CONTROLLER_4_14    -0.0000
@@ -121,7 +121,7 @@
 /*
  * Yaw Ki constant
  */
-#define YAW_KI 0.00008
+#define YAW_KI 0.0000
 
 /*
  * Z axis Ki constant
@@ -138,6 +138,11 @@
  * Thrust value to counter the gravity
  */
 #define ANTI_GRAVITY 0.22
+
+/*
+ * Counter yaw constant offset
+ */
+#define ANTI_YAW -0.09f
 
 
 /* Safety values */

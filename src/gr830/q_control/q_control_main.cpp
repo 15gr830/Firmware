@@ -222,7 +222,7 @@ int q_control_thread_main(int argc, char *argv[]) {
 
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
-                        actuators.control[2] = (float)out.yaw;
+                        actuators.control[2] = (float)out.yaw + ANTI_YAW;
                         actuators.control[3] = (float)out.thrust;
 
                         // mavlink_log_info(mavlink_fd, "T:%4.3f R:%4.3f P:%4.3f Y:%4.3f", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
