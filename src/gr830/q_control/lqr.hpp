@@ -32,7 +32,6 @@
 #include <lib/mathlib/mathlib.h>
 #include "params.hpp"
 #include "lqr_params.hpp"
-#define RAD_TO_DEGREES 57.2957914331
 
 class __EXPORT Lqr : public math::Matrix<4,16> {
 public:
