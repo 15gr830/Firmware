@@ -769,6 +769,8 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         att.g_comp[1] = raw.accelerometer_m_s2[1] - acc(1);
                                         att.g_comp[2] = raw.accelerometer_m_s2[2] - acc(2);
 
+                                        pos.timestamp = raw.timestamp;
+
                                         pos.x = x_pos_aposteriori[6]; 
                                         pos.y = x_pos_aposteriori[7];
                                         pos.z = x_pos_aposteriori[8];
