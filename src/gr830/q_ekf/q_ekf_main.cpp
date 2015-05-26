@@ -342,6 +342,7 @@ int q_ekf_thread_main(int argc, char *argv[])
         // float q_ptam2b[4] = {1, 0, 0, 0};
         float q_ptam_conj[4] = {1, 0, 0, 0};
         float q_i2h_conj[4] = {0, -1, 0, 0};
+        float q_i2h[4] = {0, 1, 0, 0};
         math::Vector<4> q_temp;
         math::Vector<3> mag_in_h = {1, 0, 0}, grav_in_h = {0, 0, -9.82f}, gm, gg;
         bool ptam_initialized = false;
@@ -480,7 +481,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 for (int i = 0; i < 4; i++)
                                                         q_temp1[i] = res.data[i];
 
-                                                res = qmult( q_temp1, q_i2h_conj);
+                                                res = qmult( q_temp1, q_i2h);
                                                 
                                                 for (int i = 0; i < 4; i++)
                                                         q_i2ptam[i] = res.data[i]; // FIXME: Fusk kan gøres bedre
@@ -775,9 +776,6 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         pos.vx = x_pos_aposteriori[3];
                                         pos.vy = x_pos_aposteriori[4];
                                         pos.vz = x_pos_aposteriori[5];
-
-                                        // for (int i = 3; i < 9; i++)
-                                        //         printf("x_pos_aposteriori[%i] = %4.4f\n", i, (double)x_pos_aposteriori[i]);
 
 					/* copy offsets */
 					memcpy(&att.rate_offsets, &(x_aposteriori[3]), sizeof(att.rate_offsets));
