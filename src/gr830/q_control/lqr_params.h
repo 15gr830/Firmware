@@ -8,12 +8,12 @@
  * @file generated from matlab script.
  * Qdiag = [50 50 100 30 30 40 200 200 40 25 25 15 0 0 0 0]
  *
- * Time of generation: 11:48:13, 2015-05-26
+ * Time of generation: 11:53:46, 2015-05-26
  *
  */
 
-#ifndef LQR_PARAMS_HPP
-#define LQR_PARAMS_HPP
+#ifndef LQR_PARAMS_H
+#define LQR_PARAMS_H
 
 
 #define LQR_CONTROLLER_1_1 -3.255710
@@ -85,4 +85,4 @@
 #define LQR_CONTROLLER_4_16 0.004301
 
 
-#endif // LQR_PARAMS_HPP
+#endif // LQR_PARAMS_H
