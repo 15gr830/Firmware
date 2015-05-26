@@ -2,6 +2,31 @@ function [xa_apo,Pa_apo,debugOutput]...
     = posEKF(zFlag,dt,z,q_acc,q_speed,q_pos,r_acc,r_ptam,r_got)
 
 
+%LQG Postion Estimator and Controller
+% Observer:
+%        x[n|n]   = x[n|n-1] + M(y[n] - Cx[n|n-1] - Du[n])
+%        x[n+1|n] = Ax[n|n] + Bu[n]
+%
+%
+% Arguments:
+% quadrotor
+% xa_apo_k: old state vectotr
+% zFlag: if sensor measurement is available [gyro, acc, mag]
+% dt: dt in s
+% z: measurements [acc, PTAM, Got]
+% q_acc: process noise acceleration
+% q_speed: process noise speed
+% q_pos: process noise position
+% r_accel: measurement noise accelerometer
+% r_ptam: measurement noise ptam
+% r_got: measurement noise got
+
+
+% Output:
+% xa_apo: updated state vectotr
+% debugOutput: not used
+
+
 %% model specific parameters
 
 %% init
@@ -51,13 +76,13 @@ posz=  x_apo(9);  % z  body positiony
 % compute the apriori state estimate from the previous aposteriori estimate
 %body accelerations
 
-    acck =[accx;accy;accz];
+    acck =[0;0;0];
 
 %body velocity
-    velk =[velx;  vely; velz] + dt*acck;
+    velk =[velx;  vely; velz] + dt*[accx;accy;accz];
 
 %body position
-    posk = [posx; posy; posz] + dt*velk + 0.5*dt*acck;
+    posk = [posx; posy; posz] + dt*[velx;  vely; velz] + 0.5*dt*dt*[accx;accy;accz];
 
 
 x_apr=[acck;velk;posk];
