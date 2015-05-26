@@ -31,7 +31,7 @@
 #include <math.h>
 #include <lib/mathlib/mathlib.h>
 #include "params.hpp"
-#include "lqr_params.hpp"
+#include "lqr_params.h"
 
 class __EXPORT Lqr : public math::Matrix<4,16> {
 public:
