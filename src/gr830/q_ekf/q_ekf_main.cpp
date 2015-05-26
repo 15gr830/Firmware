@@ -327,7 +327,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                q_pos_speed   = 0.08,
                q_pos         = 0.009,
                r_pos_acc     = 10.f,
-               r_pos_ptam[3] = {0.1f, 0.1f, 0.1f},
+               r_pos_ptam[3] = {0.001f, 0.001f, 0.001f},
                r_pos_got     = 0.0001;
         
         float debug_pos[4]  = {0, 0, 0, 0};
