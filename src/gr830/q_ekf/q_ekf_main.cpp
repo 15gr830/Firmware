@@ -426,14 +426,14 @@ int q_ekf_thread_main(int argc, char *argv[])
 						sensor_last_timestamp[1] = raw.accelerometer_timestamp;
 					}
 
-                                        raw.accelerometer_m_s2[0] -= 0.15f; // correcting for accelerometer bias in x and y
-                                        raw.accelerometer_m_s2[1] -= 0.38f;
+                                        // raw.accelerometer_m_s2[0] -= 0.15f; // correcting for accelerometer bias in x and y
+                                        // raw.accelerometer_m_s2[1] -= 0.38f;
 
 					z_k[3] = raw.accelerometer_m_s2[0];
 					z_k[4] = raw.accelerometer_m_s2[1];
 					z_k[5] = raw.accelerometer_m_s2[2];
 
-                                        mavlink_log_info(mavlink_fd, "acc x:%4.2f y:%4.2f z:%4.2f", (double)z_k[3], (double)z_k[4], (double)z_k[5]);
+                                        // mavlink_log_info(mavlink_fd, "acc x:%4.2f y:%4.2f z:%4.2f", (double)z_k[3], (double)z_k[4], (double)z_k[5]);
 
                                         bool ptam_updated = false;
 					orb_check(ptam_sub, &ptam_updated);
