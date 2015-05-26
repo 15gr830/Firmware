@@ -354,6 +354,11 @@ int q_ekf_thread_main(int argc, char *argv[])
               q_res2f[4] = {1, 0, 0, 0},
               q_b2i[4] = {1, 0, 0, 0};
 
+        float q_ptam_offset[4] = {1, 0, 0, 0},
+              q_ptam_offset_conj[4]  = {1, 0, 0, 0};
+
+        math::Vector<4> q_pt = {1, 0, 0, 0};
+
 	/* register the perf counter */
 	perf_counter_t ekf_loop_perf = perf_alloc(PC_ELAPSED, "attitude_estimator_ekf");
 
@@ -446,9 +451,9 @@ int q_ekf_thread_main(int argc, char *argv[])
 
                                         // Use PTAM data
                                         if (sensor_last_timestamp[2] != ptam.timestamp_boot) {
-						update_vect[2]     = 1;
-                                                update_vect[3]     = 1;
-                                                update_pos_vect[1] = 1;
+						update_vect[2]     = 0;
+                                                update_vect[3]     = 0;
+                                                update_pos_vect[1] = 0; // 1;
                                                 // TODO: Måske skal der vendes på quaternionen
 						
 						sensor_last_timestamp[2] = ptam.timestamp_boot;
@@ -486,6 +491,13 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 for (int i = 0; i < 4; i++)
                                                         q_i2ptam[i] = res.data[i]; // FIXME: Fusk kan gøres bedre
 
+                                                for (int i = 0; i < 4; i++)
+                                                        q_ptam_offset[i] = ptam.q[i];
+
+                                                q_ptam_offset_conj[0] = q_ptam_offset[0];
+                                                for (int i = 1; i < 4; i++)
+                                                        q_ptam_offset_conj[i] = -q_ptam_offset[i];
+
                                                 ptam_initialized = true;
                                         }
 
@@ -505,6 +517,12 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                 q_res3 = qmult( q_res2f, q_i2h_conj );
                                                 for (int i = 0; i < 4; i++)
                                                         q_b2i[i] = q_res3.data[i];
+
+                                                q_b2i[1] = -q_b2i[1];
+
+                                                q_pt = qmult( q_ptam_offset_conj, q_b2i);
+                                                for (int i = 0; i < 4; i++)
+                                                        q_b2i[i] = q_pt.data[i];
                                         }
 
                                         R_n = quat2Rot(q_b2i);

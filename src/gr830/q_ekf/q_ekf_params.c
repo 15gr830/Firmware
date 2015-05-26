@@ -139,7 +139,7 @@ PARAM_DEFINE_INT32(ATT_J_EN, 1);
  *
  * @group attitude_ekf
  */
-PARAM_DEFINE_INT32(ATT_R_PTAM, 0.0008f);
+PARAM_DEFINE_INT32(ATT_R_PTAM, 0.008f);
 
 int parameters_init(struct attitude_estimator_ekf_param_handles *h)
 {

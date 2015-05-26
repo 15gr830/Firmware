@@ -110,7 +110,6 @@ int q_control_thread_main(int argc, char *argv[]) {
 
         bool error = false;
         bool output_on = false;
-        // bool first = false;
         int freq = 0;
         // double thrust_i = 0, yaw_i = 0;
 
@@ -125,12 +124,11 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 printf("Output off modtaget\n");
                                 lqr->z_int = 0.0;
                                 output_on = false;
-                                // first = true;
+
                         } else if ( (cmd.command == (enum VEHICLE_CMD)VEHICLE_CMD_PAYLOAD_CONTROL_DEPLOY) && (cmd.param1 > 0) ) {
                                 printf("Output on modtaget\n");
                                 lqr->z_int = 0.0;
                                 output_on = true;
-                                // first = true;
                         }
                 }
 
@@ -151,14 +149,12 @@ int q_control_thread_main(int argc, char *argv[]) {
                 	orb_check(v_local_pos_sub, &v_local_pos_updated);
 	                if ( v_local_pos_updated ) {
 	                        orb_copy(ORB_ID(vehicle_local_position), v_local_pos_sub, &v_local_pos);
-                                // mavlink_log_info(mavlink_fd, "est: x:%4.3f y:%4.3f z:%4.3f\n", (double)v_local_pos.x, (double)v_local_pos.y, (double)v_local_pos.z);
 	                }
 
                         bool pos_sp_updated; // Position setpoint from gnd
                 	orb_check(pos_sp_sub, &pos_sp_updated);
 	                if ( pos_sp_updated ) {
 	                        orb_copy(ORB_ID(offboard_control_setpoint), pos_sp_sub, &pos_sp);
-                                // mavlink_log_info(mavlink_fd, "sp x:%4.3f y:%4.3f z:%4.3f\n", (double)pos_sp.position[0], (double)pos_sp.position[1], (double)pos_sp.position[2]);
 	                }                                                                                
 
                         for (int i = 0; i < 4; i++)
@@ -192,10 +188,6 @@ int q_control_thread_main(int argc, char *argv[]) {
                         
                         u = lqr->run();
 
-                        // mavlink_log_info(mavlink_fd, "err: x:%4.3f y:%4.3f z:%4.3f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[7], (double)lqr->x_e.data[8]);
-                        // if ( freq%20 == 0 )
-                        //         mavlink_log_info(mavlink_fd, "err vx:%4.6f vy:%4.6f", (double)lqr->x_est.data[9], (double)lqr->x_est.data[10]);
-
                         out = act_map_run(act_map, u);
                         out_safety_check(&out);
 
@@ -222,27 +214,17 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 error = true;
                         }
 
+                        mavlink_log_info(mavlink_fd, "err: x:%4.3f vx:%4.3f p:%4.3f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[9], (double)out.pitch);
+
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw + ANTI_YAW;
                         actuators.control[3] = (float)out.thrust;
 
-                        // mavlink_log_info(mavlink_fd, "T:%4.3f R:%4.3f P:%4.3f Y:%4.3f", (double)out.thrust, (double)out.roll, (double)out.pitch, (double)out.yaw);
-                        // mavlink_log_info(mavlink_fd, "Y:%4.6f", (double)out.yaw);
-
                         if ( output_on ) {
                                 orb_publish(ORB_ID_VEHICLE_ATTITUDE_CONTROLS, actuator_pub, &actuators);
-                                // if ( first ) {
-                                //         printf("Motor on\n");
-                                //         first = false;
-                                // }
 
                         } else if ( !output_on ) {
-                                // if ( first ) {
-                                //         printf("Motor off\n");
-                                //         first = false;
-                                // }
-
                                 for (int i = 0; i < 4; i++)
                                         actuators.control[i] = (double)0;
 
