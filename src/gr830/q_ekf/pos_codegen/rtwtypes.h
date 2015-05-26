@@ -2,7 +2,7 @@
  * File: rtwtypes.h 
  *  
  * MATLAB Coder version            : 2.6 
- * C/C++ source code generated on  : 17-May-2015 11:18:31 
+ * C/C++ source code generated on  : 26-May-2015 11:27:41 
  */
 
 #ifndef __RTWTYPES_H__
@@ -55,50 +55,50 @@ typedef char_T byte_T;
  * Complex number type definitions                                           * 
  *===========================================================================*/
 #define CREAL_T	
-typedef struct {  
-        real32_T re;  
-        real32_T im;  
-} creal32_T;  
+   typedef struct {  
+      real32_T re;  
+      real32_T im;  
+   } creal32_T;  
 
-typedef struct {  
-        real64_T re;  
-        real64_T im;  
-} creal64_T;  
+   typedef struct {  
+      real64_T re;  
+      real64_T im;  
+   } creal64_T;  
 
-typedef struct {  
-        real_T re;  
-        real_T im;  
-} creal_T;  
+   typedef struct {  
+      real_T re;  
+      real_T im;  
+   } creal_T;  
 
-typedef struct {  
-        int8_T re;  
-        int8_T im;  
-} cint8_T;  
+   typedef struct {  
+      int8_T re;  
+      int8_T im;  
+   } cint8_T;  
 
-typedef struct {  
-        uint8_T re;  
-        uint8_T im;  
-} cuint8_T;  
+   typedef struct {  
+      uint8_T re;  
+      uint8_T im;  
+   } cuint8_T;  
 
-typedef struct {  
-        int16_T re;  
-        int16_T im;  
-} cint16_T;  
+   typedef struct {  
+      int16_T re;  
+      int16_T im;  
+   } cint16_T;  
 
-typedef struct {  
-        uint16_T re;  
-        uint16_T im;  
-} cuint16_T;  
+   typedef struct {  
+      uint16_T re;  
+      uint16_T im;  
+   } cuint16_T;  
 
-typedef struct {  
-        int32_T re;  
-        int32_T im;  
-} cint32_T;  
+   typedef struct {  
+      int32_T re;  
+      int32_T im;  
+   } cint32_T;  
 
-typedef struct {  
-        uint32_T re;  
-        uint32_T im;  
-} cuint32_T;  
+   typedef struct {  
+      uint32_T re;  
+      uint32_T im;  
+   } cuint32_T;  
 
 
 /*=======================================================================* 
@@ -130,11 +130,11 @@ typedef struct {
 #  endif
 #endif
 
-  /*
-   * Maximum length of a MATLAB identifier (function/variable)
-   * including the null-termination character. Referenced by
-   * rt_logging.c and rt_matrx.c.
-   */
+/*
+ * Maximum length of a MATLAB identifier (function/variable)
+ * including the null-termination character. Referenced by
+ * rt_logging.c and rt_matrx.c.
+ */
 #define TMW_NAME_LENGTH_MAX	64
 
 #endif

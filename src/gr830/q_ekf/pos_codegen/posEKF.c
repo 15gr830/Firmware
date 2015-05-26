@@ -2,7 +2,7 @@
  * File: posEKF.c
  *
  * MATLAB Coder version            : 2.6
- * C/C++ source code generated on  : 17-May-2015 11:18:31
+ * C/C++ source code generated on  : 26-May-2015 11:27:41
  */
 
 /* Include files */
@@ -274,7 +274,24 @@ static void posEKF_init(void)
 }
 
 /*
- * % model specific parameters
+ * LQG Postion Estimator and Controller
+ *  Observer:
+ *         x[n|n]   = x[n|n-1] + M(y[n] - Cx[n|n-1] - Du[n])
+ *         x[n+1|n] = Ax[n|n] + Bu[n]
+ *
+ *
+ *  Arguments:
+ *  quadrotor
+ *  xa_apo_k: old state vectotr
+ *  zFlag: if sensor measurement is available [gyro, acc, mag]
+ *  dt: dt in s
+ *  z: measurements [acc, PTAM, Got]
+ *  q_acc: process noise acceleration
+ *  q_speed: process noise speed
+ *  q_pos: process noise position
+ *  r_accel: measurement noise accelerometer
+ *  r_ptam: measurement noise ptam
+ *  r_got: measurement noise got
  * Arguments    : const unsigned char zFlag[3]
  *                double dt
  *                const double z[9]
@@ -295,8 +312,6 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
             debugOutput[4])
 {
         int i;
-        float acck[3];
-        float velk[3];
         double a;
         float x_apr[9];
         signed char I[81];
@@ -330,6 +345,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                              0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
 
         float b_r_acc[3];
+        float b_S_k[3];
         float y[27];
         int r3;
         float a21;
@@ -338,85 +354,80 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                              1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                                              0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1 };
 
-        float b_S_k[36];
+        float c_S_k[36];
         static const signed char c_b[54] = { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
                                              0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
                                              0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 
         float c_r_acc[6];
-        float c_S_k[6];
+        float d_S_k[6];
         float c_K_k[54];
         float b_z[6];
 
+        /*  Output: */
+        /*  xa_apo: updated state vectotr */
+        /*  debugOutput: not used */
+        /* % model specific parameters */
         /* % init */
-        /* 'posEKF:9' if(isempty(x_apo)) */
-        /* 'posEKF:17' if(isempty(posx)) */
-        /* 'posEKF:30' if(isempty(P_apo)) */
-        /* 'posEKF:34' debugOutput = single(zeros(4,1)); */
+        /* 'posEKF:34' if(isempty(x_apo)) */
+        /* 'posEKF:42' if(isempty(posx)) */
+        /* 'posEKF:55' if(isempty(P_apo)) */
+        /* 'posEKF:59' debugOutput = single(zeros(4,1)); */
         for (i = 0; i < 4; i++) {
                 debugOutput[i] = 0.0F;
         }
 
         /* % copy the states */
-        /* 'posEKF:37' accx=  x_apo(1); */
+        /* 'posEKF:62' accx=  x_apo(1); */
         /*  x  body acceleration */
-        /* 'posEKF:38' accy=  x_apo(2); */
+        /* 'posEKF:63' accy=  x_apo(2); */
         /*  y  body acceleration */
-        /* 'posEKF:39' accz=  x_apo(3); */
+        /* 'posEKF:64' accz=  x_apo(3); */
         /*  z  body acceleration */
-        /* 'posEKF:41' velx=  x_apo(4); */
+        /* 'posEKF:66' velx=  x_apo(4); */
         /*  x  body velocity */
-        /* 'posEKF:42' vely=  x_apo(5); */
+        /* 'posEKF:67' vely=  x_apo(5); */
         /*  y  body velocity */
-        /* 'posEKF:43' velz=  x_apo(6); */
+        /* 'posEKF:68' velz=  x_apo(6); */
         /*  z  body velocity */
-        /* 'posEKF:45' posx =  x_apo(7); */
+        /* 'posEKF:70' posx =  x_apo(7); */
         /*  x  body position */
-        /* 'posEKF:46' posy=  x_apo(8); */
+        /* 'posEKF:71' posy=  x_apo(8); */
         /*  y  body position */
-        /* 'posEKF:47' posz=  x_apo(9); */
+        /* 'posEKF:72' posz=  x_apo(9); */
         /*  z  body positiony */
         /* % prediction section */
         /*  compute the apriori state estimate from the previous aposteriori estimate */
         /* body accelerations */
-        /* 'posEKF:54' acck =[accx;accy;accz]; */
-        acck[0] = x_apo[0];
-        acck[1] = x_apo[1];
-        acck[2] = x_apo[2];
-
+        /* 'posEKF:79' acck =[0;0;0]; */
         /* body velocity */
-        /* 'posEKF:57' velk =[velx;  vely; velz] + dt*acck; */
-        velk[0] = x_apo[3] + (float)dt * x_apo[0];
-        velk[1] = x_apo[4] + (float)dt * x_apo[1];
-        velk[2] = x_apo[5] + (float)dt * x_apo[2];
-
+        /* 'posEKF:82' velk =[velx;  vely; velz] + dt*[accx;accy;accz]; */
         /* body position */
-        /* 'posEKF:60' posk = [posx; posy; posz] + dt*velk + 0.5*dt*acck; */
-        a = 0.5 * dt;
+        /* 'posEKF:85' posk = [posx; posy; posz] + dt*[velx;  vely; velz] + 0.5*dt*dt*[accx;accy;accz]; */
+        a = 0.5 * dt * dt;
 
-        /* 'posEKF:63' x_apr=[acck;velk;posk]; */
+        /* 'posEKF:88' x_apr=[acck;velk;posk]; */
         for (i = 0; i < 3; i++) {
-                x_apr[i] = acck[i];
+                x_apr[i] = 0.0F;
         }
 
-        for (i = 0; i < 3; i++) {
-                x_apr[i + 3] = velk[i];
-        }
-
-        x_apr[6] = (x_apo[6] + (float)dt * velk[0]) + (float)a * x_apo[0];
-        x_apr[7] = (x_apo[7] + (float)dt * velk[1]) + (float)a * x_apo[1];
-        x_apr[8] = (x_apo[8] + (float)dt * velk[2]) + (float)a * x_apo[2];
+        x_apr[3] = x_apo[3] + (float)dt * x_apo[0];
+        x_apr[4] = x_apo[4] + (float)dt * x_apo[1];
+        x_apr[5] = x_apo[5] + (float)dt * x_apo[2];
+        x_apr[6] = (x_apo[6] + (float)dt * x_apo[3]) + (float)a * x_apo[0];
+        x_apr[7] = (x_apo[7] + (float)dt * x_apo[4]) + (float)a * x_apo[1];
+        x_apr[8] = (x_apo[8] + (float)dt * x_apo[5]) + (float)a * x_apo[2];
 
         /*  compute the apriori error covariance estimate from the previous */
         /* aposteriori estimate */
-        /* 'posEKF:68' E=single(eye(3)); */
-        /* 'posEKF:69' Z=single(zeros(3)); */
-        /* 'posEKF:71' A_lin=[ Z,  Z, Z;... */
-        /* 'posEKF:72'         E,  Z,  Z;... */
-        /* 'posEKF:73'         0.5*dt*E, E,  Z]; */
+        /* 'posEKF:93' E=single(eye(3)); */
+        /* 'posEKF:94' Z=single(zeros(3)); */
+        /* 'posEKF:96' A_lin=[ Z,  Z, Z;... */
+        /* 'posEKF:97'         E,  Z,  Z;... */
+        /* 'posEKF:98'         0.5*dt*E, E,  Z]; */
         a = 0.5 * dt;
 
-        /* 'posEKF:76' A_lin=eye(9)+A_lin*dt; */
+        /* 'posEKF:101' A_lin=eye(9)+A_lin*dt; */
         memset(&I[0], 0, 81U * sizeof(signed char));
         for (i = 0; i < 9; i++) {
                 I[i + 9 * i] = 1;
@@ -454,11 +465,11 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
         }
 
         /* process covariance matrix */
-        /* 'posEKF:80' if (isempty(Q)) */
+        /* 'posEKF:105' if (isempty(Q)) */
         if (!Q_not_empty) {
-                /* 'posEKF:81' Q=diag([q_acc,q_acc,q_acc,... */
-                /* 'posEKF:82'         q_speed,q_speed,q_speed,... */
-                /* 'posEKF:83'         q_pos,q_pos,q_pos]); */
+                /* 'posEKF:106' Q=diag([q_acc,q_acc,q_acc,... */
+                /* 'posEKF:107'         q_speed,q_speed,q_speed,... */
+                /* 'posEKF:108'         q_pos,q_pos,q_pos]); */
                 v[0] = q_acc;
                 v[1] = q_acc;
                 v[2] = q_acc;
@@ -476,7 +487,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                 Q_not_empty = true;
         }
 
-        /* 'posEKF:86' P_apr=A_lin*P_apo*A_lin'+Q; */
+        /* 'posEKF:111' P_apr=A_lin*P_apo*A_lin'+Q; */
         for (r2 = 0; r2 < 9; r2++) {
                 for (i = 0; i < 9; i++) {
                         A_lin[r2 + 9 * i] = 0.0F;
@@ -499,7 +510,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
 
         /* % update */
         /* % update */
-        /* 'posEKF:90' if zFlag(1)==1&&zFlag(2)==1&&zFlag(3)==1 */
+        /* 'posEKF:115' if zFlag(1)==1&&zFlag(2)==1&&zFlag(3)==1 */
         if ((zFlag[0] == 1) && (zFlag[1] == 1) && (zFlag[2] == 1)) {
                 /*      R=[ r_acc,0,0,0,0,0,0,0,0,0,0,0,0,0,0; */
                 /*          0,r_acc,0,0,0,0,0,0,0,0,0,0,0,0,0; */
@@ -510,13 +521,13 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                 /*          0,0,0,0,0,0,r_got,0,0,0,0,0,0,0,0; */
                 /*          0,0,0,0,0,0,0,r_got,0,0,0,0,0,0,0; */
                 /*          0,0,0,0,0,0,0,0,r_got,0,0,0,0,0,0; */
-                /* 'posEKF:101' R_v=[r_acc,r_acc,r_acc,r_ptam(1),r_ptam(2),r_ptam(3),r_got,r_got,r_got]; */
-                /* 'posEKF:103' H_k=[  E,     Z,      Z;  */
-                /* 'posEKF:104'            Z,     Z,      E; */
-                /* 'posEKF:105'            Z,     Z,      E]; */
-                /* 'posEKF:107' y_k=z(1:9)-H_k*x_apr; */
+                /* 'posEKF:126' R_v=[r_acc,r_acc,r_acc,r_ptam(1),r_ptam(2),r_ptam(3),r_got,r_got,r_got]; */
+                /* 'posEKF:128' H_k=[  E,     Z,      Z;  */
+                /* 'posEKF:129'            Z,     Z,      E; */
+                /* 'posEKF:130'            Z,     Z,      E]; */
+                /* 'posEKF:132' y_k=z(1:9)-H_k*x_apr; */
                 /* S_k=H_k*P_apr*H_k'+R; */
-                /* 'posEKF:111' S_k=H_k*P_apr*H_k'; */
+                /* 'posEKF:136' S_k=H_k*P_apr*H_k'; */
                 for (r2 = 0; r2 < 9; r2++) {
                         for (i = 0; i < 9; i++) {
                                 A_lin[r2 + 9 * i] = 0.0F;
@@ -533,7 +544,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                         }
                 }
 
-                /* 'posEKF:112' S_k(1:9+1:end) = S_k(1:9+1:end) + R_v; */
+                /* 'posEKF:137' S_k(1:9+1:end) = S_k(1:9+1:end) + R_v; */
                 S_k[0] = (float)r_acc;
                 S_k[1] = (float)r_acc;
                 S_k[2] = (float)r_acc;
@@ -551,7 +562,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                         b_A_lin[10 * r2] = c_A_lin[r2];
                 }
 
-                /* 'posEKF:113' K_k=(P_apr*H_k'/(S_k)); */
+                /* 'posEKF:138' K_k=(P_apr*H_k'/(S_k)); */
                 for (r2 = 0; r2 < 9; r2++) {
                         for (i = 0; i < 9; i++) {
                                 K_k[r2 + 9 * i] = 0.0F;
@@ -563,7 +574,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
 
                 mrdivide(K_k, b_A_lin);
 
-                /* 'posEKF:116' x_apo=x_apr+K_k*y_k; */
+                /* 'posEKF:141' x_apo=x_apr+K_k*y_k; */
                 for (r2 = 0; r2 < 9; r2++) {
                         maxval = 0.0F;
                         for (i = 0; i < 9; i++) {
@@ -582,7 +593,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                         x_apo[r2] = x_apr[r2] + maxval;
                 }
 
-                /* 'posEKF:117' P_apo=(eye(9)-K_k*H_k)*P_apr; */
+                /* 'posEKF:142' P_apo=(eye(9)-K_k*H_k)*P_apr; */
                 memset(&I[0], 0, 81U * sizeof(signed char));
                 for (i = 0; i < 9; i++) {
                         I[i + 9 * i] = 1;
@@ -608,17 +619,17 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                         }
                 }
         } else {
-                /* 'posEKF:119' else */
-                /* 'posEKF:120' if zFlag(1)==1&&zFlag(2)==0&&zFlag(3)==0 */
+                /* 'posEKF:144' else */
+                /* 'posEKF:145' if zFlag(1)==1&&zFlag(2)==0&&zFlag(3)==0 */
                 if ((zFlag[0] == 1) && (zFlag[1] == 0) && (zFlag[2] == 0)) {
                         /*      R=[ r_acc,0,0; */
                         /*          0,r_acc,0; */
                         /*          0,0,r_acc; */
-                        /* 'posEKF:126' R_v=[r_acc,r_acc,r_acc]; */
+                        /* 'posEKF:151' R_v=[r_acc,r_acc,r_acc]; */
                         /* observation matrix */
-                        /* 'posEKF:129' H_k=[  E,     Z,      Z;]; */
-                        /* 'posEKF:131' y_k=z(1:3)-H_k(1:3,1:9)*x_apr; */
-                        /* 'posEKF:133' S_k=H_k(1:3,1:9)*P_apr*H_k(1:3,1:9)'; */
+                        /* 'posEKF:154' H_k=[  E,     Z,      Z;]; */
+                        /* 'posEKF:156' y_k=z(1:3)-H_k(1:3,1:9)*x_apr; */
+                        /* 'posEKF:158' S_k=H_k(1:3,1:9)*P_apr*H_k(1:3,1:9)'; */
                         for (r2 = 0; r2 < 3; r2++) {
                                 for (i = 0; i < 9; i++) {
                                         b_K_k[r2 + 3 * i] = 0.0F;
@@ -635,19 +646,19 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                 }
                         }
 
-                        /* 'posEKF:134' S_k(1:3+1:end) = S_k(1:3+1:end) + R_v; */
+                        /* 'posEKF:159' S_k(1:3+1:end) = S_k(1:3+1:end) + R_v; */
                         b_r_acc[0] = (float)r_acc;
                         b_r_acc[1] = (float)r_acc;
                         b_r_acc[2] = (float)r_acc;
                         for (r2 = 0; r2 < 3; r2++) {
-                                acck[r2] = S_k[r2 << 2] + b_r_acc[r2];
+                                b_S_k[r2] = S_k[r2 << 2] + b_r_acc[r2];
                         }
 
                         for (r2 = 0; r2 < 3; r2++) {
-                                S_k[r2 << 2] = acck[r2];
+                                S_k[r2 << 2] = b_S_k[r2];
                         }
 
-                        /* 'posEKF:135' K_k=(P_apr*H_k(1:3,1:9)'/(S_k)); */
+                        /* 'posEKF:160' K_k=(P_apr*H_k(1:3,1:9)'/(S_k)); */
                         for (r2 = 0; r2 < 9; r2++) {
                                 for (i = 0; i < 3; i++) {
                                         y[r2 + 9 * i] = 0.0F;
@@ -700,26 +711,26 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                 b_K_k[i + 9 * r1] -= b_K_k[i + 9 * r2] * S_k[r2];
                         }
 
-                        /* 'posEKF:138' x_apo=x_apr+K_k*y_k; */
+                        /* 'posEKF:163' x_apo=x_apr+K_k*y_k; */
                         for (r2 = 0; r2 < 3; r2++) {
                                 maxval = 0.0F;
                                 for (i = 0; i < 9; i++) {
                                         maxval += (float)b_a[r2 + 3 * i] * x_apr[i];
                                 }
 
-                                acck[r2] = (float)z[r2] - maxval;
+                                b_r_acc[r2] = (float)z[r2] - maxval;
                         }
 
                         for (r2 = 0; r2 < 9; r2++) {
                                 maxval = 0.0F;
                                 for (i = 0; i < 3; i++) {
-                                        maxval += b_K_k[r2 + 9 * i] * acck[i];
+                                        maxval += b_K_k[r2 + 9 * i] * b_r_acc[i];
                                 }
 
                                 x_apo[r2] = x_apr[r2] + maxval;
                         }
 
-                        /* 'posEKF:139' P_apo=(eye(9)-K_k*H_k(1:3,1:9))*P_apr; */
+                        /* 'posEKF:164' P_apo=(eye(9)-K_k*H_k(1:3,1:9))*P_apr; */
                         memset(&I[0], 0, 81U * sizeof(signed char));
                         for (i = 0; i < 9; i++) {
                                 I[i + 9 * i] = 1;
@@ -745,8 +756,8 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                 }
                         }
                 } else {
-                        /* 'posEKF:140' else */
-                        /* 'posEKF:141' if  zFlag(1)==1&&zFlag(2)==1&&zFlag(3)==0 */
+                        /* 'posEKF:165' else */
+                        /* 'posEKF:166' if  zFlag(1)==1&&zFlag(2)==1&&zFlag(3)==0 */
                         if ((zFlag[0] == 1) && (zFlag[1] == 1) && (zFlag[2] == 0)) {
                                 /*      R=[ r_acc,0,0,0,0,0; */
                                 /*          0,r_acc,0,0,0,0; */
@@ -754,12 +765,12 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                 /*          0,0,0,r_ptam,0,0; */
                                 /*          0,0,0,0,r_ptam,0; */
                                 /*          0,0,0,0,0,r_ptam; */
-                                /* 'posEKF:150' R_v=[r_acc,r_acc,r_acc,r_ptam(1),r_ptam(2),r_ptam(3)]; */
+                                /* 'posEKF:175' R_v=[r_acc,r_acc,r_acc,r_ptam(1),r_ptam(2),r_ptam(3)]; */
                                 /* observation matrix */
-                                /* 'posEKF:153' H_k=[  E,     Z,      Z; */
-                                /* 'posEKF:154'                        Z,     Z,      E]; */
-                                /* 'posEKF:156' y_k=z(1:6)-H_k(1:6,1:9)*x_apr; */
-                                /* 'posEKF:158' S_k=H_k(1:6,1:9)*P_apr*H_k(1:6,1:9)'; */
+                                /* 'posEKF:178' H_k=[  E,     Z,      Z; */
+                                /* 'posEKF:179'                        Z,     Z,      E]; */
+                                /* 'posEKF:181' y_k=z(1:6)-H_k(1:6,1:9)*x_apr; */
+                                /* 'posEKF:183' S_k=H_k(1:6,1:9)*P_apr*H_k(1:6,1:9)'; */
                                 for (r2 = 0; r2 < 6; r2++) {
                                         for (i = 0; i < 9; i++) {
                                                 d_a[r2 + 6 * i] = 0.0F;
@@ -769,14 +780,14 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                         }
 
                                         for (i = 0; i < 6; i++) {
-                                                b_S_k[r2 + 6 * i] = 0.0F;
+                                                c_S_k[r2 + 6 * i] = 0.0F;
                                                 for (r1 = 0; r1 < 9; r1++) {
-                                                        b_S_k[r2 + 6 * i] += d_a[r2 + 6 * r1] * (float)c_b[r1 + 9 * i];
+                                                        c_S_k[r2 + 6 * i] += d_a[r2 + 6 * r1] * (float)c_b[r1 + 9 * i];
                                                 }
                                         }
                                 }
 
-                                /* 'posEKF:159' S_k(1:6+1:end) = S_k(1:6+1:end) + R_v; */
+                                /* 'posEKF:184' S_k(1:6+1:end) = S_k(1:6+1:end) + R_v; */
                                 c_r_acc[0] = (float)r_acc;
                                 c_r_acc[1] = (float)r_acc;
                                 c_r_acc[2] = (float)r_acc;
@@ -784,14 +795,14 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                 c_r_acc[4] = (float)r_ptam[1];
                                 c_r_acc[5] = (float)r_ptam[2];
                                 for (r2 = 0; r2 < 6; r2++) {
-                                        c_S_k[r2] = b_S_k[7 * r2] + c_r_acc[r2];
+                                        d_S_k[r2] = c_S_k[7 * r2] + c_r_acc[r2];
                                 }
 
                                 for (r2 = 0; r2 < 6; r2++) {
-                                        b_S_k[7 * r2] = c_S_k[r2];
+                                        c_S_k[7 * r2] = d_S_k[r2];
                                 }
 
-                                /* 'posEKF:160' K_k=(P_apr*H_k(1:6,1:9)'/(S_k)); */
+                                /* 'posEKF:185' K_k=(P_apr*H_k(1:6,1:9)'/(S_k)); */
                                 for (r2 = 0; r2 < 9; r2++) {
                                         for (i = 0; i < 6; i++) {
                                                 c_K_k[r2 + 9 * i] = 0.0F;
@@ -801,9 +812,9 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                         }
                                 }
 
-                                b_mrdivide(c_K_k, b_S_k);
+                                b_mrdivide(c_K_k, c_S_k);
 
-                                /* 'posEKF:163' x_apo=x_apr+K_k*y_k; */
+                                /* 'posEKF:188' x_apo=x_apr+K_k*y_k; */
                                 for (r2 = 0; r2 < 6; r2++) {
                                         maxval = 0.0F;
                                         for (i = 0; i < 9; i++) {
@@ -822,7 +833,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                         x_apo[r2] = x_apr[r2] + maxval;
                                 }
 
-                                /* 'posEKF:164' P_apo=(eye(9)-K_k*H_k(1:6,1:9))*P_apr; */
+                                /* 'posEKF:189' P_apo=(eye(9)-K_k*H_k(1:6,1:9))*P_apr; */
                                 memset(&I[0], 0, 81U * sizeof(signed char));
                                 for (i = 0; i < 9; i++) {
                                         I[i + 9 * i] = 1;
@@ -848,8 +859,8 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                         }
                                 }
                         } else {
-                                /* 'posEKF:165' else */
-                                /* 'posEKF:166' if  zFlag(1)==1&&zFlag(2)==0&&zFlag(3)==1 */
+                                /* 'posEKF:190' else */
+                                /* 'posEKF:191' if  zFlag(1)==1&&zFlag(2)==0&&zFlag(3)==1 */
                                 if ((zFlag[0] == 1) && (zFlag[1] == 0) && (zFlag[2] == 1)) {
                                         /*         R=[ r_acc,0,0,0,0,0; */
                                         /*          0,r_acc,0,0,0,0; */
@@ -857,12 +868,12 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                         /*          0,0,0,r_got,0,0; */
                                         /*          0,0,0,0,r_got,0; */
                                         /*          0,0,0,0,0,r_got; */
-                                        /* 'posEKF:173' R_v=[r_acc,r_acc,r_acc,r_got,r_got,r_got]; */
+                                        /* 'posEKF:198' R_v=[r_acc,r_acc,r_acc,r_got,r_got,r_got]; */
                                         /* observation matrix */
-                                        /* 'posEKF:176' H_k=[  E,     Z,      Z; */
-                                        /* 'posEKF:177'                         Z,     Z,        E]; */
-                                        /* 'posEKF:179' y_k=[z(1:3);z(7:9)]-H_k(1:6,1:9)*x_apr; */
-                                        /* 'posEKF:181' S_k=H_k(1:6,1:9)*P_apr*H_k(1:6,1:9)'; */
+                                        /* 'posEKF:201' H_k=[  E,     Z,      Z; */
+                                        /* 'posEKF:202'                         Z,     Z,        E]; */
+                                        /* 'posEKF:204' y_k=[z(1:3);z(7:9)]-H_k(1:6,1:9)*x_apr; */
+                                        /* 'posEKF:206' S_k=H_k(1:6,1:9)*P_apr*H_k(1:6,1:9)'; */
                                         for (r2 = 0; r2 < 6; r2++) {
                                                 for (i = 0; i < 9; i++) {
                                                         d_a[r2 + 6 * i] = 0.0F;
@@ -872,14 +883,14 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                                 }
 
                                                 for (i = 0; i < 6; i++) {
-                                                        b_S_k[r2 + 6 * i] = 0.0F;
+                                                        c_S_k[r2 + 6 * i] = 0.0F;
                                                         for (r1 = 0; r1 < 9; r1++) {
-                                                                b_S_k[r2 + 6 * i] += d_a[r2 + 6 * r1] * (float)c_b[r1 + 9 * i];
+                                                                c_S_k[r2 + 6 * i] += d_a[r2 + 6 * r1] * (float)c_b[r1 + 9 * i];
                                                         }
                                                 }
                                         }
 
-                                        /* 'posEKF:182' S_k(1:6+1:end) = S_k(1:6+1:end) + R_v; */
+                                        /* 'posEKF:207' S_k(1:6+1:end) = S_k(1:6+1:end) + R_v; */
                                         c_r_acc[0] = (float)r_acc;
                                         c_r_acc[1] = (float)r_acc;
                                         c_r_acc[2] = (float)r_acc;
@@ -887,14 +898,14 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                         c_r_acc[4] = (float)r_got;
                                         c_r_acc[5] = (float)r_got;
                                         for (r2 = 0; r2 < 6; r2++) {
-                                                c_S_k[r2] = b_S_k[7 * r2] + c_r_acc[r2];
+                                                d_S_k[r2] = c_S_k[7 * r2] + c_r_acc[r2];
                                         }
 
                                         for (r2 = 0; r2 < 6; r2++) {
-                                                b_S_k[7 * r2] = c_S_k[r2];
+                                                c_S_k[7 * r2] = d_S_k[r2];
                                         }
 
-                                        /* 'posEKF:183' K_k=(P_apr*H_k(1:6,1:9)'/(S_k)); */
+                                        /* 'posEKF:208' K_k=(P_apr*H_k(1:6,1:9)'/(S_k)); */
                                         for (r2 = 0; r2 < 9; r2++) {
                                                 for (i = 0; i < 6; i++) {
                                                         c_K_k[r2 + 9 * i] = 0.0F;
@@ -904,9 +915,9 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                                 }
                                         }
 
-                                        b_mrdivide(c_K_k, b_S_k);
+                                        b_mrdivide(c_K_k, c_S_k);
 
-                                        /* 'posEKF:186' x_apo=x_apr+K_k*y_k; */
+                                        /* 'posEKF:211' x_apo=x_apr+K_k*y_k; */
                                         for (r2 = 0; r2 < 3; r2++) {
                                                 c_r_acc[r2] = (float)z[r2];
                                         }
@@ -916,12 +927,12 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                         }
 
                                         for (r2 = 0; r2 < 6; r2++) {
-                                                c_S_k[r2] = 0.0F;
+                                                d_S_k[r2] = 0.0F;
                                                 for (i = 0; i < 9; i++) {
-                                                        c_S_k[r2] += (float)e_a[r2 + 6 * i] * x_apr[i];
+                                                        d_S_k[r2] += (float)e_a[r2 + 6 * i] * x_apr[i];
                                                 }
 
-                                                b_z[r2] = c_r_acc[r2] - c_S_k[r2];
+                                                b_z[r2] = c_r_acc[r2] - d_S_k[r2];
                                         }
 
                                         for (r2 = 0; r2 < 9; r2++) {
@@ -933,7 +944,7 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                                 x_apo[r2] = x_apr[r2] + maxval;
                                         }
 
-                                        /* 'posEKF:187' P_apo=(eye(9)-K_k*H_k(1:6,1:9))*P_apr; */
+                                        /* 'posEKF:212' P_apo=(eye(9)-K_k*H_k(1:6,1:9))*P_apr; */
                                         memset(&I[0], 0, 81U * sizeof(signed char));
                                         for (i = 0; i < 9; i++) {
                                                 I[i + 9 * i] = 1;
@@ -959,13 +970,13 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
                                                 }
                                         }
                                 } else {
-                                        /* 'posEKF:188' else */
-                                        /* 'posEKF:189' x_apo=x_apr; */
+                                        /* 'posEKF:213' else */
+                                        /* 'posEKF:214' x_apo=x_apr; */
                                         for (i = 0; i < 9; i++) {
                                                 x_apo[i] = x_apr[i];
                                         }
 
-                                        /* 'posEKF:190' P_apo=P_apr; */
+                                        /* 'posEKF:215' P_apo=P_apr; */
                                         memcpy(&P_apo[0], &P_apr[0], 81U * sizeof(float));
                                 }
                         }
@@ -982,20 +993,13 @@ void posEKF(const unsigned char zFlag[3], double dt, const double z[9], double
         xa_apo[7] = x_apo[7];
         xa_apo[8] = x_apo[8];
 
-        /* 'posEKF:195' xa_apo =x_apo; */
+        /* 'posEKF:220' xa_apo =x_apo; */
         /* for (i = 0; i < 9; i++) { */
         /*         xa_apo[i] = x_apo[i]; */
         /* } */
 
-        /* position.x = x_apo[6]; */
-        /* position.y = x_apo[7]; */
-        /* position.z = x_apo[8]; */
-
-        /* 'posEKF:196' Pa_apo =P_apo; */
+        /* 'posEKF:221' Pa_apo =P_apo; */
         memcpy(&Pa_apo[0], &P_apo[0], 81U * sizeof(float));
-        
-
-        /* return position; */
 }
 
 /*

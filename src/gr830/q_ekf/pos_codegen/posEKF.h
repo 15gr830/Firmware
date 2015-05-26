@@ -2,7 +2,7 @@
  * File: posEKF.h
  *
  * MATLAB Coder version            : 2.6
- * C/C++ source code generated on  : 17-May-2015 11:18:31
+ * C/C++ source code generated on  : 26-May-2015 11:27:41
  */
 
 #ifndef __POSEKF_H__

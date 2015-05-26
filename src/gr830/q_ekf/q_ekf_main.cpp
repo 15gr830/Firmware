@@ -331,6 +331,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                r_pos_got     = 0.0001;
         
         float debug_pos[4]  = {0, 0, 0, 0};
+        // int debug = 0;
 
         math::Matrix<3,3> R_n;
         R.identity();
@@ -657,14 +658,14 @@ int q_ekf_thread_main(int argc, char *argv[])
                                                         printf("%4.4f ", (double)x_pos_apo_k[i]);
                                                 printf("]\n");
 
-                                                // printf("P_apo =\n");
-                                                // for (int i = 0; i < 81; i++){
-                                                //         if ( !(i%9) )
-                                                //                 printf("[ ");
-                                                //         printf("%4.2f ", (double)P_pos_apo_k[i]);
-                                                //         if ( !((i + 1)%9) )
-                                                //                 printf("]\n");
-                                                // }
+                                                printf("P_apo =\n");
+                                                for (int i = 0; i < 81; i++){
+                                                        if ( !(i%9) )
+                                                                printf("[ ");
+                                                        printf("%4.2f ", (double)P_pos_apo_k[i]);
+                                                        if ( !((i + 1)%9) )
+                                                                printf("]\n");
+                                                }
                                                 printf("x = %4.4f, y = %4.4f, z = %4.4f\n", (double)pos.x, (double)pos.y, (double)pos.z);
                                                 if ( update_pos_vect[2] == 1 )
                                                         printf("GOT: x = %4.1f, y = %4.1f, z = %4.1f\n", (double)got_pos.x, (double)got_pos.y, (double)got_pos.z);
@@ -774,6 +775,9 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         pos.vx = x_pos_aposteriori[3];
                                         pos.vy = x_pos_aposteriori[4];
                                         pos.vz = x_pos_aposteriori[5];
+
+                                        // for (int i = 3; i < 9; i++)
+                                        //         printf("x_pos_aposteriori[%i] = %4.4f\n", i, (double)x_pos_aposteriori[i]);
 
 					/* copy offsets */
 					memcpy(&att.rate_offsets, &(x_aposteriori[3]), sizeof(att.rate_offsets));
