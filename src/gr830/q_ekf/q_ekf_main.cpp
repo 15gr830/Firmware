@@ -34,7 +34,9 @@
 /*
  * Implementation of Extended Kalman Filters for both position and
  * attitude, for use in the semester project
+ *
  * Adapted by 15gr830 Aalborg university
+ *
  *
  * Originally written by:
  *
@@ -46,10 +48,10 @@
 /* Ved nygenereret Kalman kode:
  *
  * memcpy er ændret til loops i de autogenererede kalman filtre
- * dataen bliver ødelagt når der benyttes memcpy?
+ * dataen bliver a en eller anden grund ødelagt når der benyttes memcpy?
  *
  * tjek i den autogenerede kode om der er husket alle paranteser ved 
- * generering af quaternion
+ * generering af quaternions
  */
 
 #include <nuttx/config.h>
@@ -95,9 +97,6 @@ extern "C" {
 }
 #endif
 
-// #define Q_EKF_ATT_DEBUG
-// #define Q_EKF_POS_DEBUG
-
 extern "C" __EXPORT int q_ekf_main(int argc, char *argv[]);
 
 static bool thread_should_exit = false;		/**< Deamon exit flag */
@@ -109,17 +108,15 @@ static int attitude_estimator_ekf_task;				/**< Handle of deamon task / thread *
  */
 int q_ekf_thread_main(int argc, char *argv[]);
 
-/**
- * Print the correct usage.
- */
+
 static void usage(const char *reason);
 math::Matrix<3,3> quat2Rot(float q[4]);
 math::Vector<3> matVectMult(math::Matrix<3,3> mat, math::Vector<3> v);
 math::Vector<4> qmult( float *q, float *p );
 
+
 static void
-usage(const char *reason)
-{
+usage(const char *reason) {
 	if (reason)
 		fprintf(stderr, "%s\n", reason);
 
@@ -127,16 +124,8 @@ usage(const char *reason)
 	exit(1);
 }
 
-/**
- * The attitude_estimator_ekf app only briefly exists to start
- * the background job. The stack size assigned in the
- * Makefile does only apply to this management task.
- *
- * The actual stack size should be set in the call
- * to task_spawn_cmd().
- */
-int q_ekf_main(int argc, char *argv[])
-{
+
+int q_ekf_main(int argc, char *argv[]) {
 	if (argc < 1)
 		usage("missing command");
 
@@ -180,25 +169,11 @@ int q_ekf_main(int argc, char *argv[])
 	exit(1);
 }
 
-/*
- * [Rot_matrix,x_aposteriori,P_aposteriori] = attitudeKalmanfilter(dt,z_k,x_aposteriori_k,P_aposteriori_k,knownConst)
- */
 
-/*
- * EKF Attitude Estimator main function.
- *
- * Estimates the attitude recursively once started.
- *
- * @param argc number of commandline arguments (plus command name)
- * @param argv strings containing the arguments
- */
-int q_ekf_thread_main(int argc, char *argv[])
-{
-
-        // const unsigned int loop_interval_alarm = 6500;	// loop interval in microseconds
+int q_ekf_thread_main(int argc, char *argv[]) {
 
 	float dt = 0.005f;
-        /* state vector x has the following entries [ax,ay,az||mx,my,mz||wox,woy,woz||wx,wy,wz]' */
+
 	float z_k[12] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, -9.81f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}; /**< Measurement vector */
 	float x_aposteriori_k[12];		/**< states */
 	float P_aposteriori_k[144] = {100.f,  0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,
@@ -267,41 +242,28 @@ int q_ekf_thread_main(int argc, char *argv[])
 	uint64_t last_data = 0;
 	uint64_t last_measurement = 0;
 
-	/* current velocity */
 	math::Vector<3> vel;
 	vel.zero();
-	/* previous velocity */
+
 	math::Vector<3> vel_prev;
 	vel_prev.zero();
 
 	math::Vector<3> acc;
 	acc.zero();
 
-	/* rotation matrix */
 	math::Matrix<3, 3> R;
 	R.identity();
 
 	/* subscribe to raw data */
 	int sub_raw = orb_subscribe(ORB_ID(sensor_combined));
-	/* rate-limit raw data updates to 333 Hz (sensors app publishes at 200, so this is just paranoid) */
 	orb_set_interval(sub_raw, 3);
 
-	/* subscribe to param changes */
 	int sub_params = orb_subscribe(ORB_ID(parameter_update));
-
-	/* subscribe to control mode */
 	int sub_control_mode = orb_subscribe(ORB_ID(vehicle_control_mode));
-
-        /* subscribe to ptam data */
         int ptam_sub = orb_subscribe(ORB_ID(vision_position_estimate));
-
-        /* subscribe to data from GOT */
         int got_pos_sub = orb_subscribe(ORB_ID(att_pos_mocap));
 
-	/* advertise attitude */
 	orb_advert_t pub_att = orb_advertise(ORB_ID(vehicle_attitude), &att);
-        
-        /* advertise vehicle position */
         orb_advert_t pub_pos = orb_advertise(ORB_ID(vehicle_local_position), &pos);
 
 	int loopcounter = 0;
@@ -331,15 +293,12 @@ int q_ekf_thread_main(int argc, char *argv[])
                r_pos_got     = 0.0001;
         
         float debug_pos[4]  = {0, 0, 0, 0};
-        // int debug = 0;
 
         math::Matrix<3,3> R_n;
         R.identity();
         float q_h2c[4] = {0.6124, -0.3536, -0.3536, -0.6124};
         float q_b2c_conj[4] = {0.6124, 0.3536, 0.3536, 0.6124};
         float q_i2ptam[4] = {1, 0, 0, 0};
-        // float q_h2b[4] = {1, 0, 0, 0};
-        // float q_ptam2b[4] = {1, 0, 0, 0};
         float q_ptam_conj[4] = {1, 0, 0, 0};
         float q_i2h_conj[4] = {0, -1, 0, 0};
         float q_i2h[4] = {0, 1, 0, 0};
@@ -362,7 +321,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 	/* register the perf counter */
 	perf_counter_t ekf_loop_perf = perf_alloc(PC_ELAPSED, "attitude_estimator_ekf");
 
-	/* Main loop*/
 	while (!thread_should_exit) {
 
 		struct pollfd fds[2];
@@ -439,8 +397,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 					z_k[3] = raw.accelerometer_m_s2[0];
 					z_k[4] = raw.accelerometer_m_s2[1];
 					z_k[5] = raw.accelerometer_m_s2[2];
-
-                                        // mavlink_log_info(mavlink_fd, "acc x:%4.2f y:%4.2f z:%4.2f", (double)z_k[3], (double)z_k[4], (double)z_k[5]);
 
                                         bool ptam_updated = false;
 					orb_check(ptam_sub, &ptam_updated);
@@ -545,7 +501,7 @@ int q_ekf_thread_main(int argc, char *argv[])
                                         rot_b2c_pos = quat2Rot(q_h2c);
                                         ptam_pos_vect_rotated = matVectMult(rot_b2c_pos, ptam_pos_vect);
 
-                                        z_pos_k[3] = ptam_pos_vect_rotated.data[0] * -1.0f; // FIXME: mulig fejl
+                                        z_pos_k[3] = ptam_pos_vect_rotated.data[0] * -1.0f;
                                         z_pos_k[4] = ptam_pos_vect_rotated.data[1];
                                         z_pos_k[5] = ptam_pos_vect_rotated.data[2];
 
@@ -591,111 +547,6 @@ int q_ekf_thread_main(int argc, char *argv[])
 						continue;
 					}
 
-#ifdef Q_EKF_ATT_DEBUG
-                                        if (debug < 100) {
-                                                printf("\n");
-                                                for (int i = 0; i < 4; i++){
-                                                        printf("ekf_param.q[%i] = ",i);
-                                                        printf("%4.4f", (double)ekf_params.q[i]);
-                                                        printf("\n");
-                                                }
-
-                                                for (int i = 0; i < 2; i++){
-                                                        printf("ekf_param.r[%i] = ",i);
-                                                        printf("%4.4f", (double)ekf_params.r[i]);
-                                                        printf("\n");
-                                                }
-
-                                                printf("ekf_params.r_ptam = %4.4f\n", (double)ekf_params.r_ptam);
-
-                                                printf("z_k = [ ");
-                                                for (int i = 0; i < 12; i++)
-                                                        printf("%4.4f ", (double)z_k[i]);
-                                                printf("]\n");
-
-                                                printf("update_vector = [ ");
-                                                for (int i = 0; i < 4; i++)
-                                                        printf("%f ", (double)update_vect[i]);
-                                                printf("]\n");
-
-                                                printf("dt = %4.4f\n", (double)dt);
-
-                                                printf("J = \n");
-                                                for (int i = 0; i < 9; i++){
-                                                        if ( !(i%3) )
-                                                                printf("[ ");
-                                                        printf("%4.5f ", ekf_params.moment_inertia_J[i]);
-                                                        if ( !((i + 1)%3) )
-                                                                printf("]\n");
-                                                }
-
-                                                printf("x_apo = [ ");
-                                                for (int i = 0; i < 12; i++)
-                                                        printf("%4.4f ", (double)x_aposteriori_k[i]);
-                                                printf("]\n");
-
-                                                printf("Rot_matrix =\n");
-                                                for (int i = 0; i < 9; i++){
-                                                        if ( !(i%3) )
-                                                                printf("[ ");
-                                                        printf("%4.4f ", (double)Rot_matrix[i]);
-                                                        if ( !((i + 1)%3) )
-                                                                printf("]\n");
-                                                }
-
-                                                printf("P_apo =\n");
-                                                for (int i = 0; i < 144; i++){
-                                                        if ( !(i%12) )
-                                                                printf("[ ");
-                                                        printf("%4.4f ", (double)P_aposteriori_k[i]);
-                                                        if ( !((i + 1)%12) )
-                                                                printf("]\n");
-                                                }
-
-                                                debug++;
-                                        }
-#endif //Q_EKF_ATT_DEBUG
-
-#ifdef Q_EKF_POS_DEBUG
-                                        if (debug < 1000) {
-                                                printf("\n");
-
-                                                printf("z_pos_k = [ ");
-                                                for (int i = 0; i < 9; i++)
-                                                        printf("%4.4f ", (double)z_pos_k[i]);
-                                                printf("]\n");
-
-                                                printf("update_vector = [ ");
-                                                for (int i = 0; i < 3; i++)
-                                                        printf("%f ", (double)update_pos_vect[i]);
-                                                printf("]\n");
-
-                                                // printf("dt = %4.4f\n", (double)dt);
-
-                                                printf("x_pos_apo = [ ");
-                                                for (int i = 0; i < 9; i++)
-                                                        printf("%4.4f ", (double)x_pos_apo_k[i]);
-                                                printf("]\n");
-
-                                                printf("P_apo =\n");
-                                                for (int i = 0; i < 81; i++){
-                                                        if ( !(i%9) )
-                                                                printf("[ ");
-                                                        printf("%4.2f ", (double)P_pos_apo_k[i]);
-                                                        if ( !((i + 1)%9) )
-                                                                printf("]\n");
-                                                }
-                                                printf("x = %4.4f, y = %4.4f, z = %4.4f\n", (double)pos.x, (double)pos.y, (double)pos.z);
-                                                if ( update_pos_vect[2] == 1 )
-                                                        printf("GOT: x = %4.1f, y = %4.1f, z = %4.1f\n", (double)got_pos.x, (double)got_pos.y, (double)got_pos.z);
-
-                                                if ( update_pos_vect[1] == 1 )
-                                                        printf("PTAM: x = %4.1f, y = %4.1f, z = %4.1f\n", (double)ptam.x, (double)ptam.y, (double)ptam.z);
-
-                                                debug++;
-                                        }
-#endif //Q_EKF_POS_DEBUG
-					/* Call the estimators */
 					AttitudeEKF2grav(false, // approx_prediction
                                                          (unsigned char)ekf_params.use_moment_inertia,
                                                          update_vect,

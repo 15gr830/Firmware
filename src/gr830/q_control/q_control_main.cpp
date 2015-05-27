@@ -214,8 +214,6 @@ int q_control_thread_main(int argc, char *argv[]) {
                                 error = true;
                         }
 
-                        mavlink_log_info(mavlink_fd, "err: x:%4.3f vx:%4.3f p:%4.3f\n", (double)lqr->x_e.data[6], (double)lqr->x_e.data[9], (double)out.pitch);
-
                         actuators.control[0] = (float)out.roll;
                         actuators.control[1] = (float)out.pitch;
                         actuators.control[2] = (float)out.yaw + ANTI_YAW;
@@ -240,7 +238,6 @@ int q_control_thread_main(int argc, char *argv[]) {
 }
 
 
-// TODO: De rigtige værdier skal findes til sikkerhed
 /* Limiting attitude controllers output */
 void out_safety_check( struct output_s *out ) {
         if ( (double)fabs(out->roll) > (double)RP_MAX )
