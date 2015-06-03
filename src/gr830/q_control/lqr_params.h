@@ -5,10 +5,10 @@
  *
  * Parameters for the LQR controller.
  *
- * @file generated from matlab script: contollerdesign.m
+ * @file generated from matlab script: contoller_design.m
  * Qdiag = [50 50 100 30 30 40 200 200 40 40 40 15 0 0 0 0]
  *
- * Time of generation: 17:57:26, 2015-05-27
+ * Time of generation: 20:37:44, 2015-06-03
  *
  */
 
